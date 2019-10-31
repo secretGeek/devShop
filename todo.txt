@@ -1,0 +1,47 @@
+TODO:
+
+[ ] Board height should be limited.
+
+DEFER
+
+
+[ ] Training:
+		- able to give new skills to existing workers.
+		- able to increase efficiency of existing workers
+ ?  is there inflation?
+[ ] achievement when a thing is done for the first time?
+
+Done
+[x] short series of tool tips for showing/hiding "next action"
+		- start the game
+		- buy a sales lead
+		- click the founder, then click the lead (or vice versa).
+		- click the founder then click a story
+
+[x] when to show "buy person" button(s) ? When money first reaches minimum...
+
+[x] select names from an array
+[x] updating person: update card in place, don't remove.
+[x] restore delay time factor. (avgDuration)
+
+[x] when someone is busy, say what they are doing. (could be creative later.)
+[x] give people names
+
+[x] if something is delivered that has a bug... the customer finds it and gives it back... to be started over. gets angry customer icon.
+[x] when developing, chance of finding a bug should be related to: 1. presence of bug, effectiveness of worker.
+[x] when developing, chance of *creating* a bug should be related to: effectiveness of worker, size of card.
+
+[x] each project... should also have a project logo. (random emoji)
+	[x] that logo is displayed on its lead and subsequent stories
+[x] instead of random time to move things... have it relate to # points / effectiveness of worker.
+[x] project names could be generated using an algo. ()-().
+[x] show the cash amount.
+[x] when person is busy show that they are busy
+[x] when person is busy they cannot be selected for task
+[x] when task is busy it cannot be selected as receiver
+[x] when things are 'done' they are delivered... get cash as a result. (Every time! not only when project is completed)
+	[x] dollar is shown next to card... it dissappears off board after a few seconds. at which time money appears on board.
+ ?  how do leads arrive? randomly? via advertising?
+		[x] you buy them.
+[x] top align cards in columns.
+
