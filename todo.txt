@@ -1,11 +1,10 @@
 TODO:
 
-
-
-DEFER
-
-
 [ ] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
+[ ] when something is selected and it's wrong then de-select the previous thing. (be it doer or receiver)
+
+
+
 [ ] when you click anywhere other than on a sender/receiver -- unselect whatever's selected.
 [ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
 
@@ -16,7 +15,7 @@ DEFER
 			cancel/back
 			done
 			THings to purchase (potentially scrollable)
-			(An array of objects...)
+			(An array of objects... )
 				- courses
 				- skills
 				- items:
@@ -27,7 +26,8 @@ DEFER
 					- desk fridge
 					- software courses
 				(Items are only shown if at least one of your people is eligible for that item)
-
+				[ ] more are added as level increases. 
+				[ ] costs of a thing go up by a percentage each time a thing is purchased
 	TRAIN >>
 	Printed materials
 		Books (many many titles)
@@ -55,14 +55,26 @@ DEFER
 		Performance Testing
 		Automating the Impossible
 		Agile Testing: Fact or Fiction
-	BA/Project management Traning
+	- BA/Project management Traning
 		Handling difficult people
 		Required reading in reading Requirements
 		'What are you really wanting to achieve?'
 		'What's it gonna cost if you don't have that feature?'
 		An analysis of the cost and benefit of cost benefit analysis
 		Business Process Re-engineering from 20,000 feet
-
+  - BLING
+		- better seat 💺 
+		- a plant 🌳
+		- a personal coffee machine ☕️
+		- Office decoration s 🎣 
+		- a fan 
+		- a robot 🤖
+		- a printer 🖨
+		- a mechanical keyboard ⌨️
+		- A games console 🕹
+		- a fax machine 📠???
+		- Artworks 🌄
+		- another games console 🎮
 
 [ ] Training button... buy dev training... buy tester training... buy BA training...
 		- when you buy a training course, anyone can grab it... potentially
@@ -73,8 +85,39 @@ DEFER
 				pro-active. while idle, independently decides to look for a task they can do.
 				courage.
 
+Thomas ideas:
+
+A few ideas
+
+**definitely**
+
+- Change request event, like the current bug event, which pulls a card from its current position, even finished, back to start.
+--> difference is, it is an added story, not a recycled story, it takes BA time, it doesn't have a money decrease, but rather an increase.... although it does delay the completion bonus. Has different symbology/description. (How to trigger it, without worrying about a race condition regarding completion bonus?)
+
+- Special abilities which you unlock over time and obtain charges of in some way, purchasing or as rewards, such as Bug Bash to rapidly get through a stack of bugs, or Mercenary which brings in a high-level super contractor for a single sprint.
+
+--> bug bash... like a bonus round
+--> 
+
+- Occasional Tenders, which are like boss fights compared to normal projects. You have to put together the tender somehow, perhaps it's like a normal project but instead of rewarding money it rewards a tender application score that determines whether you win the tender. The tender itself is then a bigger more challenging version of a project with better rewards.
+
+--> a tender item pays no money along the way, and only pays money if you win the tender and complete the project, but the project pays a premium (to make up for the tender cost)
 
 
+
+**probably not**
+
+- At the end of each project you choose a go live party option (random multiple activities with different costs), the option you pick determines the morale boost each employee gets in the first sprint of the next project.
+
+- Adding complexity to above: each employee has activities they like (extra boost) and dislike (no boost).
+
+
+- Traits for employees, so when choosing employees to hire you have to balance their salary, traits and current level. For example devs can have a Cowboy trait that increases dev speed but also bug chance. No stats like Game Dev Story, an employee just has a level and their traits.
+
+
+DEFER
+
+ ? Dark mode
  ?  is there inflation?
 		each time a thing is purchased, that thing becomes x% more expensive. i.e. compounding interest on prices.
 	levels:
