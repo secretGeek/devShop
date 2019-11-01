@@ -2,9 +2,10 @@ var avgDuration = 400;
 var startingMoney = 100;
 let game: Game;
 //These are convenience objects which are handy references to game.Stories, game.People and game.Projects.
-var stories: object;
-var people: object;
-var projects: object;
+var stories: { [id: string] : Story; }
+var people: { [id: string] : Person; }
+//var persons: { [id: string] : IPerson; }
+var projects: { [id: string] : Project; }
 
 class Game {
   constructor(startingMoney: number){
@@ -24,12 +25,13 @@ class Game {
   XP: number;
   TotalXP: number;
   NextId: number; //ideally: private. used for determining primary key of staff members (inside the 'nextId' function)
-  People: object;
-  Projects: object;
-  Stories: object;
+  People: { [id: string] : Person; };
+  Projects: { [id: string] : Project; }
+  Stories: { [id: string] : Story; };
   SelectedDoer: string; //id of selected person
   SelectedReceiver: string; //id of selected story
 }
+
 class Person {
   id: number;
   skills: string[];
@@ -38,12 +40,38 @@ class Person {
   icon: string;
   efficiency: number;
   XP: number;
+  busy: boolean;
+}
+
+class Story {
+  person: string;
+  id: number;
+  column: string;
+  status: string;
+  busy: boolean;
+  summary: string;
+  points: number;
+  logo: string; //logo from the project.
+  icon: string; //icon from the person.
+  hasBug: boolean;
+  customerFoundBug: boolean;
+  projectId: string;
+  
+}
+
+class Project {
+  constructor(lead: Story){
+    this.lead = lead;
+    this.stories = [];
+  }
+  lead: Story; // the lead that lead to the project
+  stories: string[] = []; //the storyid's of the subsequent stories created by the BA
 }
 
 function initGameState()
 {
   game = new Game(startingMoney);
-  let player: Person = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0};
+  let player: Person = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0, busy: false};
   people = game.People;
   people['p' + player.id] = player;
   projects = game.Projects;
@@ -96,7 +124,7 @@ function drawStory(key: string, stories: { [x: string]: any; }, el: HTMLElement,
     avatar = "<span class='avatar'>" + story.icon + "</span>";
   }
   var logo = "<span class='logo'>" + story.logo + "</span>";
-  if (story.busy != undefined) {
+  if (story.busy) {
     busy = " busy";
   }
 
@@ -131,7 +159,7 @@ function drawPerson(key: string, people: { [x: string]: any; }, el: HTMLElement)
   }
   var busy = "";
   var person = people[key];
-  if (person.busy != undefined) {
+  if (person.busy) {
     busy = " busy";
   }
   var skills = getSkillsDiv(person.skills);
@@ -188,11 +216,10 @@ function getNewLead() {
 
   incrementMoney(price * -1);
   incrementXP(5);
-  var newLead = { id: nextId(), points:10, value:1000, status:"lead", column:"ba", summary:projectName(), logo: getLogo() };
-  console.log(stories);
+  var newLead = { id: nextId(), points:10, value:1000, status:"lead", column:"ba", summary:projectName(), logo: getLogo() , person: null, busy: false, icon: null, hasBug: false, customerFoundBug: null, projectId: null};
   if (isEmpty(stories)) {
-    //this was the first lead ever!
-    drawMessage("Click the project " + newLead.logo + ", then click the Founder " + people.p1.icon + " (or vice-versa)");
+    // this was the first lead ever! give them a tip...
+    drawMessage("Click the project " + newLead.logo + ", then click the Founder " + people["p1"].icon + " (or vice-versa)");
   }
 
   stories['r' + newLead.id] = newLead;
@@ -209,7 +236,7 @@ function getNewPerson(skill: any,price: number) {
   incrementMoney(price * -1);
   incrementXP(10);
   var id = nextId();
-  var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0};
+  let newEmployee: Person = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false};
   people['p' + id] = newEmployee;
   drawPerson('p' + id, people, document.getElementById('people'));
 }
@@ -229,7 +256,7 @@ function getNewPerson(skill: any,price: number) {
   //    The highlighting of receiver and doer is changed to indicate that they cannot fulfill each other (at least one must be changed)
   //When you click a receiver, if there is not receiver selected, it becomes the receiver.
     //When you click a receiver, if the receiver is already selected, it stops being the receiver.
-  //When you click a receiver, if a different receiver was already selected, it sops being the receiver and this becomes the reciever.
+  //When you click a receiver, if a different receiver was already selected, it stops being the receiver and this becomes the reciever.
   */
 
   document.onkeypress = function(e) {
@@ -349,7 +376,6 @@ function doIt(doId: string, receiveId: string) {
   story.busy = true;
   story.icon = person.icon;
   story.person = doId;
-  person.task = receiveId;
   person.busy = true;
   person.summary = getSummary(story);
   drawMessage(person.name + " is " + person.summary);
@@ -360,7 +386,7 @@ function doIt(doId: string, receiveId: string) {
   setTimeout(function() { done(receiveId);}, duration);
 }
 
-function getSummary(story: { column: any; summary: string; }) {
+function getSummary(story: Story) {
   return getTaskVerb(story.column) + " '" + story.summary + "'...";
 }
 
@@ -384,9 +410,9 @@ function getTaskFactor(column: any){
 
 function done(receiveId: string) {
   var story = stories[receiveId];
-  story.busy = null;
+  story.busy = false;
   var person = people[story.person];
-  person.busy = null;
+  person.busy = false;
   person.XP += 1;
   incrementXP(1);
   drawMessage(person.name + " finished " + person.summary.replace('...','.'));
@@ -423,20 +449,25 @@ function doneBa(storyId: string) {
   var person = people[oldStory.person];
   oldStory.status = 'done';
   console.log("Lead: " + storyId + " has been analyzed. A bunch of stories are being created.");
-  projects[storyId] = {};
-  projects[storyId].lead = oldStory;
-  projects[storyId].stories = [];
+  //var project = 
+  //projects[storyId] = new Project();// { lead: oldStory, stories: {[id:string]: Story }};
+  //projects[storyId] = { lead: oldStory, stories: []};
+  projects[storyId] = new Project(oldStory);
+  //{[id:String]: Story; };
+  //let project: Project = projects[storyId];
+  //projects[storyId].lead = oldStory;
+  //projects[storyId].stories = [];
   var newCards = [];
   //TODO: Don't always make same number of cards worth same number of points.
   for(var i = 0; i<5; i++) {
     nextId()
-    var newCard = { id: nextId(), points:2, value:200, status:"story", column:"dev", summary: getTask(), logo:oldStory.logo, projectId: storyId };
+    let newCard = { id: nextId(), points: 2, value: 200, status:"story", column:"dev", summary: getTask(), logo:oldStory.logo, projectId: storyId, person: null, icon: null, busy: false, hasBug: false, customerFoundBug: null };
     stories['r' + newCard.id] = newCard;
     newCards.push(newCard);
     //Add this new card to the list of stories for that project.
     projects[storyId].stories.push('r' + newCard.id);
   }
-  person.busy = null;
+  person.busy = false;
   person.summary = "idle";
   drawPerson('p' + person.id, people, document.getElementById('people'));
   const el = document.getElementById('kanbanboard');
@@ -485,7 +516,7 @@ function doneDev0(storyId: string) {
   story.icon = null;
   console.log("Story: " + storyId + " is ready for testing.");
   drawStory(storyId, stories, el, false);
-  person.busy = null;
+  person.busy = false;
   person.summary = "idle";
   drawPerson('p' + person.id, people, document.getElementById('people'));
 }
@@ -498,7 +529,7 @@ function doneTest(storyId: string) {
   //chance of finding bug relates to:
   // 1. is there a bug? If so, 2. how effective is the tester?
   var person = people[story.person];
-  person.busy = null;
+  person.busy = false;
   person.summary = "idle";
   drawPerson('p' + person.id, people, document.getElementById('people'));
   if (story.hasBug) {
@@ -532,7 +563,7 @@ function bankStory(storyId: string) {
   const el = document.getElementById('kanbanboard');
   //If story has a bug... customer has now find it! (it got past testing!)
   //and it will go back the dev column!
-  if (story.hasBug == true) {
+  if (story.hasBug) {
     //remove from board
     removeStory(storyId, el);
     console.log("Customer found a bug in story: " + storyId);
@@ -552,7 +583,7 @@ function bankStory(storyId: string) {
   var message2 = " for '" + story.summary + "'";
   incrementXP(5);
 
-  if (story.customerFoundBug == true) {
+  if (story.customerFoundBug) {
     price = 25;
     message2 += " (reduced as customer found that bug)";
     //price is reduced because customer previously found a bug in this!.
@@ -624,27 +655,12 @@ function removeAllClass(className: string) {
   }
 }
 
-var projectPart0 = ['project', 'operation', 'system', 'the','strategem'];
-var projectPart1 = ['robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steamy'];
-var projectPart2 = ['hat', 'puzzle', 'cobra','window','monkey','donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger'];
-
 function drawMessage(message: string) {
   $id('message').innerText = message;
 }
 
 function part(list: any[] | string[]) {
 return list[Math.floor(Math.random() * list.length)];
-}
-function projectName() {
-    return part(projectPart0) + " " + part(projectPart1) + "-" + part(projectPart2);
-}
-var icons = ['😕','😉','😕','🙄','🤣','😀','🙃','😁','😂','🤣','😃','😄','😅','😆','😗','😘','😍','😎','😋','😊','😉','😙','😚','🙂','🤗','🤔','😜','😛','😌','😴','😫','😪','😯','🤐','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😰','😬','😨','😩','😬','😰','😠','😵','😳','😱','😡','😷','🤒','🤕','🤢','🤧','🤥','🤡','🤠','😇','🤓','😈','👿','👹','👺'];
-function getIcon() {
-  return part(icons);
-}
-var logos = ['🎈','🎈','🎆','🎇','✨','🎉','🎊','🎃','🎄','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎗','🎟','🎫','🎠','🎡','🎢','🎪','🎭','🖼','🎨','🛒','👓','🕶','🧥','👔','👕','👖','🧣','🧤','🧦','👗','👘','👙','👚','👛','👜','👝','🛍','🎒','👞','👟','👠','👢','👑','🧢','👒','🎩','🎓','💋','💄','💍','💎','⚽','⚾','🏀','🏐','🏈','🏉','🎱','🎳','🥌','⛳','⛸','🎣','🎽','🛶','🎿','🛷','🥅','🏒'];
-function getLogo() {
-  return part(logos);
 }
 
 // names from https://introcs.cs.princeton.edu/java/data/
@@ -655,12 +671,30 @@ function getName() {
   return part(names);
 }
 
+var projectPart0 = ['project', 'operation', 'system', 'the','strategem'];
+var projectPart1 = ['robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry'];
+var projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi'];
+
+function projectName() {
+  return part(projectPart0) + " " + part(projectPart1) + "-" + part(projectPart2);
+}
+var icons = ['😕','😉','😕','🙄','🤣','😀','🙃','😁','😂','🤣','😃','😄','😅','😆','😗','😘','😍','😎','😋','😊','😉','😙','😚','🙂','🤗','🤔','😜','😛','😌','😴','😫','😪','😯','🤐','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😰','😬','😨','😩','😬','😰','😠','😵','😳','😱','😡','😷','🤒','🤕','🤢','🤧','🤥','🤡','🤠','😇','🤓','😈','👿','👹','👺'];
+function getIcon() {
+  return part(icons);
+}
+var logos = ['🎈','🎈','🎆','🎇','✨','🎉','🎊','🎃','🎄','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎗','🎟','🎫','🎠','🎡','🎢','🎪','🎭','🖼','🎨','🛒','👓','🕶','🧥','👔','👕','👖','🧣','🧤','🧦','👗','👘','👙','👚','👛','👜','👝','🛍','🎒','👞','👟','👠','👢','👑','🧢','👒','🎩','🎓','💋','💄','💍','💎','⚽','⚾','🏀','🏐','🏈','🏉','🎱','🎳','🥌','⛳','⛸','🎣','🎽','🛶','🎿','🛷','🥅','🏒'];
+function getLogo() {
+  return part(logos);
+}
+
 var taskParts = ['validation','logical','virtual','structural','micro','hyper','accessible','indirect','pointer','truth','business','customer','person','manipulation','pure','seamless','crypto','interactive','SEO','custom','web','auto','digital','cyber','secure','3D','enterprise','pro','developer','augmented','robo','productivity','neural','positronic','computery','deep','immutable','functional','lock-free','meta','native','non-virtual','opinionated','recursive','p2p','yet another','distributed','reticulated','hierarchical','obfuscated','weaponised','graphical','cloud-based','ethical','point-free','chat','social','mobile'];
 var taskParts2 = ['logic','algo','mesh','structure','form','service','container','data','DB','UX','UI','layer','component','system','diagram','app','client','server','host','classes','object','functions','job','parts','platform','framework','foundation','emailer','pager','plugin','addin','2.0','automation','cybernetics','drone','graphics','artwork','architecture','collector','list','heuristic','solver','network','net','9000','2001','multiplexor','switch','hub','paradigm','catalog','registry','RIA','SPA','IP','JSON','XML','CSV','Yaml','Macro','analytics','cluster','node','graph','avatar','reticulator','spline','hierarchy','classes','threads','logging','engine','blockchain','map-reduce','content','exploits','hacks','styles','customizations','RAM','DRM','GPGPU','wiki'];
 
 function getTask() {
   return part(taskParts) + ' ' + part(taskParts2);
 }
+
+//TODO: add this to game class
 function incrementXP(amount: number) {
   game.XP += amount;
   if (game.TotalXP < 100 && game.TotalXP + amount >= 100) {
@@ -677,6 +711,7 @@ function incrementXP(amount: number) {
   drawXP(game.XP);
 }
 
+//TODO: add this to game class
 function incrementMoney(amount: number) {
   game.Money += amount;
   if (game.Money >= game.HighestMoney) {
