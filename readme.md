@@ -37,6 +37,19 @@ Not implemented:
 - inflation. (i.e. things will cost more and be higher stakes as the game progresses.)
 - (people will get faster as you increase their skills, but jobs will be bigger... thus creating a steady state, a hedonic treadmill, a red queen's race.)
 
+
+## Tips
+
+Some keystrokes....
+
+	1. Press 1 to select the first available item in the `Inbox` column
+	2. Press 2 to select the first available item in the `Backlog` column
+	4. Press 4 to select the first available item in the `Test` column
+
+
+## Contributions
+
 Pull requests welcome!
 
 The code is messy, i wrote it in a fevered rush
+
