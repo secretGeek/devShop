@@ -298,6 +298,7 @@ var game = {};
 var stories = {};
 var people = {};
 var projects = {};
+
 function initGameState()
 {
   game = {};
@@ -498,6 +499,30 @@ function getNewPerson(skill,price) {
     //When you click a receiver, if the receiver is already selected, it stops being the receiver.
   //When you click a receiver, if a different receiver was already selected, it sops being the receiver and this becomes the reciever.
   */
+
+  document.onkeypress = function(e) {
+    switch (e.key) {
+      case "1":
+        var firstStory = Object.keys(stories).map(k => stories[k]).filter(s => s.column === 'ba' && s.status === 'lead' && !s.person)[0];
+        if (firstStory)
+          clickReceiver('r' + firstStory.id);
+        break;
+      case "2":
+        var firstStory = Object.keys(stories).map(k => stories[k]).filter(s => s.column === 'dev' && s.status === 'story' && !s.person)[0];
+        if (firstStory)
+          clickReceiver('r' + firstStory.id);
+        break;
+      case "3":
+        break;
+      case "4":
+        var firstStory = Object.keys(stories).map(k => stories[k]).filter(s => s.column === 'test' && s.status === 'story' && !s.person)[0];
+        if (firstStory)
+          clickReceiver('r' + firstStory.id);
+        break;
+      case "5":
+        break;
+    }
+  }
 
 function clickDoer(id) {
   if (game.doer == id) {
