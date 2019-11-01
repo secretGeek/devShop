@@ -83,6 +83,7 @@ th {
 
 .person {
   display:inline-block;
+  vertical-align:top;
   margin:5px;
   padding:5px;
   width:120px;
@@ -240,14 +241,14 @@ th {
 }
 </style>
 <body>
-<span id='money'>💲0</span>
-<span id='xp'>0🥓</span>
+<span id='money' title='cash on hand'>💲0</span>
+<span id='xp' title='eXperience Points'>0🥓</span>
 <h1>DevShop</h1>
-<button id='start' onclick='go();'>start</button>
-<button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>find project (💲100)</button>
-<button class='getPerson hidden tester' onclick='getNewPerson("test", 300);'>hire tester (💲300)</button>
-<button class='getPerson hidden dev' onclick='getNewPerson("dev", 300);'>hire dev (💲300)</button>
-<button class='getPerson hidden ba' onclick='getNewPerson("ba", 300);'>hire BA (💲300)</button>
+<button id='start' onclick='go();'>🌟 start</button>
+<button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
+<button class='getPerson hidden dev' onclick='getNewPerson("dev", 300);'>💻 hire dev (💲300)</button>
+<button class='getPerson hidden tester' onclick='getNewPerson("test", 300);'>🔬 hire tester (💲300)</button>
+<button class='getPerson hidden ba' onclick='getNewPerson("ba", 300);'>🗣 hire BA (💲300)</button>
 <table id='kanbanboard'>
 <tr>
 <thead>
@@ -286,7 +287,7 @@ th {
 
 <div id='people'>
 </div>
-<span id='message'>Press 'start' to begin.</span>
+<span id='message'>Press '🌟 start' to begin.</span>
 <a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
 </body>
 <script>
@@ -443,7 +444,7 @@ function go() {
   $id('start').classList.add("hidden");   //hide 'start' button
   removeClass('.getLead', 'hidden'); //show 'purchase sales lead' button
   addClass(".getPerson", 'hidden'); //hide 'buy dev/test/ba' buttons. (They are re-enabled when total >= 300)
-  drawMessage('STEP 1: find a project');
+  drawMessage("STEP 1: press '🎁 find project'");
 }
 
 function getNewLead() {
@@ -879,7 +880,7 @@ var icons = ['😕','😉','😕','🙄','🤣','😀','🙃','😁','😂','�
 function getIcon() {
   return part(icons);
 }
-var logos = ['🎈','🎈','🎆','🎇','✨','🎉','🎊','🎃','🎄','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎠','🎡','🎢','🎪','🎭','🖼','🎨','🛒','👓','🕶','🧥','👔','👕','👖','🧣','🧤','🧦','👗','👘','👙','👚','👛','👜','👝','🛍','🎒','👞','👟','👠','👢','👑','🧢','👒','🎩','🎓','💋','💄','💍','💎','⚽','⚾','🏀','🏐','🏈','🏉','🎱','🎳','🥌','⛳','⛸','🎣','🎽','🛶','🎿','🛷','🥅','🏒'];
+var logos = ['🎈','🎈','🎆','🎇','✨','🎉','🎊','🎃','🎄','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎗','🎟','🎫','🎠','🎡','🎢','🎪','🎭','🖼','🎨','🛒','👓','🕶','🧥','👔','👕','👖','🧣','🧤','🧦','👗','👘','👙','👚','👛','👜','👝','🛍','🎒','👞','👟','👠','👢','👑','🧢','👒','🎩','🎓','💋','💄','💍','💎','⚽','⚾','🏀','🏐','🏈','🏉','🎱','🎳','🥌','⛳','⛸','🎣','🎽','🛶','🎿','🛷','🥅','🏒'];
 function getLogo() {
   return part(logos);
 }
