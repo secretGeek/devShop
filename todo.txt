@@ -1,17 +1,87 @@
 TODO:
 
-[ ] Board height should be limited.
+
 
 DEFER
 
 
-[ ] Training:
+[ ] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
+
+[ ] BUY button ....
+	[ ] hides main "screen"
+	[ ] new screen has:
+			cancel/back
+			done
+			THings to purchase (potentially scrollable)
+			(An array of objects...)
+				- courses
+				- skills
+				- items:
+					- coffee machine
+					- new chair
+					- pot plant
+					- monitor upgrade
+					- desk fridge
+					- software courses
+				(Items are only shown if at least one of your people is eligible for that item)
+
+	TRAIN >>
+	Printed materials
+		Books (many many titles)
+		Magazine subscriptions (ever dwindling list!)
+	Developer training courses (too many to list)
+		Code Reuse
+		Writing courses
+		Topics in usability
+		Scalability
+		Secure code
+		Literate code
+		Defensive coding
+		(and thousands more:
+		always 'general' topics)
+	Tester training (sample)
+		Effective repro
+		A Lesson in Regression
+		Eliminating the irrelevant
+		Automation for fun and profit
+		Rattle testing: the dying art
+		Load testing for one
+		Overcoming developer envy
+		Usability Testing
+		Accesibility Testing
+		Performance Testing
+		Automating the Impossible
+		Agile Testing: Fact or Fiction
+	BA/Project management Traning
+		Handling difficult people
+		Required reading in reading Requirements
+		'What are you really wanting to achieve?'
+		'What's it gonna cost if you don't have that feature?'
+		An analysis of the cost and benefit of cost benefit analysis
+		Business Process Re-engineering from 20,000 feet
+
+
+[ ] Training button... buy dev training... buy tester training... buy BA training...
+		- when you buy a training course, anyone can grab it... potentially
 		- able to give new skills to existing workers.
 		- able to increase efficiency of existing workers
+			SKILL:
+				observation. (when completing a task, looks for another task of the same type.)
+				pro-active. while idle, independently decides to look for a task they can do.
+				courage.
+
+
+
  ?  is there inflation?
+		each time a thing is purchased, that thing becomes x% more expensive. i.e. compounding interest on prices.
+	levels:
+		each time an action is performed, you receive an experience point.
+		? the person also receives an experience point for that skill.
 [ ] achievement when a thing is done for the first time?
 
 Done
+[x] Board height should be limited.
+
 [x] short series of tool tips for showing/hiding "next action"
 		- start the game
 		- buy a sales lead

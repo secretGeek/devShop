@@ -6,23 +6,6 @@
 <title>DevShop</title>
 </head>
 <style>
-h1,th {
-  font-family: 'Press Start 2P', monospace;
-  font-size:14pt;
-  color:#333;
-  text-shadow:2px 2px 0 #AAA;
-  margin-block-start:0;
-  margin-block-end:5px;
-}
-button {
-  font-family: 'lucida console', monospace;
-}
-th {
-  color:#666;
-  font-size:10pt;
-  padding:4px;
-  text-shadow:2px 2px 0 #CCC;
-}
 body {
   font-family: 'lucida console', monospace;
   max-width:70ch;
@@ -32,15 +15,36 @@ body {
   font-size:1.0em;
   height:100%;
 }
+
+h1,th {
+  font-family: 'Press Start 2P', monospace;
+  font-size:14pt;
+  color:#333;
+  text-shadow:2px 2px 0 #AAA;
+  margin-block-start:0;
+  margin-block-end:5px;
+}
+
+button {
+  font-family: 'lucida console', monospace;
+}
+
+th {
+  color:#666;
+  font-size:10pt;
+  padding:4px;
+  text-shadow:2px 2px 0 #CCC;
+}
+
 #kanbanboard {
   margin-top:5px;
   border:1px solid #666;
   border-collapse: collapse;
   width:100%;
   table-layout: fixed;
-	height:100%;
-	min-height:100%;
-	max-height:100%;
+  height:100%;
+  min-height:100%;
+  max-height:100%;
 }
 
 #kanbanboard th, #kanbanboard td {
@@ -51,7 +55,7 @@ body {
 #kanbanboard td {
   min-height:100%;
   height:100%;
-	max-height:100%;
+  max-height:100%;
   vertical-align:top;
 }
 
@@ -76,12 +80,13 @@ body {
 .possible {
   box-shadow:0 0 1px #FF0,0 0 2px #FF0,0 0 3px #FF0,0 0 4px #FF0,0 0 5px #FF0;
 }
+
 .person {
   display:inline-block;
   margin:5px;
   padding:5px;
   width:120px;
-  max-width:120px;
+  max-width:100px;
   min-height:50px;
   text-align:center;
   border:1px solid #333;
@@ -99,33 +104,45 @@ body {
   margin:3px 3px 0 3px;
   width:calc(100%-20px);
 }
+
 .busy {
   opacity:0.5;
-	border:1px solid #CCC;
+  border:1px solid #CCC;
 }
+
 #money {
   text-shadow:0 2px 2px #CCC;
   float:right;
   margin:5px 0;
 }
 
+#xp {
+  text-shadow:0 2px 2px #CCC;
+  float:right;
+  margin:5px 20px;
+}
+
 .hidden {
  display:none;
 }
+
 .person .summary {
   display:block;
   font-size:8pt;
 }
+
 .summary {
   margin-top:5px;
 }
+
 .person .skills {
   display:block;
- 
 }
+
 .skills {
   margin-bottom:3px;
 }
+
 .skills .skill{
   font-family:arial;
   font-size:10pt;
@@ -134,6 +151,7 @@ body {
   border-radius:4px;
   border:1px solid #CCC;
 }
+
 .logo, .avatar, .avatar2 {
   font-family: arial;
   font-size:14pt;
@@ -159,6 +177,21 @@ body {
   box-shadow:2px 2px #CCC;
   font-size:10pt;
 }
+
+#helpLink{
+  position:absolute;
+  bottom:5px;
+  border:1px solid #CCC;
+  right: 0%;
+  background-color:#CDF;
+  box-shadow:0 0 2px #CCC, 0 0 5px #ACF inset, 0 0 2px #ACF inset;
+  z-index:-1;
+  padding:3px 7px;
+  border-radius:10px;
+  margin-right:5px;
+  text-decoration:none;
+}
+
 .points {
   position:absolute;
   bottom:0;
@@ -170,7 +203,7 @@ body {
 }
 
 /* tablet/large phone layout */
-@media screen and (max-width: 720px) 
+@media screen and (max-width: 720px)
 {
   body {
     padding:1ch;
@@ -182,7 +215,7 @@ body {
     font-size:10pt;
   }
 }
-@media screen and (max-height: 500px) 
+@media screen and (max-height: 500px)
 {
   #kanbanboard td .inner {
     padding:0;
@@ -193,13 +226,13 @@ body {
   }
 }
 /* small phone layout */
-@media screen and (max-width: 480px) 
+@media screen and (max-width: 480px)
 {
   body {
     padding:1ch;
   }
   th,.story {
-   font-size:6pt;
+    font-size:6pt;
   }
   #message {
     font-size:10pt;
@@ -208,16 +241,17 @@ body {
 </style>
 <body>
 <span id='money'>💲0</span>
+<span id='xp'>0🥓</span>
 <h1>DevShop</h1>
 <button id='start' onclick='go();'>start</button>
 <button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>find project (💲100)</button>
-<button class='getPerson hidden' onclick='getNewPerson("test", 300);'>hire tester (💲300)</button>
-<button class='getPerson hidden' onclick='getNewPerson("dev", 300);'>hire dev (💲300)</button>
-<button class='getPerson hidden' onclick='getNewPerson("ba", 300);'>hire BA (💲300)</button>
+<button class='getPerson hidden tester' onclick='getNewPerson("test", 300);'>hire tester (💲300)</button>
+<button class='getPerson hidden dev' onclick='getNewPerson("dev", 300);'>hire dev (💲300)</button>
+<button class='getPerson hidden ba' onclick='getNewPerson("ba", 300);'>hire BA (💲300)</button>
 <table id='kanbanboard'>
 <tr>
 <thead>
-<th>Leads</th>
+<th>Inbox</th>
 <th>Backlog</th>
 <th>Dev</th>
 <th>Test</th>
@@ -253,7 +287,7 @@ body {
 <div id='people'>
 </div>
 <span id='message'>Press 'start' to begin.</span>
-
+<a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
 </body>
 <script>
 var avgDuration = 400;
@@ -268,8 +302,11 @@ function initGameState()
   game = {};
   game.Money = startingMoney;
   game.HighestMoney = game.Money;
+  game.Level = 1;
+  game.XP = 0;
+  game.TotalXP = 0;
   game.NextId = 0; //used for determining primary key of staff members (inside the 'nextId' function)
-  var player = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2};
+  var player = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0};
   stories = {};
   people = {};
   people['p' + player.id] = player;
@@ -302,6 +339,17 @@ function drawMoney(money) {
   }
   s.innerText = "💲" + money;
 }
+
+function drawXP(xp) {
+  var s = document.getElementById('xp');
+  if (xp < 0) {
+    s.classList.add("negative");
+  } else {
+    s.classList.remove("negative");
+  }
+  s.innerText = "" + xp + "🥓";
+}
+
 
 function removeStory(key, el) {
   var s = el.querySelector('#' + key);
@@ -377,8 +425,8 @@ function getSkillsDiv(skills) {
       case "ba": s1 = "<span class='skill ba' title='business analyst'>🗣</span>";
         break;
     }
-    
-    result += s1;  
+
+    result += s1;
   }
   return "<div class='skills'>" + result + "</div>";
 }
@@ -405,6 +453,7 @@ function getNewLead() {
   }
 
   incrementMoney(price * -1);
+  incrementXP(5);
   var newLead = { id: nextId(), points:10, value:1000, status:"lead", column:"ba", summary:projectName(), logo: getLogo() };
   console.log(stories);
   if (isEmpty(stories)) {
@@ -424,8 +473,9 @@ function getNewPerson(skill,price) {
   }
 
   incrementMoney(price * -1);
+  incrementXP(10);
   var id = nextId();
-  var newEmployee = { id: id, skills: [skill], summary: "idle", icon:getIcon(), efficiency: 0.15, name:getName()};
+  var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0};
   people['p' + id] = newEmployee;
   drawPerson('p' + id, people, document.getElementById('people'));
 }
@@ -577,6 +627,8 @@ function done(receiveId) {
   story.busy = null;
   var person = people[story.person];
   person.busy = null;
+  person.XP += 1;
+  incrementXP(1);
   drawMessage(person.name + " finished " + person.summary.replace('...','.'));
   $id('p' + people[story.person].id).classList.remove("busy");
 
@@ -738,7 +790,7 @@ function bankStory(storyId) {
   //TODO: set appropriate price
   var price = 50;
   var message2 = " for '" + story.summary + "'";
-
+  incrementXP(5);
   if (story.customerFoundBug == true) {
     price = 25;
     message2 += " (reduced as customer found that bug)";
@@ -758,6 +810,7 @@ function bankStory(storyId) {
       //TODO: completion bonus;
       bonus = 100;
       message2 += " plus 💲" + bonus + " for completing '" + project.lead.summary + "'!";
+      incrementXP(10);
     }
   }
 
@@ -845,11 +898,27 @@ var taskParts2 = ['logic','algo','mesh','structure','form','service','container'
 function getTask() {
   return part(taskParts) + ' ' + part(taskParts2);
 }
+function incrementXP(amount) {
+  game.XP += amount;
+  if (game.TotalXP < 100 && game.TotalXP + amount >= 100) {
+      removeClass('.getPerson.tester', 'hidden'); //show 'hire dev/tester/ba' buttons
+  }
+  if (game.TotalXP < 500 && game.TotalXP + amount >= 500) {
+      removeClass('.getPerson.ba', 'hidden'); //show 'hire dev/tester/ba' buttons
+  }
+  game.TotalXP += amount;
+
+  //TODO: Is it time to level up?
+  // XP resets, but total xp does not.
+  // game.Level increments.
+  drawXP(game.XP);
+}
+
 function incrementMoney(amount) {
   game.Money += amount;
   if (game.Money >= game.HighestMoney) {
     if (game.HighestMoney < 300 && game.Money >= 300) {
-      removeClass('.getPerson', 'hidden'); //show 'hire dev/tester/ba' buttons
+      removeClass('.getPerson.dev', 'hidden'); //show 'hire dev/tester/ba' buttons
     }
     game.HighestMoney = game.Money;
   }
