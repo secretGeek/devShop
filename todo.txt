@@ -1,13 +1,16 @@
 TODO:
 
 [ ] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
-[ ] when something is selected and it's wrong then de-select the previous thing. (be it doer or receiver)
 
 
 
 [ ] when you click anywhere other than on a sender/receiver -- unselect whatever's selected.
 [ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
 
+
+
+//TODO: Some items can only be purchased if you have the necessary target.
+  // e.g. advanced developer training requires a dedicated developer (not just the founder)
 
 [ ] BUY button ....
 	[ ] hides main "screen"
@@ -126,8 +129,9 @@ DEFER
 [ ] achievement when a thing is done for the first time?
 
 Done
-[x] Board height should be limited.
 
+[x] when something is selected and it's wrong then de-select the previous thing. (be it doer or receiver)
+[x] Board height should be limited.
 [x] short series of tool tips for showing/hiding "next action"
 		- start the game
 		- buy a sales lead

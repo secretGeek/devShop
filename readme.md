@@ -2,7 +2,7 @@
 
 I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and decided to implement a minimal non-viable product of it, in vanilla js, with the no-framework.
 
-It's a kind of 'lemonade stand' game, but instead of buying lemons and making lemonade, you hire developers/testers and business analysts, and complete tasks on a kanban board.
+It's a kind of 'lemonade stand' game, but instead of buying lemons 🍋 and making lemonade 🍹, you hire developers/testers and business analysts, and complete tasks on a kanban board.
 
 Play it online here:
 
@@ -28,14 +28,15 @@ Repeat this until you have enough money to buy a dev or a tester or a ba.
 
 Not yet implemented:
 
-- upskilling people
+- upskilling people 📕 📗
 - training people to increase their efficiency
 - giving them 'automated' skills so they can sometimes grab cards for themselves.
 - achievements and goals
 - having animated people instead of simple boxes
 - ☕ coffee and donuts 🍩
+- 🐶 dogs and cats 😸
 - inflation. (i.e. things will cost more and be higher stakes as the game progresses.)
-- (People will get faster as you increase their skills, but jobs will be bigger... thus creating a steady state, a hedonic treadmill, a red queen's race.)
+- (People will get faster as you increase their skills, but jobs will be bigger... thus creating a steady state, a hedonic treadmill, a red queen's race 👑.)
 
 
 ## Tips

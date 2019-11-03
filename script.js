@@ -1,6 +1,6 @@
 var testMode = false; //true;
 var avgDuration = testMode ? 4 : 400;
-var startingMoney = testMode ? 299 : 100;
+var startingMoney = testMode ? 1000 : 100;
 var game;
 function getAllLevelItems() {
     var allItems = { "l2": //Level 2 Items
@@ -23,10 +23,11 @@ var Game = /** @class */ (function () {
     function Game(startingMoney) {
         this.Money = startingMoney;
         this.HighestMoney = startingMoney;
+        this.Inflation = testMode ? 1.3 : 1;
         this.Level = 1;
         this.XP = 0;
         this.TotalXP = 0;
-        this.LevelUpXP = 50;
+        this.LevelUpXP = testMode ? 3 : 50;
         this.NextId = 0;
         this.People = {};
         this.Stories = {};
@@ -66,10 +67,15 @@ function drawRoom() {
     drawButtons();
 }
 function drawButtons() {
-    //todo: 
-    var d = $id('getDev');
-    d.innerHTML = "💻 hire dev (💲500)";
-    d.setAttribute('onclick', 'getNewPerson("dev", 500);');
+    for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {
+        var _b = _a[_i], key = _b[0], value = _b[1];
+        console.log(key, value);
+        var d = $id("get" + value.skill);
+        if (d != undefined) {
+            d.innerHTML = value.icon + " hire " + value.title + " (\uD83D\uDCB2" + value.price + ")";
+            d.setAttribute('onclick', "getNewPerson(\"" + value.skill + "\");");
+        }
+    }
 }
 function drawMoney(money) {
     var s = document.getElementById('money');
@@ -219,18 +225,20 @@ function getNewLead() {
     game.Stories['r' + newLead.id] = newLead;
     drawStory('r' + newLead.id, game.Stories, document.getElementById('kanbanboard'), false);
 }
-function getNewPerson(skill, price) {
-    if (game.Money < price) {
-        drawMessage("Cannot afford a new person.");
-        console.log("Cannot afford a new person.");
+function getNewPerson(skill) {
+    var personType = game.AllPeopleTypes[skill];
+    if (game.Money < personType.price) {
+        drawMessage("Cannot afford a new " + personType.title + ".");
         return;
     }
-    incrementMoney(price * -1);
+    incrementMoney(personType.price * -1);
     incrementXP(10);
     var id = nextId();
     var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false };
     game.People['p' + id] = newEmployee;
     drawPerson('p' + id, game.People, document.getElementById('people'));
+    personType.price = Math.floor(personType.price * game.Inflation);
+    drawButtons();
 }
 document.onkeypress = function (e) {
     switch (e.key) {
@@ -667,16 +675,18 @@ function incrementXP(amount) {
         game.Level += 1;
         game.LevelUpXP = Math.floor(1.6 * game.LevelUpXP);
         var items = game.AllLevelItems["l" + game.Level];
-        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
-            var item = items_1[_i];
-            game.StoreItems.push(item);
+        if (items != undefined) {
+            for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
+                var item = items_1[_i];
+                game.StoreItems.push(item);
+            }
         }
         console.log("StoreItems", game.StoreItems);
         switch (game.Level) {
             case 2:
                 //show 'hire dev/tester/ba' buttons
                 removeClass('.getPerson.dev', 'hidden');
-                //TODO: remove this condition one store feature is finished
+                //TODO: remove this condition once store feature is finished
                 if (testMode) {
                     removeClass('.visitStore', 'hidden');
                 }
@@ -714,7 +724,7 @@ function drawStore() {
     // add store items to #items  
     for (var _i = 0, _a = game.StoreItems; _i < _a.length; _i++) {
         var item = _a[_i];
-        var shtml = "<div class='storeItem'><button onclick='purchase(" + item.id + ");'>\uD83D\uDCB2" + item.price + "</button>" + item.name + " " + item.icon + "</div>";
+        var shtml = "<div class='storeItem'><button onclick='purchase(" + item.id + ");' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</button> " + item.name + " " + item.icon + "</div>";
         console.log("item html", shtml);
         var newItem = htmlToElement(shtml);
         itemList.appendChild(newItem);
@@ -730,10 +740,13 @@ function leaveStore() {
 function purchase(itemId) {
     var item = game.StoreItems.filter(function (i) { return i.id == itemId; })[0];
     if (game.Money < item.price) {
-        drawMessage("You cannot afford the " + item.name + " " + item.icon);
+        drawMessage("You cannot afford the " + item.name + " " + item.icon + " for \uD83D\uDCB2" + item.price);
         return;
     }
     incrementMoney(item.price * -1);
     game.Items["i" + item.id] = item;
+    drawMessage("You bought " + item.name + " " + item.icon + " for \uD83D\uDCB2" + item.price + ". Nice!");
     drawInboxItem("i" + item.id, item, $id('kanbanboard'));
+    item.price = Math.floor(item.price * game.Inflation);
+    $id("store-button-" + item.id).innerText = "\uD83D\uDCB2" + item.price;
 }
