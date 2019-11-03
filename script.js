@@ -64,7 +64,8 @@ function drawRoom() {
     drawPeople(game.People, 'people');
     drawStories(game.Stories, 'kanbanboard');
     drawMoney(game.Money);
-    drawButtons();
+    if (testMode)
+        drawButtons();
 }
 function drawButtons() {
     for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {

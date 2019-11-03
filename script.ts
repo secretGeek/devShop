@@ -158,7 +158,7 @@ function drawRoom() {
   drawPeople(game.People, 'people');
   drawStories(game.Stories, 'kanbanboard');
   drawMoney(game.Money);
-  drawButtons();
+  if (testMode) drawButtons();
 }
 
 function drawButtons() {
