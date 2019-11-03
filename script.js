@@ -1,7 +1,12 @@
 var testMode = false; //true;
+var debugOutput = getParameterByName('debug') == "true";
 var avgDuration = testMode ? 4 : 400;
 var startingMoney = testMode ? 1000 : 100;
 var game;
+if (debugOutput) {
+    $id('debug').classList.remove('hidden');
+    log('debug mode detected');
+}
 function getAllLevelItems() {
     var allItems = { "l2": //Level 2 Items
         [{ id: 1, name: 'Office Cat', price: 100, icon: "🐱", skillneeded: "dev", busy: false, code: 'cat' },
@@ -633,7 +638,18 @@ function removeAllClass(className) {
         example.classList.remove(className);
     }
 }
+function getParameterByName(name) {
+    var url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'), results = regex.exec(url);
+    if (!results)
+        return null;
+    if (!results[2])
+        return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
 function drawMessage(message) {
+    log('m:' + message);
     console.log("m:" + message);
     $id('message').innerText = message;
 }
@@ -750,4 +766,11 @@ function purchase(itemId) {
     drawInboxItem("i" + item.id, item, $id('kanbanboard'));
     item.price = Math.floor(item.price * game.Inflation);
     $id("store-button-" + item.id).innerText = "\uD83D\uDCB2" + item.price;
+}
+function log(message) {
+    if (debugOutput) {
+        var m = htmlToElement("<div>" + message + "</div>");
+        $id('debug').appendChild(m);
+    }
+    console.log(message);
 }
