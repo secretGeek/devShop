@@ -20,7 +20,7 @@ h1,th {
   font-family: 'Press Start 2P', monospace;
   font-size:14pt;
   color:#333;
-  text-shadow:2px 2px 0 #AAA;
+  text-shadow:2px 2px #AAA;
   margin-block-start:0;
   margin-block-end:5px;
 }
@@ -33,7 +33,7 @@ th {
   color:#666;
   font-size:10pt;
   padding:4px;
-  text-shadow:2px 2px 0 #CCC;
+  text-shadow:2px 2px #CCC;
 }
 
 #kanbanboard {
@@ -73,10 +73,6 @@ th {
  box-shadow:0 0 1px #80F,0 0 2px #80F,0 0 3px #80F,0 0 4px #80F,0 0 5px #80F;
 }
 
-.selected.badSelection {
-  box-shadow:0 0 1px #C00,0 0 2px #C00,0 0 3px #C00,0 0 4px #C00,0 0 5px #C00;
-}
-
 .possible {
   box-shadow:0 0 1px #FF0,0 0 2px #FF0,0 0 3px #FF0,0 0 4px #FF0,0 0 5px #FF0;
 }
@@ -94,7 +90,7 @@ th {
   border-radius:10px;
 }
 
-.story {
+.story, .storeItem {
   font-family: 'lucida console', monospace;
   font-size: 8pt;
   float:left;
@@ -121,10 +117,10 @@ th {
   margin:5px 0;
 }
 
-#xp {
+#xp, #level {
   text-shadow:0 2px 2px #CCC;
   float:right;
-  margin:5px 20px;
+  margin:5px 20px 0 0;
 }
 
 .hidden {
@@ -207,14 +203,18 @@ th {
   color:#E00;
 }
 
+#items {
+  margin:20px 0;
+}
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
 {
   body {
     padding:1ch;
   }
-  th,.story {
+  th,.story,.storeItem {
     font-size:7pt;
+    text-shadow:1px 1px #CCC;
   }
   #message {
     font-size:10pt;
@@ -236,8 +236,9 @@ th {
   body {
     padding:1ch;
   }
-  th,.story {
+  th,.story,.storeItem {
     font-size:6pt;
+    text-shadow:1px 1px #CCC;
   }
   #message {
     font-size:10pt;
@@ -245,51 +246,64 @@ th {
 }
 </style>
 <body>
-<span id='money' title='cash on hand'>💲0</span>
-<span id='xp' title='eXperience Points'>0🥓</span>
+<span id='money' title='cash on hand'>💲100</span>
+<span id='xp' title='eXperience Points'>0/50🥓</span>
+<span id='level' title='Level'>1🥑</span>
 <h1>DevShop</h1>
+
 <button id='start' onclick='go();'>🌟 start</button>
 <button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
-<button class='getPerson hidden dev' onclick='getNewPerson("dev", 300);'>💻 hire dev (💲300)</button>
-<button class='getPerson hidden tester' onclick='getNewPerson("test", 300);'>🔬 hire tester (💲300)</button>
-<button class='getPerson hidden ba' onclick='getNewPerson("ba", 300);'>🗣 hire BA (💲300)</button>
-<table id='kanbanboard'>
-<tr>
-<thead>
-<th title='[1]'>Inbox</th>
-<th title='[2]'>Backlog</th>
-<th>Dev</th>
-<th title='[4]'>Test</th>
-<th>Done</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td id='ba'>
-<div class='inner'>
-</div>
-</td>
-<td id='dev'>
-<div class='inner'>
-</div>
-</td>
-<td id='dev0'>
-<div class='inner'>
-</div>
-</td>
-<td id='test'>
-<div class='inner'>
-</div>
-</td>
-<td id='done'>
-<div class='inner'>
-</div>
-</td>
-</tr>
-</tbody>
-</table>
+<div id='office'>
 
-<div id='people'>
+  <button id='getDev' class='getPerson hidden dev' onclick='getNewPerson("dev", 300);'>💻 hire dev (💲300)</button>
+  <button id='getTester' class='getPerson hidden tester' onclick='getNewPerson("test", 300);'>🔬 hire tester (💲300)</button>
+  <button id='getBA' class='getPerson hidden ba' onclick='getNewPerson("ba", 300);'>🗣 hire BA (💲300)</button>
+  <button class='visitStore hidden' onclick='visitStore();'>🏪 visit store</button>
+  <table id='kanbanboard'>
+  <thead>
+  <tr>
+  <th title='[1]'>Inbox</th>
+  <th title='[2]'>Backlog</th>
+  <th>Dev</th>
+  <th title='[4]'>Test</th>
+  <th>Done</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td id='ba'>
+  <div class='inner'>
+  </div>
+  </td>
+  <td id='dev'>
+  <div class='inner'>
+  </div>
+  </td>
+  <td id='dev0'>
+  <div class='inner'>
+  </div>
+  </td>
+  <td id='test'>
+  <div class='inner'>
+  </div>
+  </td>
+  <td id='done'>
+  <div class='inner'>
+  </div>
+  </td>
+  </tr>
+  </tbody>
+  </table>
+
+  <div id='people'>
+  </div>
+</div>
+
+<div id='store' class='hidden'>
+  <button id='closeStore' onclick='leaveStore();'>🏢 leave store</button>
+  <div id='items'>
+  ITEMS for SALE
+  </div>
 </div>
 <span id='message'>Press '🌟 start' to begin.</span>
 <a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>

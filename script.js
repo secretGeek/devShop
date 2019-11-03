@@ -1,11 +1,24 @@
-var avgDuration = 400;
-var startingMoney = 100;
+var testMode = false; //true;
+var avgDuration = testMode ? 4 : 400;
+var startingMoney = testMode ? 299 : 100;
 var game;
-//These are convenience objects which are handy references to game.Stories, game.People and game.Projects.
-var stories;
-var people;
-//var persons: { [id: string] : IPerson; }
-var projects;
+function getAllLevelItems() {
+    var allItems = { "l2": //Level 2 Items
+        [{ id: 1, name: 'Office Cat', price: 100, icon: "🐱", skillneeded: "dev", busy: false, code: 'cat' },
+            { id: 2, name: 'Office Dog', price: 200, icon: "🐶", skillneeded: "test", busy: false, code: 'dog' },
+            { id: 3, name: 'Be a Better Tester', price: 200, icon: "📗", skillneeded: "test", busy: false, code: 'test' },
+        ],
+        "l3": //Level 3 Items
+        [{ id: 4, name: 'Guide to Unit testing', price: 300, icon: "📗", skillneeded: "dev", busy: false, code: 'unitt' }] };
+    return allItems;
+}
+function getAllPeopleTypes() {
+    return {
+        "dev": { skill: "dev", price: 300, icon: "💻", title: "dev" },
+        "test": { skill: "test", price: 300, icon: "🔬", title: "tester" },
+        "ba": { skill: "ba", price: 300, icon: "🗣", title: "business analyst" }
+    };
+}
 var Game = /** @class */ (function () {
     function Game(startingMoney) {
         this.Money = startingMoney;
@@ -13,26 +26,23 @@ var Game = /** @class */ (function () {
         this.Level = 1;
         this.XP = 0;
         this.TotalXP = 0;
+        this.LevelUpXP = 50;
         this.NextId = 0;
         this.People = {};
         this.Stories = {};
         this.Projects = {};
+        this.StoreItems = [];
+        this.AllLevelItems = getAllLevelItems();
+        this.AllPeopleTypes = getAllPeopleTypes();
+        this.Items = {};
+        this.SelectedDoer = null;
+        this.SelectedReceiver = null;
     }
     return Game;
 }());
-var Person = /** @class */ (function () {
-    function Person() {
-    }
-    return Person;
-}());
-var Story = /** @class */ (function () {
-    function Story() {
-    }
-    return Story;
-}());
 var Project = /** @class */ (function () {
     function Project(lead) {
-        this.stories = []; //the storyid's of the subsequent stories created by the BA
+        this.stories = []; //storyid's of the subsequent stories created by the BA
         this.lead = lead;
         this.stories = [];
     }
@@ -41,20 +51,25 @@ var Project = /** @class */ (function () {
 function initGameState() {
     game = new Game(startingMoney);
     var player = { id: nextId(), skills: ["dev", "test", "ba"], name: "Founder", summary: "idle", icon: "🤔", efficiency: 0.2, XP: 0, busy: false };
-    people = game.People;
-    people['p' + player.id] = player;
-    projects = game.Projects;
-    stories = game.Stories;
-    game.SelectedDoer = null;
-    game.SelectedReceiver = null;
+    game.People['p' + player.id] = player;
+    incrementXP(0);
+    incrementMoney(0);
 }
+// todo: put this function onto the game object
 function nextId() {
     return ++game.NextId;
 }
 function drawRoom() {
-    drawPeople(people, 'people');
-    drawStories(stories, 'kanbanboard');
+    drawPeople(game.People, 'people');
+    drawStories(game.Stories, 'kanbanboard');
     drawMoney(game.Money);
+    drawButtons();
+}
+function drawButtons() {
+    //todo: 
+    var d = $id('getDev');
+    d.innerHTML = "💻 hire dev (💲500)";
+    d.setAttribute('onclick', 'getNewPerson("dev", 500);');
 }
 function drawMoney(money) {
     var s = document.getElementById('money');
@@ -66,7 +81,7 @@ function drawMoney(money) {
     }
     s.innerText = "💲" + money;
 }
-function drawXP(xp) {
+function drawXP(xp, levelUpXP, level) {
     var s = document.getElementById('xp');
     if (xp < 0) {
         s.classList.add("negative");
@@ -74,7 +89,9 @@ function drawXP(xp) {
     else {
         s.classList.remove("negative");
     }
-    s.innerText = "" + xp + "🥓";
+    s.innerText = "" + xp + "/" + levelUpXP + "🥓";
+    var s2 = document.getElementById('level');
+    s2.innerText = "" + level + "🥑";
 }
 function removeStory(key, el) {
     var s = el.querySelector('#' + key);
@@ -93,12 +110,12 @@ function drawStory(key, stories, el, top) {
         busy = " busy";
     }
     var points = "<span class='points'>" + story.points + "</span>";
-    var shtml = "<span class='story receiver " + story.column + busy + "' id='" + key + "' onclick='clickReceiver(\"" + key + "\");'>" + logo + story.summary + avatar + points + "</span>";
+    var shtml = "<span class='story receiver " + story.skillneeded + busy + "' id='" + key + "' onclick='clickReceiver(\"" + key + "\");'>" + logo + story.summary + avatar + points + "</span>";
     if (s != null) {
         s.outerHTML = shtml;
     }
     else {
-        var column = el.querySelector("td#" + story.column + " .inner");
+        var column = el.querySelector("td#" + story.skillneeded + " .inner");
         var newstory = htmlToElement(shtml);
         if (top) {
             column.insertBefore(newstory, column.firstChild);
@@ -112,6 +129,19 @@ function drawStories(stories, id) {
     var el = document.getElementById(id);
     for (var key in stories) {
         drawStory(key, stories, el, false);
+    }
+}
+function drawInboxItem(key, item, el) {
+    var s = el.querySelector('#' + key);
+    var shtml = "<span class='storeItem receiver " + item.skillneeded + "' id='" + key + "' onclick=\"clickReceiver('" + key + "');\">" + item.icon + " " + item.name + "</span>";
+    if (s != null) {
+        s.outerHTML = shtml;
+    }
+    else {
+        var column = el.querySelector("td#ba .inner");
+        var newInboxItem = htmlToElement(shtml);
+        // put it at the top of the inbox column (the 'ba' column)
+        column.insertBefore(newInboxItem, column.firstChild);
     }
 }
 function drawPerson(key, people, el) {
@@ -181,13 +211,13 @@ function getNewLead() {
     }
     incrementMoney(price * -1);
     incrementXP(5);
-    var newLead = { id: nextId(), points: 10, value: 1000, status: "lead", column: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, customerFoundBug: null, projectId: null };
-    if (isEmpty(stories)) {
+    var newLead = { id: nextId(), points: 10, value: 1000, status: "lead", skillneeded: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, customerFoundBug: null, projectId: null };
+    if (isEmpty(game.Stories)) {
         // this was the first lead ever! give them a tip...
-        drawMessage("Click the project " + newLead.logo + ", then click the Founder " + people["p1"].icon + " (or vice-versa)");
+        drawMessage("Click the project " + newLead.logo + ", then click the Founder " + game.People["p1"].icon + " (or vice-versa)");
     }
-    stories['r' + newLead.id] = newLead;
-    drawStory('r' + newLead.id, stories, document.getElementById('kanbanboard'), false);
+    game.Stories['r' + newLead.id] = newLead;
+    drawStory('r' + newLead.id, game.Stories, document.getElementById('kanbanboard'), false);
 }
 function getNewPerson(skill, price) {
     if (game.Money < price) {
@@ -199,42 +229,25 @@ function getNewPerson(skill, price) {
     incrementXP(10);
     var id = nextId();
     var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false };
-    people['p' + id] = newEmployee;
-    drawPerson('p' + id, people, document.getElementById('people'));
+    game.People['p' + id] = newEmployee;
+    drawPerson('p' + id, game.People, document.getElementById('people'));
 }
-/*
-//In any action there is a receiver and a doer. The doer can be 'the player' or a dev, tester, or BA.
-  // the receiver could be... a card on the board, the phone, the computer, anyone.
-  //When you click on someone, if there is no doer selected, they become the doer.
-  //When you click on someone, if they are already the doer, they stop being the doer.
-  //When you click on someone, if there is a doer selected, they become the doer instead.
-  //They doer is highlighted. (The previous doer is no longer highlighted)
-  //When someone becomes the doer... if there is already a receiver:
-  //    Can the doer do what the receive needs done? then they are assigned to do the needful
-  //      They are no longer highlighted as they are no longer the selected doer and receiver.
-  //    They are not available to be highlighted until they are done doing the needful.
-  //    If they cannot do what needs doing, then a message is displayed to this effect.
-  //    The highlighting of receiver and doer is changed to indicate that they cannot fulfill each other (at least one must be changed)
-  //When you click a receiver, if there is not receiver selected, it becomes the receiver.
-    //When you click a receiver, if the receiver is already selected, it stops being the receiver.
-  //When you click a receiver, if a different receiver was already selected, it stops being the receiver and this becomes the reciever.
-  */
 document.onkeypress = function (e) {
     switch (e.key) {
         case "1":
-            var firstStory = Object.keys(stories).map(function (k) { return stories[k]; }).filter(function (s) { return s.column === 'ba' && s.status === 'lead' && !s.person; })[0];
+            var firstStory = Object.keys(game.Stories).map(function (k) { return game.Stories[k]; }).filter(function (s) { return s.skillneeded === 'ba' && s.status === 'lead' && !s.person; })[0];
             if (firstStory)
                 clickReceiver('r' + firstStory.id);
             break;
         case "2":
-            var firstStory = Object.keys(stories).map(function (k) { return stories[k]; }).filter(function (s) { return s.column === 'dev' && s.status === 'story' && !s.person; })[0];
+            var firstStory = Object.keys(game.Stories).map(function (k) { return game.Stories[k]; }).filter(function (s) { return s.skillneeded === 'dev' && s.status === 'story' && !s.person; })[0];
             if (firstStory)
                 clickReceiver('r' + firstStory.id);
             break;
         case "3":
             break;
         case "4":
-            var firstStory = Object.keys(stories).map(function (k) { return stories[k]; }).filter(function (s) { return s.column === 'test' && s.status === 'story' && !s.person; })[0];
+            var firstStory = Object.keys(game.Stories).map(function (k) { return game.Stories[k]; }).filter(function (s) { return s.skillneeded === 'test' && s.status === 'story' && !s.person; })[0];
             if (firstStory)
                 clickReceiver('r' + firstStory.id);
             break;
@@ -242,69 +255,88 @@ document.onkeypress = function (e) {
             break;
     }
 };
+function updatePossible() {
+    if (game.SelectedDoer != undefined) {
+        //As a 'doer' -- highlight everything I can do.  (where not busy)
+        for (var _i = 0, _a = game.People[game.SelectedDoer].skills; _i < _a.length; _i++) {
+            var skill = _a[_i];
+            addClass("." + skill + ".receiver:not(.busy)", 'possible');
+        }
+    }
+    // As a 'receiver' -- highlight everything that can do this (where not busy)
+    if (game.SelectedReceiver != undefined) {
+        var receiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
+        addClass("." + receiver.skillneeded + ".doer:not(.busy)", 'possible');
+    }
+}
+function deselectDoer() {
+    var doer = $id(game.SelectedDoer);
+    if (doer != undefined)
+        doer.classList.remove('selected');
+    removeAllClass("possible");
+    game.SelectedDoer = null;
+    updatePossible();
+}
+function selectDoer() {
+    $id(game.SelectedDoer).classList.add('selected');
+    updatePossible();
+}
 function clickDoer(id) {
     if (game.SelectedDoer == id) {
-        $id(game.SelectedDoer).classList.remove('selected');
-        removeAllClass("possible");
-        removeAllClass("badSelection");
-        game.SelectedDoer = null;
+        deselectDoer();
         return;
     }
     if (game.SelectedDoer != undefined) {
-        var doer = $id(game.SelectedDoer);
-        if (doer != undefined)
-            doer.classList.remove('selected');
-        removeAllClass("possible");
-        removeAllClass("badSelection");
+        deselectDoer();
     }
     game.SelectedDoer = id;
-    $id(game.SelectedDoer).classList.add('selected');
-    //As a 'doer' -- highlight everything I can do.  (where not busy)
-    for (var _i = 0, _a = people[game.SelectedDoer].skills; _i < _a.length; _i++) {
-        var skill = _a[_i];
-        addClass("." + skill + ".receiver:not(.busy)", 'possible');
-    }
+    selectDoer();
     if (game.SelectedReceiver != undefined && game.SelectedDoer != undefined) {
-        tryDo(game.SelectedDoer, game.SelectedReceiver);
+        tryDo(game.SelectedDoer, game.SelectedReceiver, true);
     }
+}
+function deselectReceiver() {
+    var receiver = $id(game.SelectedReceiver);
+    if (receiver != undefined)
+        receiver.classList.remove('selected');
+    removeAllClass("possible");
+    game.SelectedReceiver = null;
+    updatePossible();
+}
+function selectReceiver() {
+    $id(game.SelectedReceiver).classList.add('selected');
+    updatePossible();
 }
 function clickReceiver(id) {
     if (game.SelectedReceiver == id) {
-        $id(game.SelectedReceiver).classList.remove('selected');
-        removeAllClass("possible");
-        removeAllClass("badSelection");
-        game.SelectedReceiver = null;
+        deselectReceiver();
         return;
     }
     if (game.SelectedReceiver != undefined) {
-        var receiver = $id(game.SelectedReceiver);
-        if (receiver != undefined)
-            receiver.classList.remove('selected');
-        removeAllClass("possible");
-        removeAllClass("badSelection");
+        deselectReceiver();
     }
     game.SelectedReceiver = id;
-    $id(game.SelectedReceiver).classList.add('selected');
-    // As a 'receiver' -- highlight everything that can do this (where not busy)
-    addClass("." + stories[game.SelectedReceiver].column + ".doer:not(.busy)", 'possible');
+    selectReceiver();
     if (game.SelectedReceiver != undefined && game.SelectedDoer != undefined) {
-        tryDo(game.SelectedDoer, game.SelectedReceiver);
+        tryDo(game.SelectedDoer, game.SelectedReceiver, false);
     }
 }
-function tryDo(doId, receiveId) {
-    var doer = people[doId];
-    var receiver = stories[receiveId];
-    if (!doer.skills.includes(receiver.column)) {
-        $id(doId).classList.add('badSelection');
-        $id(receiveId).classList.add('badSelection');
+function tryDo(doId, receiverId, viaDoer) {
+    var doer = game.People[doId];
+    var receiver = game.Stories[receiverId] || game.Items[receiverId];
+    if (!doer.skills.includes(receiver.skillneeded)) {
+        if (viaDoer) {
+            deselectReceiver();
+        }
+        else {
+            deselectDoer();
+        }
         return;
     }
     if (doer.busy) {
         console.log("doer is busy");
-        $id(doId).classList.add('badSelection');
     }
     if (receiver.busy) {
-        $id(receiveId).classList.add('badSelection');
         console.log("receiver is busy");
     }
     if (doer.busy || receiver.busy) {
@@ -312,43 +344,52 @@ function tryDo(doId, receiveId) {
     }
     //doer will now do the receiver thing.
     $id(game.SelectedReceiver).classList.remove('selected');
-    removeAllClass("possible");
-    removeAllClass("badSelection");
     $id(game.SelectedDoer).classList.remove('selected');
     removeAllClass("possible");
-    removeAllClass("badSelection");
     game.SelectedReceiver = null;
     game.SelectedDoer = null;
-    doIt(doId, receiveId);
+    doIt(doId, receiverId);
 }
-function doIt(doId, receiveId) {
-    var story = stories[receiveId];
-    var person = people[doId];
+function useIt(doId, item) {
+    alert('person ' + doId + ' is gonna use the ' + JSON.stringify(item));
+}
+function doIt(doId, receiverId) {
+    var story = game.Stories[receiverId];
+    if (story == undefined) {
+        var item = game.Items[receiverId];
+        if (item == undefined) {
+            console.log("Cannot work out what the receiver is!");
+            return;
+        }
+        useIt(doId, item);
+        return;
+    }
+    var person = game.People[doId];
     story.busy = true;
     story.icon = person.icon;
     story.person = doId;
     person.busy = true;
     person.summary = getSummary(story);
     drawMessage(person.name + " is " + person.summary);
-    drawPerson(doId, people, document.getElementById('people'));
-    drawStory(receiveId, stories, document.getElementById('kanbanboard'), false);
-    var duration = story.points * avgDuration * (1.0 / person.efficiency) * getTaskFactor(story.column);
+    drawPerson(doId, game.People, document.getElementById('people'));
+    drawStory(receiverId, game.Stories, document.getElementById('kanbanboard'), story.customerFoundBug);
+    var duration = story.points * avgDuration * (1.0 / person.efficiency) * getTaskFactor(story.skillneeded);
     console.log("Duration: " + duration);
-    setTimeout(function () { done(receiveId); }, duration);
+    setTimeout(function () { done(receiverId); }, duration);
 }
 function getSummary(story) {
-    return getTaskVerb(story.column) + " '" + story.summary + "'...";
+    return getTaskVerb(story.skillneeded) + " '" + story.summary + "'...";
 }
-function getTaskVerb(column) {
-    switch (column) {
+function getTaskVerb(skill) {
+    switch (skill) {
         case "ba": return "analyzing";
         case "dev": return "designing";
         case "dev0": return "developing";
         case "test": return "testing";
     }
 }
-function getTaskFactor(column) {
-    switch (column) {
+function getTaskFactor(skill) {
+    switch (skill) {
         case "ba": return 0.3;
         case "dev": return 0.3;
         case "dev0": return 1.0;
@@ -356,15 +397,15 @@ function getTaskFactor(column) {
     }
 }
 function done(receiveId) {
-    var story = stories[receiveId];
+    var story = game.Stories[receiveId];
     story.busy = false;
-    var person = people[story.person];
+    var person = game.People[story.person];
     person.busy = false;
     person.XP += 1;
     incrementXP(1);
     drawMessage(person.name + " finished " + person.summary.replace('...', '.'));
-    $id('p' + people[story.person].id).classList.remove("busy");
-    switch (story.column) {
+    $id('p' + game.People[story.person].id).classList.remove("busy");
+    switch (story.skillneeded) {
         case "ba":
             //okay -- we've done the ba work on it.
             //now we add a bunch of cards to the backlog.
@@ -384,20 +425,20 @@ function done(receiveId) {
             doneTest(receiveId);
             break;
         default:
-            alert('unrecognised ' + story.column);
+            alert('unrecognised ' + story.skillneeded);
     }
 }
 function doneBa(storyId) {
     //okay -- we've done the ba work on it.
     //now we add a bunch of cards to the backlog.
-    var oldStory = stories[storyId];
-    var person = people[oldStory.person];
+    var oldStory = game.Stories[storyId];
+    var person = game.People[oldStory.person];
     oldStory.status = 'done';
     console.log("Lead: " + storyId + " has been analyzed. A bunch of stories are being created.");
     //var project = 
     //projects[storyId] = new Project();// { lead: oldStory, stories: {[id:string]: Story }};
     //projects[storyId] = { lead: oldStory, stories: []};
-    projects[storyId] = new Project(oldStory);
+    game.Projects[storyId] = new Project(oldStory);
     //{[id:String]: Story; };
     //let project: Project = projects[storyId];
     //projects[storyId].lead = oldStory;
@@ -406,43 +447,43 @@ function doneBa(storyId) {
     //TODO: Don't always make same number of cards worth same number of points.
     for (var i = 0; i < 5; i++) {
         nextId();
-        var newCard = { id: nextId(), points: 2, value: 200, status: "story", column: "dev", summary: getTask(), logo: oldStory.logo, projectId: storyId, person: null, icon: null, busy: false, hasBug: false, customerFoundBug: null };
-        stories['r' + newCard.id] = newCard;
+        var newCard = { id: nextId(), points: 2, value: 200, status: "story", skillneeded: "dev", summary: getTask(), logo: oldStory.logo, projectId: storyId, person: null, icon: null, busy: false, hasBug: false, customerFoundBug: null };
+        game.Stories['r' + newCard.id] = newCard;
         newCards.push(newCard);
         //Add this new card to the list of stories for that project.
-        projects[storyId].stories.push('r' + newCard.id);
+        game.Projects[storyId].stories.push('r' + newCard.id);
     }
     person.busy = false;
     person.summary = "idle";
-    drawPerson('p' + person.id, people, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People, document.getElementById('people'));
     var el = document.getElementById('kanbanboard');
     //The original lead is removed from the board.
     removeStory(storyId, el);
     //The new stories are added (to the 'backlog' column)
     for (var _i = 0, newCards_1 = newCards; _i < newCards_1.length; _i++) {
         var cc = newCards_1[_i];
-        drawStory('r' + cc.id, stories, el, false);
+        drawStory('r' + cc.id, game.Stories, el, false);
     }
 }
 function doneDev(storyId) {
     //okay -- it's done being in the backlog
     //maybe add it to dev -- or send it back to be clarified.
-    var person = people[stories[storyId].person];
+    var person = game.People[game.Stories[storyId].person];
     //person.busy = null; //it continues straight into the dev0 role... so no need to mark the person idle.
     //person.summary = "idle";
-    drawPerson('p' + person.id, people, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People, document.getElementById('people'));
     var el = document.getElementById('kanbanboard');
     console.log("Story: " + storyId + " is being developed.");
-    var story = stories[storyId];
+    var story = game.Stories[storyId];
     removeStory(storyId, el);
-    story.column = "dev0";
+    story.skillneeded = "dev0";
     doIt(story.person, storyId);
 }
 function doneDev0(storyId) {
     //okay -- development is done
     //Add it to test
-    var story = stories[storyId];
-    var person = people[story.person];
+    var story = game.Stories[storyId];
+    var person = game.People[story.person];
     var bugLikelihood = (story.points / 12.0) * (1.0 - person.efficiency) * 100.0;
     console.log(storyId, story.points, person.efficiency);
     var hasBug = (Math.floor(Math.random() * 100) < bugLikelihood);
@@ -454,28 +495,28 @@ function doneDev0(storyId) {
     }
     var el = document.getElementById('kanbanboard');
     removeStory(storyId, el);
-    story.column = "test";
+    story.skillneeded = "test";
     story.person = null;
     story.icon = null;
     console.log("Story: " + storyId + " is ready for testing.");
-    drawStory(storyId, stories, el, false);
+    drawStory(storyId, game.Stories, el, false);
     person.busy = false;
     person.summary = "idle";
-    drawPerson('p' + person.id, people, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People, document.getElementById('people'));
 }
 function doneTest(storyId) {
     //okay -- test is done
     var el = document.getElementById('kanbanboard');
     removeStory(storyId, el);
-    var story = stories[storyId];
+    var story = game.Stories[storyId];
     //chance of finding bug relates to:
     // 1. is there a bug? If so, 2. how effective is the tester?
-    var person = people[story.person];
+    var person = game.People[story.person];
     person.busy = false;
     person.summary = "idle";
-    drawPerson('p' + person.id, people, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People, document.getElementById('people'));
     if (story.hasBug) {
-        var tester = people[story.person];
+        var tester = game.People[story.person];
         var chanceOfFindingBug = (50 + tester.efficiency * 50.0);
         console.log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
         var foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
@@ -485,21 +526,21 @@ function doneTest(storyId) {
             story.person = null;
             story.hasBug = null;
             story.icon = "🐛";
-            story.column = "dev";
-            drawStory(storyId, stories, el, true);
+            story.skillneeded = "dev";
+            drawStory(storyId, game.Stories, el, true);
             return;
         }
     }
     story.person = null;
     story.icon = null;
     console.log("Story: " + storyId + " passed testing. Done!");
-    story.column = "done";
+    story.skillneeded = "done";
     story.icon = "✔";
-    drawStory(storyId, stories, el, false);
+    drawStory(storyId, game.Stories, el, false);
     setTimeout(function () { bankStory(storyId); }, avgDuration * 5);
 }
 function bankStory(storyId) {
-    var story = stories[storyId];
+    var story = game.Stories[storyId];
     var el = document.getElementById('kanbanboard');
     //If story has a bug... customer has now find it! (it got past testing!)
     //and it will go back the dev column!
@@ -511,10 +552,9 @@ function bankStory(storyId) {
         story.customerFoundBug = true;
         story.person = null;
         story.hasBug = null;
-        //todo: much lower money too!
         story.icon = "🐞";
-        story.column = "dev";
-        drawStory(storyId, stories, el, true);
+        story.skillneeded = "dev";
+        drawStory(storyId, game.Stories, el, true);
         return;
     }
     //But if there is no bug .. money will be paid... and if the project is thus completed, a completion payment is made.
@@ -527,9 +567,9 @@ function bankStory(storyId) {
         message2 += " (reduced as customer found that bug)";
         //price is reduced because customer previously found a bug in this!.
     }
-    var projectId = stories[storyId].projectId;
+    var projectId = game.Stories[storyId].projectId;
     //remove the story from the project it belongs to.
-    var project = projects[projectId];
+    var project = game.Projects[projectId];
     var bonus = 0;
     if (project.stories.includes(storyId)) {
         project.stories.splice(project.stories.indexOf(storyId), 1);
@@ -537,8 +577,6 @@ function bankStory(storyId) {
         console.log("removed this story from the project it belongs to");
         console.log("length", project.stories.length);
         if (project.stories.length == 0) {
-            console.log("no stories left in project");
-            //TODO: completion bonus;
             bonus = 100;
             message2 += " plus 💲" + bonus + " for completing '" + project.lead.summary + "'!";
             incrementXP(10);
@@ -587,6 +625,7 @@ function removeAllClass(className) {
     }
 }
 function drawMessage(message) {
+    console.log("m:" + message);
     $id('message').innerText = message;
 }
 function part(list) {
@@ -611,34 +650,90 @@ var logos = ['🎈', '🎈', '🎆', '🎇', '✨', '🎉', '🎊', '🎃', '�
 function getLogo() {
     return part(logos);
 }
+// todo: alphabetic ordering
 var taskParts = ['validation', 'logical', 'virtual', 'structural', 'micro', 'hyper', 'accessible', 'indirect', 'pointer', 'truth', 'business', 'customer', 'person', 'manipulation', 'pure', 'seamless', 'crypto', 'interactive', 'SEO', 'custom', 'web', 'auto', 'digital', 'cyber', 'secure', '3D', 'enterprise', 'pro', 'developer', 'augmented', 'robo', 'productivity', 'neural', 'positronic', 'computery', 'deep', 'immutable', 'functional', 'lock-free', 'meta', 'native', 'non-virtual', 'opinionated', 'recursive', 'p2p', 'yet another', 'distributed', 'reticulated', 'hierarchical', 'obfuscated', 'weaponised', 'graphical', 'cloud-based', 'ethical', 'point-free', 'chat', 'social', 'mobile'];
-var taskParts2 = ['logic', 'algo', 'mesh', 'structure', 'form', 'service', 'container', 'data', 'DB', 'UX', 'UI', 'layer', 'component', 'system', 'diagram', 'app', 'client', 'server', 'host', 'classes', 'object', 'functions', 'job', 'parts', 'platform', 'framework', 'foundation', 'emailer', 'pager', 'plugin', 'addin', '2.0', 'automation', 'cybernetics', 'drone', 'graphics', 'artwork', 'architecture', 'collector', 'list', 'heuristic', 'solver', 'network', 'net', '9000', '2001', 'multiplexor', 'switch', 'hub', 'paradigm', 'catalog', 'registry', 'RIA', 'SPA', 'IP', 'JSON', 'XML', 'CSV', 'Yaml', 'Macro', 'analytics', 'cluster', 'node', 'graph', 'avatar', 'reticulator', 'spline', 'hierarchy', 'classes', 'threads', 'logging', 'engine', 'blockchain', 'map-reduce', 'content', 'exploits', 'hacks', 'styles', 'customizations', 'RAM', 'DRM', 'GPGPU', 'wiki'];
+// todo: alphabetic ordering
+// note: should be singular.
+var taskParts2 = ['logic', 'algo', 'mesh', 'structure', 'form', 'service', 'container', 'data', 'DB', 'UX', 'UI', 'layer', 'component', 'system', 'diagram', 'app', 'client', 'server', 'host', 'class', 'object', 'function', 'job', 'part', 'platform', 'framework', 'foundation', 'emailer', 'pager', 'plugin', 'addin', '2.0', 'automation', 'cybernetics', 'drone', 'graphic', 'artwork', 'architecture', 'collector', 'list', 'heuristic', 'solver', 'network', 'net', '9000', '2001', 'multiplexor', 'switch', 'hub', 'paradigm', 'catalog', 'registry', 'RIA', 'SPA', 'IP', 'JSON', 'XML', 'CSV', 'Yaml', 'Macro', 'analytics', 'cluster', 'node', 'graph', 'avatar', 'reticulator', 'spline', 'hierarchy', 'thread', 'logging', 'engine', 'blockchain', 'map-reduce', 'content', 'exploit', 'hack', 'style', 'customization', 'RAM', 'DRM', 'GPGPU', 'wiki'];
 function getTask() {
     return part(taskParts) + ' ' + part(taskParts2);
 }
 //TODO: add this to game class
 function incrementXP(amount) {
     game.XP += amount;
-    if (game.TotalXP < 100 && game.TotalXP + amount >= 100) {
-        removeClass('.getPerson.tester', 'hidden'); //show 'hire dev/tester/ba' buttons
-    }
-    if (game.TotalXP < 500 && game.TotalXP + amount >= 500) {
-        removeClass('.getPerson.ba', 'hidden'); //show 'hire dev/tester/ba' buttons
+    if (game.XP >= game.LevelUpXP) {
+        //LEVEL UP!
+        game.XP -= game.LevelUpXP;
+        game.Level += 1;
+        game.LevelUpXP = Math.floor(1.6 * game.LevelUpXP);
+        var items = game.AllLevelItems["l" + game.Level];
+        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
+            var item = items_1[_i];
+            game.StoreItems.push(item);
+        }
+        console.log("StoreItems", game.StoreItems);
+        switch (game.Level) {
+            case 2:
+                //show 'hire dev/tester/ba' buttons
+                removeClass('.getPerson.dev', 'hidden');
+                //TODO: remove this condition one store feature is finished
+                if (testMode) {
+                    removeClass('.visitStore', 'hidden');
+                }
+                break;
+            case 3:
+                removeClass('.getPerson.tester', 'hidden');
+                break;
+            case 4:
+                removeClass('.getPerson.ba', 'hidden');
+                break;
+        }
     }
     game.TotalXP += amount;
-    //TODO: Is it time to level up?
-    // XP resets, but total xp does not.
-    // game.Level increments.
-    drawXP(game.XP);
+    drawXP(game.XP, game.LevelUpXP, game.Level);
 }
-//TODO: add this to game class
+// TODO: add this to game class
 function incrementMoney(amount) {
     game.Money += amount;
     if (game.Money >= game.HighestMoney) {
-        if (game.HighestMoney < 300 && game.Money >= 300) {
-            removeClass('.getPerson.dev', 'hidden'); //show 'hire dev/tester/ba' buttons
-        }
         game.HighestMoney = game.Money;
     }
     drawMoney(game.Money);
+}
+function visitStore() {
+    //change title to 'DevStore'
+    $('h1')[0].innerText = "DevStore";
+    drawStore();
+    $id('store').classList.remove('hidden');
+    $id('office').classList.add('hidden');
+}
+function drawStore() {
+    var itemList = $id('items');
+    // clear store items from #items
+    itemList.innerText = "";
+    // add store items to #items  
+    for (var _i = 0, _a = game.StoreItems; _i < _a.length; _i++) {
+        var item = _a[_i];
+        var shtml = "<div class='storeItem'><button onclick='purchase(" + item.id + ");'>\uD83D\uDCB2" + item.price + "</button>" + item.name + " " + item.icon + "</div>";
+        console.log("item html", shtml);
+        var newItem = htmlToElement(shtml);
+        itemList.appendChild(newItem);
+        console.log("store item", item, newItem.outerHTML);
+    }
+}
+function leaveStore() {
+    $id('store').classList.add('hidden');
+    $id('office').classList.remove('hidden');
+    //change title back to 'DevShop'
+    $('h1')[0].innerText = "DevShop";
+}
+function purchase(itemId) {
+    var item = game.StoreItems.filter(function (i) { return i.id == itemId; })[0];
+    if (game.Money < item.price) {
+        drawMessage("You cannot afford the " + item.name + " " + item.icon);
+        return;
+    }
+    incrementMoney(item.price * -1);
+    game.Items["i" + item.id] = item;
+    drawInboxItem("i" + item.id, item, $id('kanbanboard'));
 }
