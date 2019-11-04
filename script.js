@@ -1,4 +1,4 @@
-var testMode = false; //true;//false;//true;//false;//true;
+var testMode = false; //true;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
 var startingMoney = testMode ? 100 : 100;

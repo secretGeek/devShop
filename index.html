@@ -27,6 +27,8 @@ h1,th {
 
 button {
   font-family: 'lucida console', monospace;
+  display:inline-block;
+  vertical-align: top;
 }
 
 th {
@@ -260,9 +262,8 @@ button {
 <h1>DevShop</h1>
 
 <button id='start' onclick='go();'>🌟 start</button>
-<button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
-<div id='office'>
-
+<div id='office' style='clear:left'>
+  <button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
   <button id='getdev' class='getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</button>
   <button id='gettester' class='getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</button>
   <button id='getba' class='getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</button>
