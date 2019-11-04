@@ -132,11 +132,9 @@ function drawStory(key, stories, el, top) {
         var column = el.querySelector("td#" + story.skillneeded + " .inner");
         var newstory = htmlToElement(shtml);
         if (top) {
-            log("Added story to top of " + story.skillneeded);
             column.insertBefore(newstory, column.firstChild);
         }
         else {
-            log("Added story to bottom of " + story.skillneeded);
             column.appendChild(newstory);
         }
     }
@@ -378,7 +376,7 @@ function doIt(doId, receiverId) {
     if (story == undefined) {
         var item = game.Items[receiverId];
         if (item == undefined) {
-            console.log("Cannot work out what the receiver is!");
+            log("Cannot work out what the receiver is!");
             return;
         }
         useIt(doId, item);
@@ -394,7 +392,7 @@ function doIt(doId, receiverId) {
     drawPerson(doId, game.People, document.getElementById('people'));
     drawStory(receiverId, game.Stories, document.getElementById('kanbanboard'), story.customerFoundBug);
     var duration = story.points * avgDuration * (1.0 / person.efficiency) * getTaskFactor(story.skillneeded);
-    console.log("Duration: " + duration);
+    log("Duration: of " + story.summary + " " + story.skillneeded + ": " + duration);
     setTimeout(function () { done(receiverId); }, duration);
 }
 function getSummary(story) {
@@ -467,7 +465,7 @@ function doneBa(storyId) {
         return;
     }
     oldStory.status = 'done';
-    console.log("Lead: " + storyId + " has been analyzed. A bunch of stories are being created.");
+    log("Lead: " + oldStory.summary + " " + oldStory.logo + " has been analyzed. A bunch of stories are being created.");
     game.Projects[storyId] = new Project(oldStory);
     var newCards = ElaborateProject(oldStory, person);
     person.busy = false;
@@ -489,12 +487,12 @@ function ElaborateProject(story, person) {
     for (var i = 0; i < numCards; i++) {
         //TODO: bug Likelihood could additionally be related to person.skills['ba'].accuracy
         var specBugLikelihood = (story.points / (numCards * 12.0)) * (1.0 - person.efficiency) * 100.0;
-        log("Likelihood of spec bug: " + specBugLikelihood);
+        log("Likelihood of spec bug: " + Math.floor(specBugLikelihood) + "% on " + story.points + "point project with " + numCards + " cards");
         var hasSpecBug = (Math.floor(Math.random() * 100) < specBugLikelihood);
         //chance of adding a bug relates to effectiveness of dev, and size of story.
         var summary = getTask();
         if (hasSpecBug) {
-            log("Spec bug added to " + summary);
+            log("Spec bug 💥 added to " + summary);
         }
         var newCard = { id: nextId(), points: 1, value: 200, status: "story", skillneeded: "dev", summary: summary, logo: story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: hasSpecBug, customerFoundBug: null };
         game.Stories['r' + newCard.id] = newCard;
@@ -521,14 +519,13 @@ function doneDev(storyId) {
     var story = game.Stories[storyId];
     if (story.hasSpecBug) {
         var chanceOfFindingSpecBug = (50 + person.efficiency * 50.0);
-        log("Story: " + storyId + " needs clarification, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of realising this.");
+        log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of realising this.");
         var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
         if (foundSpecBug) {
             person.busy = false;
             person.summary = "idle";
             drawPerson('p' + person.id, game.People, document.getElementById('people'));
-            console.log("Found a spec bug in story: " + storyId);
-            drawMessage(person.name + " found a spec bug in story '" + story.summary + "'");
+            drawMessage(person.name + " found a spec bug 💥 in story '" + story.summary + "'");
             story.person = null;
             story.hasBug = null;
             story.icon = "💥";
@@ -557,14 +554,14 @@ function doneDev0(storyId) {
     if (hasBug) {
         story.hasBug = true;
         // Note the bug may or may not be found later. If not found the customer *will* find it.
-        log("A bug was added to " + storyId + " which was " + Math.floor(bugLikelihood) + "% likely");
+        log("A bug 🐛 was added to " + story.summary + " which was " + Math.floor(bugLikelihood) + "% likely");
     }
     var el = document.getElementById('kanbanboard');
     removeStory(storyId, el);
     story.skillneeded = "test";
     story.person = null;
     story.icon = null;
-    console.log("Story: " + storyId + " is ready for testing.");
+    log("Story: " + story.summary + " is ready for testing.");
     drawStory(storyId, game.Stories, el, false);
     person.busy = false;
     person.summary = "idle";
@@ -598,7 +595,7 @@ function doneTest(storyId) {
     }
     if (story.hasSpecBug) {
         var chanceOfFindingSpecBug = (50 + tester.efficiency * 50.0);
-        console.log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
+        log("Story: " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
         var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
         if (foundSpecBug) {
             drawMessage(tester.name + " found a spec bug 💥 in story '" + story.summary + "'");
@@ -612,7 +609,7 @@ function doneTest(storyId) {
     }
     story.person = null;
     story.icon = null;
-    console.log("Story: " + storyId + " passed testing. Done!");
+    log("Story: " + story.summary + " passed testing. Done!");
     story.skillneeded = "done";
     story.icon = "✔";
     drawStory(storyId, game.Stories, el, false);
@@ -626,7 +623,6 @@ function bankStory(storyId) {
     if (story.hasBug || story.hasSpecBug) {
         //remove from board
         removeStory(storyId, el);
-        //console.log("Customer found a bug in story: " + storyId);
         drawMessage("Oops! The customer found a bug 🐞 in story '" + story.summary + "'");
         story.customerFoundBug = true;
         story.person = null;
@@ -654,8 +650,6 @@ function bankStory(storyId) {
     if (project.stories.includes(storyId)) {
         project.stories.splice(project.stories.indexOf(storyId), 1);
         //if there are no stories remaining then a bonus is paid.
-        console.log("removed this story from the project it belongs to");
-        console.log("length", project.stories.length);
         if (project.stories.length == 0) {
             bonus = Math.ceil(project.lead.points * game.PointValue / 2);
             message2 += " plus 💲" + bonus + " for completing '" + project.lead.summary + "'!";
