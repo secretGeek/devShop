@@ -1,6 +1,5 @@
 TODO:
 
-[ ] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
 
 
 
@@ -8,15 +7,20 @@ TODO:
 [ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
 
 
+[ ] A worker sometimes gets distracted. (Often). 
+		-- the dog/cat might decrease that.
+
+
+
 
 //TODO: Some items can only be purchased if you have the necessary target.
   // e.g. advanced developer training requires a dedicated developer (not just the founder)
 
 [ ] BUY button ....
-	[ ] hides main "screen"
-	[ ] new screen has:
-			cancel/back
-			done
+	[x] hides main "screen"
+	[x] new screen has:
+			<< leave shop
+			
 			THings to purchase (potentially scrollable)
 			(An array of objects... )
 				- courses
@@ -120,7 +124,6 @@ A few ideas
 
 DEFER
 
- ? Dark mode
  ?  is there inflation?
 		each time a thing is purchased, that thing becomes x% more expensive. i.e. compounding interest on prices.
 	levels:
@@ -165,3 +168,9 @@ Done
 		[x] you buy them.
 [x] top align cards in columns.
 
+
+
+Unlikely:
+
+[no] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
+ ? Dark mode

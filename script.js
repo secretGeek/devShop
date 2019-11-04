@@ -1,7 +1,7 @@
-var testMode = false; //true;
-var debugOutput = getParameterByName('debug') == "true";
+var testMode = false; //true;//false;//true;//false;//true;
+var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
-var startingMoney = testMode ? 1000 : 100;
+var startingMoney = testMode ? 100 : 100;
 var game;
 if (debugOutput) {
     $id('debug').classList.remove('hidden');
@@ -28,11 +28,13 @@ var Game = /** @class */ (function () {
     function Game(startingMoney) {
         this.Money = startingMoney;
         this.HighestMoney = startingMoney;
-        this.Inflation = testMode ? 1.3 : 1;
+        this.Inflation = testMode ? 1.3 : 1.3;
         this.Level = 1;
         this.XP = 0;
         this.TotalXP = 0;
-        this.LevelUpXP = testMode ? 3 : 50;
+        this.LevelUpXP = testMode ? 50 : 50;
+        this.PointValue = 25;
+        this.ProjectSize = 10;
         this.NextId = 0;
         this.People = {};
         this.Stories = {};
@@ -130,9 +132,11 @@ function drawStory(key, stories, el, top) {
         var column = el.querySelector("td#" + story.skillneeded + " .inner");
         var newstory = htmlToElement(shtml);
         if (top) {
+            log("Added story to top of " + story.skillneeded);
             column.insertBefore(newstory, column.firstChild);
         }
         else {
+            log("Added story to bottom of " + story.skillneeded);
             column.appendChild(newstory);
         }
     }
@@ -223,7 +227,9 @@ function getNewLead() {
     }
     incrementMoney(price * -1);
     incrementXP(5);
-    var newLead = { id: nextId(), points: 10, value: 1000, status: "lead", skillneeded: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, customerFoundBug: null, projectId: null };
+    // TODO: instead of 10 points and value 1000....
+    // should be based on current level... some randomness.
+    var newLead = { id: nextId(), points: game.ProjectSize, value: 1000, status: "lead", skillneeded: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, hasSpecBug: false, customerFoundBug: null, projectId: null };
     if (isEmpty(game.Stories)) {
         // this was the first lead ever! give them a tip...
         drawMessage("Click the project " + newLead.logo + ", then click the Founder " + game.People["p1"].icon + " (or vice-versa)");
@@ -445,32 +451,28 @@ function done(receiveId) {
 function doneBa(storyId) {
     //okay -- we've done the ba work on it.
     //now we add a bunch of cards to the backlog.
+    var el = document.getElementById('kanbanboard');
     var oldStory = game.Stories[storyId];
     var person = game.People[oldStory.person];
+    if (oldStory.status == "story") {
+        //if (!oldStory.hasSpecBug && !oldStory.hasBug) alert('I THOUGHT THIS WAS A SPEC BUG?\r\n'  + JSON.stringify(oldStory));
+        oldStory.person = null;
+        oldStory.skillneeded = "dev"; //it goes into backlog, with bug fixed.
+        oldStory.hasSpecBug = false; //if it was a spec bug, it is now fixed.
+        //if it was a regular bug, it is not fixed until the dev is performed.
+        oldStory.icon = null; //remove the icon... 
+        log("Fixed the bug (or spec bug)");
+        removeStory(storyId, el); //remove the story from the Inbox...
+        drawStory(storyId, game.Stories, el, true); //top of the backlog... race it through
+        return;
+    }
     oldStory.status = 'done';
     console.log("Lead: " + storyId + " has been analyzed. A bunch of stories are being created.");
-    //var project = 
-    //projects[storyId] = new Project();// { lead: oldStory, stories: {[id:string]: Story }};
-    //projects[storyId] = { lead: oldStory, stories: []};
     game.Projects[storyId] = new Project(oldStory);
-    //{[id:String]: Story; };
-    //let project: Project = projects[storyId];
-    //projects[storyId].lead = oldStory;
-    //projects[storyId].stories = [];
-    var newCards = [];
-    //TODO: Don't always make same number of cards worth same number of points.
-    for (var i = 0; i < 5; i++) {
-        nextId();
-        var newCard = { id: nextId(), points: 2, value: 200, status: "story", skillneeded: "dev", summary: getTask(), logo: oldStory.logo, projectId: storyId, person: null, icon: null, busy: false, hasBug: false, customerFoundBug: null };
-        game.Stories['r' + newCard.id] = newCard;
-        newCards.push(newCard);
-        //Add this new card to the list of stories for that project.
-        game.Projects[storyId].stories.push('r' + newCard.id);
-    }
+    var newCards = ElaborateProject(oldStory, person);
     person.busy = false;
     person.summary = "idle";
     drawPerson('p' + person.id, game.People, document.getElementById('people'));
-    var el = document.getElementById('kanbanboard');
     //The original lead is removed from the board.
     removeStory(storyId, el);
     //The new stories are added (to the 'backlog' column)
@@ -479,16 +481,66 @@ function doneBa(storyId) {
         drawStory('r' + cc.id, game.Stories, el, false);
     }
 }
+function ElaborateProject(story, person) {
+    var numCards = Math.floor(story.points / 3) + 1;
+    var remainingPointsToAllocate = story.points;
+    var newCards = [];
+    // Deal out starting cards worth 1 point each.
+    for (var i = 0; i < numCards; i++) {
+        //TODO: bug Likelihood could additionally be related to person.skills['ba'].accuracy
+        var specBugLikelihood = (story.points / (numCards * 12.0)) * (1.0 - person.efficiency) * 100.0;
+        log("Likelihood of spec bug: " + specBugLikelihood);
+        var hasSpecBug = (Math.floor(Math.random() * 100) < specBugLikelihood);
+        //chance of adding a bug relates to effectiveness of dev, and size of story.
+        var summary = getTask();
+        if (hasSpecBug) {
+            log("Spec bug added to " + summary);
+        }
+        var newCard = { id: nextId(), points: 1, value: 200, status: "story", skillneeded: "dev", summary: summary, logo: story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: hasSpecBug, customerFoundBug: null };
+        game.Stories['r' + newCard.id] = newCard;
+        newCards.push(newCard);
+        //Add this new card to the list of stories for that project.
+        game.Projects['r' + story.id].stories.push('r' + newCard.id);
+    }
+    //okay we've given a point to each card.
+    remainingPointsToAllocate -= numCards;
+    //randomly allocate remaining points to card.
+    while (remainingPointsToAllocate > 0) {
+        var card = part(newCards); //draw a card from the deck
+        card.points += 1;
+        remainingPointsToAllocate--;
+    }
+    return newCards;
+}
 function doneDev(storyId) {
+    var el = document.getElementById('kanbanboard');
     //okay -- it's done being in the backlog
     //maybe add it to dev -- or send it back to be clarified.
     var person = game.People[game.Stories[storyId].person];
+    //console.log("Story: " + storyId + " is now being developed.");
+    var story = game.Stories[storyId];
+    if (story.hasSpecBug) {
+        var chanceOfFindingSpecBug = (50 + person.efficiency * 50.0);
+        log("Story: " + storyId + " needs clarification, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of realising this.");
+        var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
+        if (foundSpecBug) {
+            person.busy = false;
+            person.summary = "idle";
+            drawPerson('p' + person.id, game.People, document.getElementById('people'));
+            console.log("Found a spec bug in story: " + storyId);
+            drawMessage(person.name + " found a spec bug in story '" + story.summary + "'");
+            story.person = null;
+            story.hasBug = null;
+            story.icon = "💥";
+            story.skillneeded = "ba";
+            removeStory(storyId, el);
+            drawStory(storyId, game.Stories, el, true);
+            return;
+        }
+    }
     //person.busy = null; //it continues straight into the dev0 role... so no need to mark the person idle.
     //person.summary = "idle";
-    drawPerson('p' + person.id, game.People, document.getElementById('people'));
-    var el = document.getElementById('kanbanboard');
-    console.log("Story: " + storyId + " is being developed.");
-    var story = game.Stories[storyId];
+    //drawPerson('p' + person.id, game.People, document.getElementById('people'));
     removeStory(storyId, el);
     story.skillneeded = "dev0";
     doIt(story.person, storyId);
@@ -529,8 +581,8 @@ function doneTest(storyId) {
     person.busy = false;
     person.summary = "idle";
     drawPerson('p' + person.id, game.People, document.getElementById('people'));
+    var tester = game.People[story.person];
     if (story.hasBug) {
-        var tester = game.People[story.person];
         var chanceOfFindingBug = (50 + tester.efficiency * 50.0);
         console.log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
         var foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
@@ -541,6 +593,21 @@ function doneTest(storyId) {
             story.hasBug = null;
             story.icon = "🐛";
             story.skillneeded = "dev";
+            drawStory(storyId, game.Stories, el, true);
+            return;
+        }
+    }
+    if (story.hasSpecBug) {
+        var chanceOfFindingSpecBug = (50 + tester.efficiency * 50.0);
+        console.log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
+        var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
+        if (foundSpecBug) {
+            console.log("Found a spec bug in story: " + storyId);
+            drawMessage(tester.name + " found a spec bug in story '" + story.summary + "'");
+            story.person = null;
+            story.hasBug = null;
+            story.icon = "💥";
+            story.skillneeded = "ba";
             drawStory(storyId, game.Stories, el, true);
             return;
         }
@@ -558,26 +625,27 @@ function bankStory(storyId) {
     var el = document.getElementById('kanbanboard');
     //If story has a bug... customer has now find it! (it got past testing!)
     //and it will go back the dev column!
-    if (story.hasBug) {
+    if (story.hasBug || story.hasSpecBug) {
         //remove from board
         removeStory(storyId, el);
         console.log("Customer found a bug in story: " + storyId);
         drawMessage("Oops! The customer found a bug in story '" + story.summary + "'");
         story.customerFoundBug = true;
         story.person = null;
-        story.hasBug = null;
+        //story.hasBug = null;
+        //story.hasSpecBug = null;
         story.icon = "🐞";
-        story.skillneeded = "dev";
-        drawStory(storyId, game.Stories, el, true);
+        story.skillneeded = "ba"; //goes all the way back to the BA column.
+        drawStory(storyId, game.Stories, el, true); //at the top.
         return;
     }
     //But if there is no bug .. money will be paid... and if the project is thus completed, a completion payment is made.
-    //TODO: set appropriate price
-    var price = 50;
+    //TODO: set appropriate price based on # points.
+    var price = story.points * game.PointValue;
     var message2 = " for '" + story.summary + "'";
     incrementXP(5);
     if (story.customerFoundBug) {
-        price = 25;
+        price = Math.floor(price / 2);
         message2 += " (reduced as customer found that bug)";
         //price is reduced because customer previously found a bug in this!.
     }
@@ -591,7 +659,7 @@ function bankStory(storyId) {
         console.log("removed this story from the project it belongs to");
         console.log("length", project.stories.length);
         if (project.stories.length == 0) {
-            bonus = 100;
+            bonus = Math.ceil(project.lead.points * game.PointValue / 2);
             message2 += " plus 💲" + bonus + " for completing '" + project.lead.summary + "'!";
             incrementXP(10);
         }
@@ -690,7 +758,9 @@ function incrementXP(amount) {
         //LEVEL UP!
         game.XP -= game.LevelUpXP;
         game.Level += 1;
-        game.LevelUpXP = Math.floor(1.6 * game.LevelUpXP);
+        game.LevelUpXP = Math.floor(game.Inflation * game.LevelUpXP);
+        game.PointValue = Math.floor(game.Inflation * game.PointValue);
+        game.ProjectSize = Math.floor(game.Inflation * game.ProjectSize);
         var items = game.AllLevelItems["l" + game.Level];
         if (items != undefined) {
             for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
