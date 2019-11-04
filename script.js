@@ -459,7 +459,7 @@ function doneBa(storyId) {
         oldStory.person = null;
         oldStory.skillneeded = "dev"; //it goes into backlog, with bug fixed.
         oldStory.hasSpecBug = false; //if it was a spec bug, it is now fixed.
-        //if it was a regular bug, it is not fixed until the dev is performed.
+        oldStory.hasBug = false; //If it was a regular bug, the further development will resolve it.
         oldStory.icon = null; //remove the icon... 
         log("Fixed the bug (or spec bug)");
         removeStory(storyId, el); //remove the story from the Inbox...
@@ -557,7 +557,7 @@ function doneDev0(storyId) {
     if (hasBug) {
         story.hasBug = true;
         // Note the bug may or may not be found later. If not found the customer *will* find it.
-        console.log("A bug was added to " + storyId + " which was " + Math.floor(bugLikelihood) + "% likely");
+        log("A bug was added to " + storyId + " which was " + Math.floor(bugLikelihood) + "% likely");
     }
     var el = document.getElementById('kanbanboard');
     removeStory(storyId, el);
@@ -584,11 +584,10 @@ function doneTest(storyId) {
     var tester = game.People[story.person];
     if (story.hasBug) {
         var chanceOfFindingBug = (50 + tester.efficiency * 50.0);
-        console.log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
+        log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
         var foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
         if (foundBug) {
-            console.log("Found a bug in story: " + storyId);
-            drawMessage(tester.name + " found a bug in story '" + story.summary + "'");
+            drawMessage(tester.name + " found a bug 🐛 in story '" + story.summary + "'");
             story.person = null;
             story.hasBug = null;
             story.icon = "🐛";
@@ -602,8 +601,7 @@ function doneTest(storyId) {
         console.log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
         var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
         if (foundSpecBug) {
-            console.log("Found a spec bug in story: " + storyId);
-            drawMessage(tester.name + " found a spec bug in story '" + story.summary + "'");
+            drawMessage(tester.name + " found a spec bug 💥 in story '" + story.summary + "'");
             story.person = null;
             story.hasBug = null;
             story.icon = "💥";
@@ -628,8 +626,8 @@ function bankStory(storyId) {
     if (story.hasBug || story.hasSpecBug) {
         //remove from board
         removeStory(storyId, el);
-        console.log("Customer found a bug in story: " + storyId);
-        drawMessage("Oops! The customer found a bug in story '" + story.summary + "'");
+        //console.log("Customer found a bug in story: " + storyId);
+        drawMessage("Oops! The customer found a bug 🐞 in story '" + story.summary + "'");
         story.customerFoundBug = true;
         story.person = null;
         //story.hasBug = null;
