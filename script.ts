@@ -738,7 +738,7 @@ function doneTest(storyId: string) {
   
   if (story.hasBug) {
     let chanceOfFindingBug = (50 + tester.efficiency * 50.0);
-    log("Story: " + storyId + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
+    log("Story: " + story.summary + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
     var foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
     if (foundBug) {
       drawMessage(tester.name + " found a bug 🐛 in story '" + story.summary + "'");
