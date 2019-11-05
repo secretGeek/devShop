@@ -3,6 +3,10 @@
 <head>
 <meta charset='utf-8' name='viewport' content='width=device-width, initial-scale=1.0'>
 <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
 <title>DevShop</title>
 </head>
 <style>
@@ -16,7 +20,10 @@ body {
   height:100%;
 }
 #debug {
+	clear:both;
   font-size:0.7em;
+	position:absolute;
+	top:calc(50vw);
 }
 
 h1,th {
@@ -34,7 +41,7 @@ button {
   vertical-align: top;
   border-radius:0;
   min-height:60px;
-  max-width:120px;
+  max-width:100px;
 }
 
 th {
@@ -50,9 +57,9 @@ th {
   border-collapse: collapse;
   width:100%;
   table-layout: fixed;
-  height:100%;
-  min-height:100%;
-  max-height:100%;
+  height:50%;
+  min-height:50%;
+  max-height:50%;
 }
 
 #kanbanboard th, #kanbanboard td {
@@ -161,9 +168,13 @@ th {
   border:1px solid #CCC;
 }
 
-.logo, .avatar, .avatar2 {
+.logo, .avatar, .avatar2, .secrets {
   font-family: arial;
   font-size:14pt;
+}
+.secrets {
+  background-color:#AAA;
+  opacity:0.5;
 }
 .avatar {
   border:1px solid #8AF;
@@ -200,11 +211,16 @@ th {
   margin-right:5px;
   text-decoration:none;
 }
-
+.story-detail {
+ display:inline-block;
+ whitespace:pre-wrap;
+ overflow-y: hidden;
+ margin-left:3px;
+}
 .points {
   position:absolute;
   bottom:0;
-  right:5px;
+  left:3px;
 }
 
 .negative {
@@ -213,6 +229,29 @@ th {
 
 #items {
   margin:20px 0;
+}
+
+.describe {
+  display:inline-block;
+  font-size:2em;
+  box-shadow:0 0 5px #FCA inset;
+  pointer:cursor;
+  border-radius:5px;
+  padding:5px;
+  min-width:20px;
+}
+.storeIcon {
+  font-size:3em;
+}
+
+#store, #office {
+  position:absolute;
+	max-height:calc(100vh - 100px);
+	height:calc(100vh - 100px);
+	overflow-y:auto;
+	xbackground-color:white;
+	xborder:1px solid red;
+	max-width:70ch;
 }
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
@@ -272,7 +311,7 @@ th {
 
 <button id='start' onclick='go();'>🌟 start</button>
 <div id='office' style='clear:left'>
-  <button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
+  <button id='getLead' class='hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
   <button id='getdev' class='getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</button>
   <button id='gettester' class='getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</button>
   <button id='getba' class='getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</button>
@@ -325,7 +364,7 @@ th {
 </div>
 <span id='message'>Press '🌟 start' to begin.</span>
 <a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
-<div id='debug' class='hidden'></div>
+<div id='debug' class='hidden' style='clear:both'></div>
 </body>
 <script src='script.js?1' type="text/javascript"></script>
 </html>

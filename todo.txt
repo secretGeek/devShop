@@ -1,8 +1,6 @@
 TODO:
 
 
-
-
 [ ] when you click anywhere other than on a sender/receiver -- unselect whatever's selected.
 [ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
 
@@ -133,6 +131,11 @@ DEFER
 
 Done
 
+[x] store items should have an info icon that reveals their description.
+[x] bugs don't exist until level 2...
+[x] store: buy observation skills. 
+[x] replace 'var ' with 'let '
+[x] bug: shouldn't be able to select a 'busy' receiver or doer.
 [x] when something is selected and it's wrong then de-select the previous thing. (be it doer or receiver)
 [x] Board height should be limited.
 [x] short series of tool tips for showing/hiding "next action"
