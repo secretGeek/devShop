@@ -1,13 +1,17 @@
+// vertical-center content in .button
+// button text smaller, particularly at smaller sizes
+// guillotine bug on iOS (table too tall basically)
+//  rework on a bug should be quicker than original work.
 //? When is interest added to the loan!?
 //   after a certain amount of time.... (is it a turn based game or a time based game?)
 //   some things about it are time based... delays for 
 //   whenever levelling up... whenever a story is finished? whenever an action occurs
 //? Show count of items in top of column
-// store items should have an info icon that reveals their description.
-// bugs don't exist until level 2...
 // limited number of slots for people. cannot hire more than level number... until 
 // Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
 // consider: the store should show level n+1 items, disabled.
+// ? dual-skill cannot be better than "4/5" at either skill
+// ? how to show attributes/stats sheet of a person?
 var testMode = false; //true;//false;//true;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
@@ -99,7 +103,7 @@ function drawRoom() {
         drawButtons();
 }
 function drawButtons() {
-    //  <button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
+    //  <div class='button getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
     var getLead = $id('getLead');
     getLead.innerHTML = "\uD83C\uDF81 find project (\uD83D\uDCB2" + game.LeadPrice + ")";
     for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {
@@ -896,7 +900,7 @@ function drawStore() {
     // add store items to #items  
     for (var _i = 0, _a = game.StoreItems; _i < _a.length; _i++) {
         var item = _a[_i];
-        var shtml = "<div class='storeItem'><button onclick='purchase(" + item.id + ");' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</button> " + item.name + " <span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span></div>";
+        var shtml = "<div class='storeItem'><div onclick='purchase(" + item.id + ");' class='button' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</div> " + item.name + " <span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span></div>";
         console.log("item html", shtml);
         var newItem = htmlToElement(shtml);
         itemList.appendChild(newItem);

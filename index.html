@@ -20,10 +20,10 @@ body {
   height:100%;
 }
 #debug {
-	clear:both;
+  clear:both;
   font-size:0.7em;
-	position:absolute;
-	top:calc(50vw);
+  position:absolute;
+  top:calc(50vw);
 }
 
 h1,th {
@@ -35,15 +35,37 @@ h1,th {
   margin-block-end:5px;
 }
 
-button {
+.button {
+  font-size:0.7em;
+  border:1px solid #333;
+  box-shadow:2px 2px 0 #AAA;
   font-family: 'lucida console', monospace;
-  display:inline-block;
-  vertical-align: top;
   border-radius:0;
   min-height:60px;
   max-width:100px;
-}
+  min-width:100px;
 
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: inline-flex;
+  vertical-align:top;
+
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  text-align:center;
+  padding:5px;
+}
 th {
   color:#666;
   font-size:10pt;
@@ -122,7 +144,7 @@ th {
   border:1px solid #CCC;
 }
 
-.doer:not(.busy):hover, .receiver:not(.busy):hover, button {
+.doer:not(.busy):hover, .receiver:not(.busy):hover, .button {
   cursor:pointer;
 }
 
@@ -246,12 +268,12 @@ th {
 
 #store, #office {
   position:absolute;
-	max-height:calc(100vh - 100px);
-	height:calc(100vh - 100px);
-	overflow-y:auto;
-	xbackground-color:white;
-	xborder:1px solid red;
-	max-width:70ch;
+  max-height:calc(100vh - 100px);
+  height:calc(100vh - 100px);
+  overflow-y:auto;
+  xbackground-color:white;
+  xborder:1px solid red;
+  max-width:70ch;
 }
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
@@ -266,12 +288,6 @@ th {
   #message {
     font-size:10pt;
   }
-  button {
-    -webkit-appearance:none
-    -webkit-border-radius:0 !important;
-    border-radius:0;
-  }
-
 }
 @media screen and (max-height: 500px)
 {
@@ -296,10 +312,10 @@ th {
   #message {
     font-size:10pt;
   }
-  button {
-    -webkit-appearance:none
-    -webkit-border-radius:0 !important;
-    border-radius:0;
+  .button {
+    max-width:80px;
+    min-width:80px;
+    font-size:10pt;
   }
 }
 </style>
@@ -309,13 +325,13 @@ th {
 <span id='level' title='Level'>1🥑</span>
 <h1>DevShop</h1>
 
-<button id='start' onclick='go();'>🌟 start</button>
+<div class='button' id='start' onclick='go();'>🌟 start</div>
 <div id='office' style='clear:left'>
-  <button id='getLead' class='hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
-  <button id='getdev' class='getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</button>
-  <button id='gettester' class='getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</button>
-  <button id='getba' class='getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</button>
-  <button class='visitStore hidden' onclick='visitStore();'>🏪 visit store</button>
+  <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
+  <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</div>
+  <div id='gettester' class='button getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</div>
+  <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</div>
+  <div class='button visitStore hidden' onclick='visitStore();'>🏪 visit store</div>
   <table id='kanbanboard'>
   <thead>
   <tr>
@@ -357,7 +373,7 @@ th {
 </div>
 
 <div id='store' class='hidden'>
-  <button id='closeStore' onclick='leaveStore();'>🏢 leave store</button>
+  <div id='closeStore' class='button' onclick='leaveStore();'>🏢 leave store</div>
   <div id='items'>
   ITEMS for SALE
   </div>

@@ -1,14 +1,17 @@
+// vertical-center content in .button
+// button text smaller, particularly at smaller sizes
+// guillotine bug on iOS (table too tall basically)
+//  rework on a bug should be quicker than original work.
 //? When is interest added to the loan!?
 //   after a certain amount of time.... (is it a turn based game or a time based game?)
 //   some things about it are time based... delays for 
 //   whenever levelling up... whenever a story is finished? whenever an action occurs
 //? Show count of items in top of column
-// store items should have an info icon that reveals their description.
-// bugs don't exist until level 2...
 // limited number of slots for people. cannot hire more than level number... until 
 // Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
 // consider: the store should show level n+1 items, disabled.
-
+// ? dual-skill cannot be better than "4/5" at either skill
+// ? how to show attributes/stats sheet of a person?
 let testMode = false;//true;//false;//true;
 let debugOutput = (testMode || getParameterByName('debug') == "true");
 let avgDuration = testMode ? 4 : 400; 
@@ -50,6 +53,9 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
   
   - Seat upgrade 💺 
     - Desk plant 🌳
+    - Desk cactus 🌵
+    - Desk bling 💎
+    - Stuffed flatbread 🥙
     
 		- Personal coffee machine ☕️
 		- Office decoration 🎣 
@@ -209,7 +215,7 @@ function drawRoom() {
 }
 
 function drawButtons() {
-//  <button class='getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</button>
+//  <div class='button getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
   let getLead = $id('getLead');
   getLead.innerHTML = `🎁 find project (💲${game.LeadPrice})`;
 
@@ -1110,7 +1116,7 @@ function drawStore() {
   itemList.innerText = "";
   // add store items to #items  
   for(const item of game.StoreItems){
-    let shtml = `<div class='storeItem'><button onclick='purchase(${item.id});' id='store-button-${item.id}'>💲${item.price}</button> ${item.name} <span class='storeIcon'>${item.icon}</span> <span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
+    let shtml = `<div class='storeItem'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div> ${item.name} <span class='storeIcon'>${item.icon}</span> <span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
     console.log("item html", shtml);
     let newItem = htmlToElement(shtml);
     itemList.appendChild(newItem);
