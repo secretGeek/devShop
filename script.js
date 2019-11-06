@@ -1,18 +1,17 @@
-// [x] vertical-center content in .button
-// [x] button text smaller, particularly at smaller sizes
 // guillotine bug on iOS (table too tall basically)
-// [x] rework on a bug should be quicker than original work.
-//? When is interest added to the loan!?
-//   after a certain amount of time.... (is it a turn based game or a time based game?)
-//   some things about it are time based... delays for 
-//   whenever levelling up... whenever a story is finished? whenever an action occurs
-//? Show count of items in top of column
-// limited number of slots for people. cannot hire more than level number... until 
-// Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
+// ? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
+// ? When is interest added to the loan!?
+//    after a certain amount of time.... (is it a turn based game or a time based game?)
+//    some things about it are time based... delays for 
+//    whenever levelling up... whenever a story is finished? whenever an action occurs
+// ? Show count of items in top of column
+// ? limited number of slots for people. cannot hire more than level number... until 
+// ? Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
 // consider: the store should show level n+1 items, disabled.
 // ? dual-skill cannot be better than "4/5" at either skill
 // ? how to show attributes/stats sheet of a person?
-var testMode = false; //true;
+// ? rename to 'tinykanban'
+var testMode = false; //true;//false;//true;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
 var startingMoney = testMode ? 100 : 100;
@@ -21,26 +20,41 @@ if (debugOutput) {
     $id('debug').classList.remove('hidden');
     log('debug mode detected');
 }
+var ItemCode;
+(function (ItemCode) {
+    ItemCode[ItemCode["cat"] = 1] = "cat";
+    ItemCode[ItemCode["dog"] = 2] = "dog";
+    ItemCode[ItemCode["test"] = 3] = "test";
+    ItemCode[ItemCode["observe"] = 4] = "observe";
+    ItemCode[ItemCode["selfstart"] = 5] = "selfstart";
+    ItemCode[ItemCode["seat"] = 6] = "seat";
+    ItemCode[ItemCode["coffee"] = 7] = "coffee";
+    ItemCode[ItemCode["donut"] = 8] = "donut";
+    ItemCode[ItemCode["pizza"] = 9] = "pizza";
+    ItemCode[ItemCode["banana"] = 10] = "banana";
+    ItemCode[ItemCode["crystal"] = 11] = "crystal";
+    ItemCode[ItemCode["unitt"] = 12] = "unitt";
+})(ItemCode || (ItemCode = {}));
 function getAllLevelItems() {
     //These are the items that become available in the store at each level.
     // Note that skillneeded includes the special value "any" which means it can be applied to any person.
     // TODO: ?? There could be a 'must not have skill' property... e.g. Beginning Development.
     //The 'code' property is used in `function useIt` to decide how the card affects the player.
     var allItems = { "l2": //Level 2 Items
-        [{ id: 1, name: 'Office Cat', price: 100, icon: "🐱", skillneeded: "dev", busy: false, code: 'cat', description: 'This friendly feline will stop one person at a time from getting distracted.' },
-            { id: 2, name: 'Office Dog', price: 200, icon: "🐶", skillneeded: "test", busy: false, code: 'dog', description: 'Bring joy and efficiency to the workplace.' },
-            { id: 3, name: 'Be a Better Tester', price: 200, icon: "📗", skillneeded: "test", busy: false, code: 'test', description: 'Already a tester? Be a better tester!' },
-            { id: 4, name: 'Observation Training', price: 200, icon: "🕵️‍♀️", skillneeded: "any", busy: false, code: 'observe', description: 'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.' },
-            { id: 5, name: 'Self-Starter', price: 200, icon: "🚀", skillneeded: "any", busy: false, code: 'selfstart', description: 'When you\'re idle, go and check the board to see if there is anything you can do.' },
-            { id: 6, name: 'Seat upgrade', price: 200, icon: "💺", skillneeded: "any", busy: false, code: 'seat', description: 'A comfortable seat upgrade makes any worker more efficient.' },
-            { id: 7, name: 'Cup of coffee', price: 10, icon: "☕", skillneeded: "any", busy: false, code: 'coffee', description: 'A cup of joe will speed up any worker ...if only for a little while.' },
-            { id: 8, name: 'Tasty donut', price: 5, icon: "🍩", skillneeded: "any", busy: false, code: 'donut', description: 'A sugary fix will speed you up... but beware the sugar crash.' },
-            { id: 9, name: 'Pizza', price: 5, icon: "🍕", skillneeded: "any", busy: false, code: 'pizza', description: 'Trap your workers in the office by giving them no reason to leave' },
-            { id: 10, name: 'Banana', price: 5, icon: "🍌", skillneeded: "any", busy: false, code: 'pizza', description: 'This healthy snack gives an energy boost' },
-            { id: 11, name: 'Crystal ball', price: 5, icon: "🔮", skillneeded: "any", busy: false, code: 'crystal', description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.' },
+        [{ id: 1, name: 'Office Cat', price: 100, icon: "🐱", skillneeded: "dev", busy: false, code: ItemCode.cat, activeDuration: 50, description: 'This friendly feline will stop one person at a time from getting distracted.' },
+            { id: 2, name: 'Office Dog', price: 200, icon: "🐶", skillneeded: "test", busy: false, code: ItemCode.dog, activeDuration: 50, description: 'Bring joy and efficiency to the workplace.' },
+            { id: 3, name: 'Be a Better Tester', price: 200, icon: "📗", skillneeded: "test", busy: false, code: ItemCode.test, activeDuration: 0, description: 'Already a tester? Be a better tester!' },
+            { id: 4, name: 'Observation Training', price: 200, icon: "🕵️‍♀️", skillneeded: "any", busy: false, code: ItemCode.observe, activeDuration: 0, description: 'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.' },
+            { id: 5, name: 'Self-Starter', price: 200, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.' },
+            { id: 6, name: 'Seat upgrade', price: 200, icon: "💺", skillneeded: "any", busy: false, code: ItemCode.seat, activeDuration: 0, description: 'A comfortable seat upgrade makes any worker more efficient.' },
+            { id: 7, name: 'Cup of coffee', price: 10, icon: "☕", skillneeded: "any", busy: false, code: ItemCode.coffee, activeDuration: 30, description: 'A cup of joe will speed up any worker ...if only for a little while.' },
+            { id: 8, name: 'Tasty donut', price: 5, icon: "🍩", skillneeded: "any", busy: false, code: ItemCode.donut, activeDuration: 10, description: 'A sugary fix will speed you up... but beware the sugar crash.' },
+            { id: 9, name: 'Pizza', price: 5, icon: "🍕", skillneeded: "any", busy: false, code: ItemCode.pizza, activeDuration: 50, description: 'Trap your workers in the office by giving them no reason to leave' },
+            { id: 10, name: 'Banana', price: 5, icon: "🍌", skillneeded: "any", busy: false, code: ItemCode.banana, activeDuration: 20, description: 'This healthy snack gives an energy boost' },
+            { id: 11, name: 'Crystal ball', price: 5, icon: "🔮", skillneeded: "any", busy: false, code: ItemCode.crystal, activeDuration: 0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.' },
         ],
         "l3": //Level 3 Items
-        [{ id: 12, name: 'Guide to Unit testing', price: 300, icon: "📗", skillneeded: "dev", busy: false, code: 'unitt', description: 'Already a developer? The power of unit testing will lower your speed but increase your accuracy leading to fewer costly bugs.' }] };
+        [{ id: 12, name: 'Guide to Unit testing', price: 300, icon: "📗", skillneeded: "dev", busy: false, code: ItemCode.unitt, activeDuration: 0, description: 'Already a developer? The power of unit testing will lower your speed but increase your accuracy leading to fewer costly bugs.' }] };
     return allItems;
 }
 function getAllPeopleTypes() {
@@ -86,7 +100,7 @@ var Project = /** @class */ (function () {
 }());
 function initGameState() {
     game = new Game(startingMoney);
-    var player = { id: nextId(), skills: ["dev", "test", "ba"], name: "Founder", summary: "idle", icon: "🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0 };
+    var player = { id: nextId(), skills: ["dev", "test", "ba"], name: "Founder", summary: "idle", icon: "🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0 };
     game.People['p' + player.id] = player;
     incrementXP(0);
     incrementMoney(0);
@@ -96,8 +110,8 @@ function nextId() {
     return ++game.NextId;
 }
 function drawRoom() {
-    drawPeople(game.People, 'people');
-    drawStories(game.Stories, 'kanbanboard');
+    drawPeople(game.People);
+    drawStories(game.Stories);
     drawMoney(game.Money);
     if (testMode)
         drawButtons();
@@ -174,12 +188,13 @@ function drawStory(key, stories, top) {
         }
     }
 }
-function drawStories(stories, id) {
+function drawStories(stories) {
     for (var key in stories) {
         drawStory(key, stories, false);
     }
 }
-function drawInboxItem(key, item, el) {
+function drawInboxItem(key, item) {
+    var el = $id('kanbanboard');
     var s = el.querySelector('#' + key);
     var shtml = "<span class='storeItem receiver " + item.skillneeded + "' id='" + key + "' onclick=\"clickReceiver('" + key + "');\">" + item.icon + " " + item.name + "</span>";
     if (s != null) {
@@ -192,7 +207,8 @@ function drawInboxItem(key, item, el) {
         column.insertBefore(newInboxItem, column.firstChild);
     }
 }
-function drawPerson(key, people, el) {
+function drawPerson(key, people) {
+    var el = document.getElementById('people');
     var p = el.querySelector('#' + key);
     //if the person is listed in #id already then update it.
     var newPerson = true;
@@ -205,7 +221,9 @@ function drawPerson(key, people, el) {
         busy = " busy";
     }
     var skills = getSkillsDiv(person.skills);
-    var phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + "<div class='summary'>" + person.summary + "</div></span>";
+    //let items = person.has.map(k => person.has[k.id].icon )
+    var items = Object.keys(person.has).map(function (k) { return person.has[k].icon; }).join(" ");
+    var phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + " " + items + "<div class='summary'>" + person.summary + "</div></span>";
     var newPersonElement = htmlToElement(phtml);
     for (var _i = 0, _a = person.skills; _i < _a.length; _i++) {
         var skill = _a[_i];
@@ -238,10 +256,9 @@ function getSkillsDiv(skills) {
     }
     return "<div class='skills'>" + result + "</div>";
 }
-function drawPeople(people, id) {
-    var el = document.getElementById(id);
+function drawPeople(people) {
     for (var key in people) {
-        drawPerson(key, people, el);
+        drawPerson(key, people);
     }
 }
 function go() {
@@ -280,9 +297,9 @@ function getNewPerson(skill) {
     incrementMoney(personType.price * -1);
     incrementXP(10);
     var id = nextId();
-    var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0 };
+    var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0 };
     game.People['p' + id] = newEmployee;
-    drawPerson('p' + id, game.People, document.getElementById('people'));
+    drawPerson('p' + id, game.People);
     // Every time you hire a person the price for that type inflates.
     personType.price = Inflate(game.Inflation, personType.price);
     drawButtons();
@@ -430,17 +447,44 @@ function useIt(doId, item) {
     //log(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
     //alert('person ' + doId + ' is gonna use the ' + JSON.stringify(item));
     applyItem(person, item);
-    removeStory("i" + item.id);
+    drawPerson('p' + person.id, game.People);
+    removeStory('i' + item.id);
 }
 function applyItem(person, item) {
     switch (item.code) {
-        case "observe":
+        case ItemCode.observe:
             person.observantLevel++;
             break;
-        case "selfstart":
+        case ItemCode.selfstart:
             person.selfStarterLevel++;
             break;
+        case ItemCode.seat:
+            person.seatLevel++;
+            break;
+        case ItemCode.dog:
+        case ItemCode.cat:
+        case ItemCode.banana:
+        case ItemCode.coffee:
+        case ItemCode.crystal:
+        case ItemCode.donut:
+        case ItemCode.pizza:
+            person.has['i' + item.id] = item;
+            if (item.activeDuration > 0) {
+                setTimeout(function () { usingFinished(person, item); }, item.activeDuration * 500);
+            }
+            break;
+        default:
+            log("Unknown type! " + item.icon + " " + item.code);
     }
+}
+function usingFinished(person, item) {
+    //person.has['i'+item.id] = undefined;
+    //jalert(person.has);
+    delete person.has['i' + item.id];
+    //jalert(person.has);
+    drawPerson('p' + person.id, game.People);
+    drawInboxItem('i' + item.id, item);
+    drawMessage(item.name + '' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
 }
 function doIt(doId, receiverId) {
     var story = game.Stories[receiverId];
@@ -460,7 +504,7 @@ function doIt(doId, receiverId) {
     person.busy = true;
     person.summary = getSummary(story);
     drawMessage(person.name + " is " + person.summary);
-    drawPerson(doId, game.People, document.getElementById('people'));
+    drawPerson(doId, game.People);
     drawStory(receiverId, game.Stories, story.customerFoundBug);
     var duration = story.points * avgDuration * (1.0 / person.efficiency) * getTaskFactor(story.skillneeded);
     if (story.rework && (story.skillneeded == "ba" || story.skillneeded == "dev")) {
@@ -557,7 +601,7 @@ function doneBa(storyId) {
     var newCards = ElaborateProject(oldStory, person);
     person.busy = false;
     person.summary = "idle";
-    drawPerson('p' + person.id, game.People, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People);
     //The original lead is removed from the board.
     removeStory(storyId);
     //The new stories are added (to the 'backlog' column)
@@ -605,14 +649,15 @@ function doneDev(storyId) {
     var person = game.People[game.Stories[storyId].person];
     //console.log("Story: " + storyId + " is now being developed.");
     var story = game.Stories[storyId];
-    if (story.hasSpecBug) {
+    // no spec bugs can be found until level 3.
+    if (game.Level > 2 && story.hasSpecBug) {
         var chanceOfFindingSpecBug = (50 + person.efficiency * 50.0);
         log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of realising this.");
         var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
         if (foundSpecBug) {
             person.busy = false;
             person.summary = "idle";
-            drawPerson('p' + person.id, game.People, document.getElementById('people'));
+            drawPerson('p' + person.id, game.People);
             drawMessage(person.name + " discovered a spec bug 💥 in story '" + story.summary + "'");
             story.person = null;
             story.hasBug = null;
@@ -656,7 +701,7 @@ function doneDev0(storyId) {
     drawStory(storyId, game.Stories, false);
     person.busy = false;
     person.summary = "idle";
-    drawPerson('p' + person.id, game.People, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People);
 }
 function doneTest(storyId) {
     //okay -- test is done
@@ -667,7 +712,7 @@ function doneTest(storyId) {
     var person = game.People[story.person];
     person.busy = false;
     person.summary = "idle";
-    drawPerson('p' + person.id, game.People, document.getElementById('people'));
+    drawPerson('p' + person.id, game.People);
     var tester = game.People[story.person];
     //no bugs can be found until level 2.
     if (game.Level > 1 && story.hasBug) {
@@ -803,7 +848,6 @@ function getParameterByName(name) {
 }
 function drawMessage(message) {
     log('m:' + message);
-    console.log("m:" + message);
     $id('message').innerText = message;
 }
 function randomItem(list) {
@@ -927,14 +971,14 @@ function purchase(itemId) {
     }
     incrementMoney(item.price * -1);
     // Add a shallow clone of the item (not the item itself)
-    var clone = Object.assign(item, {});
+    var clone = Object.assign({}, item);
     clone.id = nextId();
     game.Items["i" + clone.id] = clone;
     drawMessage("You bought " + clone.name + " " + clone.icon + " for \uD83D\uDCB2" + clone.price + ". Nice!");
     // Every time you purchase an item, the price of that time goes up, a lot.
     item.price = Inflate(game.Inflation, item.price);
-    drawInboxItem("i" + clone.id, clone, $id('kanbanboard'));
-    $id("store-button-" + item.id).innerText = "\uD83D\uDCB2" + item.price;
+    drawInboxItem("i" + clone.id, clone);
+    $id("store-button-" + itemId).innerText = "\uD83D\uDCB2" + item.price;
 }
 function jalert(obj) {
     alert(JSON.stringify(obj));

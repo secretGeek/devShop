@@ -1,15 +1,17 @@
 // guillotine bug on iOS (table too tall basically)
-//? When is interest added to the loan!?
-//   after a certain amount of time.... (is it a turn based game or a time based game?)
-//   some things about it are time based... delays for 
-//   whenever levelling up... whenever a story is finished? whenever an action occurs
-//? Show count of items in top of column
-// limited number of slots for people. cannot hire more than level number... until 
-// Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
+// ? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
+// ? When is interest added to the loan!?
+//    after a certain amount of time.... (is it a turn based game or a time based game?)
+//    some things about it are time based... delays for 
+//    whenever levelling up... whenever a story is finished? whenever an action occurs
+// ? Show count of items in top of column
+// ? limited number of slots for people. cannot hire more than level number... until 
+// ? Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
 // consider: the store should show level n+1 items, disabled.
 // ? dual-skill cannot be better than "4/5" at either skill
 // ? how to show attributes/stats sheet of a person?
-let testMode = false;//true;
+// ? rename to 'tinykanban'
+let testMode = false;//true;//false;//true;
 let debugOutput = (testMode || getParameterByName('debug') == "true");
 let avgDuration = testMode ? 4 : 400; 
 let startingMoney = testMode ? 100 : 100;
@@ -20,6 +22,22 @@ if (debugOutput) {
   log('debug mode detected');
 }
 
+enum ItemCode {
+  cat = 1,
+  dog,
+  test,
+  observe,
+  selfstart,
+  seat,
+  coffee,
+  donut,
+  pizza,
+  banana,
+  crystal,
+  unitt
+
+}
+
 function getAllLevelItems(): { [id: string]: StoreItem[]; } {
   //These are the items that become available in the store at each level.
   // Note that skillneeded includes the special value "any" which means it can be applied to any person.
@@ -27,20 +45,20 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
   //The 'code' property is used in `function useIt` to decide how the card affects the player.
   let allItems: { [id: string]: StoreItem[]; } = 
       { "l2": //Level 2 Items
-       [{id:1,name:'Office Cat', price:100, icon:"🐱", skillneeded:"dev", busy:false, code:'cat', description:'This friendly feline will stop one person at a time from getting distracted.'},
-        {id:2,name:'Office Dog', price:200, icon:"🐶", skillneeded:"test", busy:false, code:'dog', description:'Bring joy and efficiency to the workplace.'},
-        {id:3,name:'Be a Better Tester', price:200, icon:"📗", skillneeded:"test", busy:false, code:'test', description:'Already a tester? Be a better tester!'},
-        {id:4,name:'Observation Training', price:200, icon:"🕵️‍♀️", skillneeded:"any", busy:false, code:'observe', description:'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.'},
-        {id:5,name:'Self-Starter', price:200, icon:"🚀", skillneeded:"any", busy:false, code:'selfstart', description: 'When you\'re idle, go and check the board to see if there is anything you can do.'},
-        {id:6,name:'Seat upgrade', price:200, icon:"💺", skillneeded:"any", busy:false, code:'seat', description: 'A comfortable seat upgrade makes any worker more efficient.'},
-        {id:7,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:'coffee', description: 'A cup of joe will speed up any worker ...if only for a little while.'},
-        {id:8,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:'donut', description: 'A sugary fix will speed you up... but beware the sugar crash.'},
-        {id:9,name:'Pizza', price:5, icon:"🍕", skillneeded:"any", busy:false, code:'pizza', description: 'Trap your workers in the office by giving them no reason to leave'},
-        {id:10,name:'Banana', price:5, icon:"🍌", skillneeded:"any", busy:false, code:'pizza', description: 'This healthy snack gives an energy boost'},
-        {id:11,name:'Crystal ball', price:5, icon:"🔮", skillneeded:"any", busy:false, code:'crystal', description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.'},
+       [{id:1,name:'Office Cat', price:100, icon:"🐱", skillneeded:"dev", busy:false, code:ItemCode.cat, activeDuration:50, description:'This friendly feline will stop one person at a time from getting distracted.'},
+        {id:2,name:'Office Dog', price:200, icon:"🐶", skillneeded:"test", busy:false, code:ItemCode.dog, activeDuration:50, description:'Bring joy and efficiency to the workplace.'},
+        {id:3,name:'Be a Better Tester', price:200, icon:"📗", skillneeded:"test", busy:false, code:ItemCode.test, activeDuration:0, description:'Already a tester? Be a better tester!'},
+        {id:4,name:'Observation Training', price:200, icon:"🕵️‍♀️", skillneeded:"any", busy:false, code:ItemCode.observe, activeDuration:0, description:'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.'},
+        {id:5,name:'Self-Starter', price:200, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.'},
+        {id:6,name:'Seat upgrade', price:200, icon:"💺", skillneeded:"any", busy:false, code:ItemCode.seat, activeDuration:0, description: 'A comfortable seat upgrade makes any worker more efficient.'},
+        {id:7,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:30, description: 'A cup of joe will speed up any worker ...if only for a little while.'},
+        {id:8,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:10, description: 'A sugary fix will speed you up... but beware the sugar crash.'},
+        {id:9,name:'Pizza', price:5, icon:"🍕", skillneeded:"any", busy:false, code:ItemCode.pizza, activeDuration:50, description: 'Trap your workers in the office by giving them no reason to leave'},
+        {id:10,name:'Banana', price:5, icon:"🍌", skillneeded:"any", busy:false, code:ItemCode.banana, activeDuration:20, description: 'This healthy snack gives an energy boost'},
+        {id:11,name:'Crystal ball', price:5, icon:"🔮", skillneeded:"any", busy:false, code:ItemCode.crystal, activeDuration:0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.'},
        ],
         "l3": //Level 3 Items
-       [{id:12,name:'Guide to Unit testing', price:300, icon:"📗", skillneeded:"dev", busy:false, code:'unitt', description:'Already a developer? The power of unit testing will lower your speed but increase your accuracy leading to fewer costly bugs.'}]};
+       [{id:12,name:'Guide to Unit testing', price:300, icon:"📗", skillneeded:"dev", busy:false, code:ItemCode.unitt, activeDuration:0, description:'Already a developer? The power of unit testing will lower your speed but increase your accuracy leading to fewer costly bugs.'}]};
   return allItems;
 }
 
@@ -120,13 +138,13 @@ class Game {
   LeadPrice: number;
   TotalXP: number;
   NextId: number; // TODO: private. used for determining primary key of staff members (inside the 'nextId' function)
-  People: { [id: string] : Person; };
-  Projects: { [id: string] : Project; }
-  Stories: { [id: string] : Story; };
+  People: { [id: string] : Person; }; //id's start with "p"
+  Projects: { [id: string] : Project; } // id's start with "r"
+  Stories: { [id: string] : Story; };// id's start with "r"
   AllLevelItems: { [id: string]: StoreItem[]; } // all possible store items, grouped by the level where they become available
-  AllPeopleTypes: { [id:string]: PersonType; }
+  AllPeopleTypes: { [id:string]: PersonType; } // the skills
   StoreItems: StoreItem[]; // the items that are currently available in the store.
-  Items: { [id: string]: StoreItem; } //all items that have been purchased and added to the game
+  Items: { [id: string]: StoreItem; } //all items that have been purchased and added to the game, start with "i"
   SelectedDoer: string; //id of selected person
   SelectedReceiver: string; //id of selected story
 }
@@ -140,9 +158,11 @@ interface Person {
   efficiency: number;
   XP: number;
   busy: boolean;
-  observantLevel: number;
-  observeNow: number;
+  observantLevel: number; // how observant is this person?
+  observeNow: number; // this number counts down from observantLevel to 0, each time an extra story is grabbed off the board.
   selfStarterLevel: number;
+  seatLevel: number; //how good is your seat?
+  has: { [id:string] : StoreItem; } // coffee, donuts and puppies go here.
 }
 
 interface IReceiver {
@@ -176,10 +196,11 @@ interface StoreItem {
   icon: string;
   skillneeded: string;
   busy: boolean;
-  code: string; //'code' is a short, readable, ID, such as 'dog' that is used in a switch statement somewhere for all the deep logic/capabilities of StoreItems... as they can ultimately do anything. TODO: consider an enum for this.
+  code: ItemCode; //'code' is a short, readable, ID, such as 'dog' that is used in a switch statement somewhere for all the deep logic/capabilities of StoreItems... as they can ultimately do anything. TODO: consider an enum for this.
   //skillBoost: string; 
   //category: training/equipment
   description: string;
+  activeDuration: number; //how long does the item act on the person? (0 for indefinitely)
 }
 
 class Project {
@@ -194,7 +215,7 @@ class Project {
 function initGameState()
 {
   game = new Game(startingMoney);
-  let player: Person = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0};
+  let player: Person = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0};
   game.People['p' + player.id] = player;
   incrementXP(0);
   incrementMoney(0);
@@ -206,8 +227,8 @@ function nextId() {
 }
 
 function drawRoom() {
-  drawPeople(game.People, 'people');
-  drawStories(game.Stories, 'kanbanboard');
+  drawPeople(game.People);
+  drawStories(game.Stories);
   drawMoney(game.Money);
   if (testMode) drawButtons();
 }
@@ -289,13 +310,14 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean) 
   }
 }
 
-function drawStories(stories: {}, id: string) {
+function drawStories(stories: {}) {
   for(const key in stories) {
     drawStory(key, stories, false);
   }
 }
 
-function drawInboxItem(key: string, item: StoreItem, el: HTMLElement){
+function drawInboxItem(key: string, item: StoreItem){
+  let el = $id('kanbanboard')
   let s = el.querySelector('#' + key);
 
   let shtml = `<span class='storeItem receiver ${item.skillneeded}' id='${key}' onclick="clickReceiver(\'${key}\');">${item.icon} ${item.name}</span>`;
@@ -309,7 +331,8 @@ function drawInboxItem(key: string, item: StoreItem, el: HTMLElement){
   }
 }
 
-function drawPerson(key: string, people: { [x: string]: Person; }, el: HTMLElement) {
+function drawPerson(key: string, people: { [x: string]: Person; }) {
+  let el = document.getElementById('people');
   let p = el.querySelector('#' + key);
   //if the person is listed in #id already then update it.
   let newPerson = true;
@@ -322,7 +345,10 @@ function drawPerson(key: string, people: { [x: string]: Person; }, el: HTMLEleme
     busy = " busy";
   }
   let skills = getSkillsDiv(person.skills);
-  let phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + "<div class='summary'>" + person.summary + "</div></span>";
+  //let items = person.has.map(k => person.has[k.id].icon )
+  let items = Object.keys(person.has).map(k => person.has[k].icon).join(" ");
+  
+  let phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + " " + items + "<div class='summary'>" + person.summary + "</div></span>";
   let newPersonElement = htmlToElement(phtml);
   for(let skill of person.skills) {
     newPersonElement.classList.add(skill);
@@ -352,10 +378,9 @@ function getSkillsDiv(skills: string[]) {
   return "<div class='skills'>" + result + "</div>";
 }
 
-function drawPeople(people: {}, id: string) {
-  let el = document.getElementById(id)
+function drawPeople(people: {}) {
   for(const key in people) {
-     drawPerson(key, people, el);
+     drawPerson(key, people);
   }
 }
 
@@ -403,9 +428,9 @@ function getNewPerson(skill: string) {
   incrementMoney(personType.price * -1);
   incrementXP(10);
   let id = nextId();
-  let newEmployee: Person = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0};
+  let newEmployee: Person = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0};
   game.People['p' + id] = newEmployee;
-  drawPerson('p' + id, game.People, document.getElementById('people'));
+  drawPerson('p' + id, game.People);
   // Every time you hire a person the price for that type inflates.
   personType.price = Inflate(game.Inflation, personType.price);
   drawButtons();
@@ -579,19 +604,45 @@ function useIt(doId: string, item: StoreItem){
   //log(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
   //alert('person ' + doId + ' is gonna use the ' + JSON.stringify(item));
   applyItem(person, item);
-  removeStory("i" + item.id);
+  drawPerson('p' + person.id, game.People);
+  removeStory('i' + item.id);
 }
 
 function applyItem(person:Person, item:StoreItem) {
   switch(item.code){
-    case "observe":
+    case ItemCode.observe:
       person.observantLevel++;
       break;
-    case "selfstart":
+    case ItemCode.selfstart:
       person.selfStarterLevel++;
       break;
+    case ItemCode.seat:  
+      person.seatLevel++;
+      break;
+    case ItemCode.dog:
+    case ItemCode.cat:
+    case ItemCode.banana:
+    case ItemCode.coffee:
+    case ItemCode.crystal:
+    case ItemCode.donut:
+    case ItemCode.pizza:
+      person.has['i'+item.id] = item;
+      if (item.activeDuration > 0) {
+        setTimeout(function() { usingFinished(person, item);}, item.activeDuration*500);
+      }
+      break;
+    default:
+      log("Unknown type! " + item.icon + " " + item.code);    
   }
-
+}
+function usingFinished(person:Person, item:StoreItem) {
+  //person.has['i'+item.id] = undefined;
+  //jalert(person.has);
+  delete person.has['i'+item.id];
+  //jalert(person.has);
+  drawPerson('p' + person.id, game.People);
+  drawInboxItem('i' + item.id, item);
+  drawMessage(item.name + '' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
 }
 
 function doIt(doId: string, receiverId: string) {
@@ -614,7 +665,7 @@ function doIt(doId: string, receiverId: string) {
   person.busy = true;
   person.summary = getSummary(story);
   drawMessage(person.name + " is " + person.summary);
-  drawPerson(doId, game.People, document.getElementById('people'));
+  drawPerson(doId, game.People);
   drawStory(receiverId, game.Stories, story.customerFoundBug);
   let duration = story.points * avgDuration * (1.0 / person.efficiency) * getTaskFactor(story.skillneeded);
   if (story.rework && (story.skillneeded == "ba" || story.skillneeded == "dev")) {
@@ -725,7 +776,7 @@ function doneBa(storyId: string) {
   
   person.busy = false;
   person.summary = "idle";
-  drawPerson('p' + person.id, game.People, document.getElementById('people'));
+  drawPerson('p' + person.id, game.People);
   
   //The original lead is removed from the board.
   removeStory(storyId);
@@ -787,7 +838,8 @@ function doneDev(storyId: string) {
   //console.log("Story: " + storyId + " is now being developed.");
   let story = game.Stories[storyId];
   
-  if (story.hasSpecBug) {
+  // no spec bugs can be found until level 3.
+  if (game.Level > 2 && story.hasSpecBug) {
     let chanceOfFindingSpecBug = (50 + person.efficiency * 50.0);
     log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of realising this.");
     let foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
@@ -795,7 +847,7 @@ function doneDev(storyId: string) {
 
       person.busy = false;
       person.summary = "idle";
-      drawPerson('p' + person.id, game.People, document.getElementById('people'));
+      drawPerson('p' + person.id, game.People);
 	
       drawMessage(person.name + " discovered a spec bug 💥 in story '" + story.summary + "'");
       story.person = null;
@@ -848,7 +900,7 @@ function doneDev0(storyId: string) {
   drawStory(storyId, game.Stories, false);
   person.busy = false;
   person.summary = "idle";
-  drawPerson('p' + person.id, game.People, document.getElementById('people'));
+  drawPerson('p' + person.id, game.People);
 }
 
 function doneTest(storyId: string) {
@@ -860,7 +912,7 @@ function doneTest(storyId: string) {
   let person = game.People[story.person];
   person.busy = false;
   person.summary = "idle";
-  drawPerson('p' + person.id, game.People, document.getElementById('people'));
+  drawPerson('p' + person.id, game.People);
   let tester = game.People[story.person];
   
 
@@ -1010,7 +1062,6 @@ function getParameterByName(name: string) {
 
 function drawMessage(message: string) {
   log('m:' + message);
-  console.log("m:" + message);
   $id('message').innerText = message;
 }
 
@@ -1152,7 +1203,7 @@ function purchase(itemId:number) {
   incrementMoney(item.price * -1);
 
   // Add a shallow clone of the item (not the item itself)
-  let clone = Object.assign(item, {});
+  let clone = Object.assign({}, item);
 
   clone.id = nextId();
   
@@ -1163,10 +1214,8 @@ function purchase(itemId:number) {
   // Every time you purchase an item, the price of that time goes up, a lot.
   item.price = Inflate(game.Inflation, item.price);
 
-  drawInboxItem("i" + clone.id, clone, $id('kanbanboard'));
-
-  $id("store-button-" + item.id).innerText = `💲${item.price}`;
-
+  drawInboxItem("i" + clone.id, clone);
+  $id("store-button-" + itemId).innerText = `💲${item.price}`;
 }
 
 function jalert(obj:any){
