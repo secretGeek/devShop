@@ -1,7 +1,7 @@
-// vertical-center content in .button
-// button text smaller, particularly at smaller sizes
+// [x] vertical-center content in .button
+// [x] button text smaller, particularly at smaller sizes
 // guillotine bug on iOS (table too tall basically)
-//  rework on a bug should be quicker than original work.
+// [x] rework on a bug should be quicker than original work.
 //? When is interest added to the loan!?
 //   after a certain amount of time.... (is it a turn based game or a time based game?)
 //   some things about it are time based... delays for 
@@ -12,7 +12,7 @@
 // consider: the store should show level n+1 items, disabled.
 // ? dual-skill cannot be better than "4/5" at either skill
 // ? how to show attributes/stats sheet of a person?
-var testMode = false; //true;//false;//true;
+var testMode = false; //true;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
 var startingMoney = testMode ? 100 : 100;
@@ -261,7 +261,7 @@ function getNewLead() {
     incrementXP(5);
     // TODO: instead of 10 points and value 1000....
     // should be based on current level... some randomness.
-    var newLead = { id: nextId(), points: game.ProjectSize, value: 1000, status: "lead", skillneeded: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, hasSpecBug: false, customerFoundBug: null, projectId: null };
+    var newLead = { id: nextId(), points: game.ProjectSize, value: 1000, status: "lead", skillneeded: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, hasSpecBug: false, customerFoundBug: null, projectId: null, rework: false };
     if (isEmpty(game.Stories)) {
         // this was the first lead ever! give them a tip...
         drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the Founder " + game.People["p1"].icon + " (or vice-versa)");
@@ -463,6 +463,9 @@ function doIt(doId, receiverId) {
     drawPerson(doId, game.People, document.getElementById('people'));
     drawStory(receiverId, game.Stories, story.customerFoundBug);
     var duration = story.points * avgDuration * (1.0 / person.efficiency) * getTaskFactor(story.skillneeded);
+    if (story.rework && (story.skillneeded == "ba" || story.skillneeded == "dev")) {
+        duration = duration / 2;
+    }
     log("Duration: of " + story.summary + " " + story.skillneeded + ": " + Math.floor(duration));
     setTimeout(function () { done(receiverId); }, duration);
 }
@@ -573,17 +576,14 @@ function ElaborateProject(story, person) {
         //TODO: bug Likelihood could additionally be related to person.skills['ba'].accuracy
         var summary = getTask();
         var hasSpecBug = false;
-        //no spec bugs possible until level 2.
-        if (game.Level > 1) {
-            var specBugLikelihood = (story.points / (numCards * 12.0)) * (1.0 - person.efficiency) * 100.0;
-            log("Likelihood of spec bug: " + Math.floor(specBugLikelihood) + "% on " + story.points + " point project with " + numCards + " cards");
-            hasSpecBug = (Math.floor(Math.random() * 100) < specBugLikelihood);
-            //chance of adding a bug relates to effectiveness of dev, and size of story.
-            if (hasSpecBug) {
-                log("Spec bug 💥 added to '" + summary + "'");
-            }
+        var specBugLikelihood = (story.points / (numCards * 12.0)) * (1.0 - person.efficiency) * 100.0;
+        log("Likelihood of spec bug: " + Math.floor(specBugLikelihood) + "% on " + story.points + " point project with " + numCards + " cards");
+        hasSpecBug = (Math.floor(Math.random() * 100) < specBugLikelihood);
+        //chance of adding a bug relates to effectiveness of dev, and size of story.
+        if (hasSpecBug) {
+            log("Spec bug 💥 added to '" + summary + "'");
         }
-        var newCard = { id: nextId(), points: 1, value: 200, status: "story", skillneeded: "dev", summary: summary, logo: story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: hasSpecBug, customerFoundBug: null };
+        var newCard = { id: nextId(), points: 1, value: 200, status: "story", skillneeded: "dev", summary: summary, logo: story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: hasSpecBug, customerFoundBug: null, rework: false };
         game.Stories['r' + newCard.id] = newCard;
         newCards.push(newCard);
         //Add this new card to the list of stories for that project.
@@ -618,6 +618,7 @@ function doneDev(storyId) {
             story.hasBug = null;
             story.icon = "💥";
             story.skillneeded = "ba";
+            story.rework = true;
             removeStory(storyId);
             drawStory(storyId, game.Stories, true);
             return;
@@ -635,16 +636,17 @@ function doneDev0(storyId) {
     //Add it to test
     var story = game.Stories[storyId];
     var person = game.People[story.person];
-    //no bugs in level 1.
-    if (game.Level > 1) {
-        // chance of developing creating a bug relates to effectiveness of dev, and size of story.
-        var bugLikelihood = (story.points / 12.0) * (1.0 - person.efficiency) * 100.0;
-        var hasBug = (Math.floor(Math.random() * 100) < bugLikelihood);
-        if (hasBug) {
-            story.hasBug = true;
-            // Note the bug may or may not be found later. If not found the customer *will* find it.
-            log("A bug 🐛 was added to " + story.summary + " which was " + Math.floor(bugLikelihood) + "% likely");
-        }
+    // chance of developing creating a bug relates to effectiveness of dev, and size of story.
+    var bugLikelihood = (story.points / 12.0) * (1.0 - person.efficiency) * 100.0;
+    if (story.rework) {
+        // an item being reworked is quicker to work on, and has less chance of new bugs being introduced.
+        bugLikelihood = bugLikelihood / 2;
+    }
+    var hasBug = (Math.floor(Math.random() * 100) < bugLikelihood);
+    if (hasBug) {
+        story.hasBug = hasBug;
+        // Note the bug may or may not be found later. If not found the customer *will* find it.
+        log("A bug 🐛 was added to " + story.summary + " which was " + Math.floor(bugLikelihood) + "% likely");
     }
     removeStory(storyId);
     story.skillneeded = "test";
@@ -667,7 +669,8 @@ function doneTest(storyId) {
     person.summary = "idle";
     drawPerson('p' + person.id, game.People, document.getElementById('people'));
     var tester = game.People[story.person];
-    if (story.hasBug) {
+    //no bugs can be found until level 2.
+    if (game.Level > 1 && story.hasBug) {
         var chanceOfFindingBug = (50 + tester.efficiency * 50.0);
         log("Story: " + story.summary + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
         var foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
@@ -677,11 +680,13 @@ function doneTest(storyId) {
             story.hasBug = null;
             story.icon = "🐛";
             story.skillneeded = "dev";
+            story.rework = true;
             drawStory(storyId, game.Stories, true);
             return;
         }
     }
-    if (story.hasSpecBug) {
+    // no spec bugs can be found until level 3.
+    if (game.Level > 2 && story.hasSpecBug) {
         var chanceOfFindingSpecBug = (50 + tester.efficiency * 50.0);
         log("Story: " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
         var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
@@ -691,6 +696,7 @@ function doneTest(storyId) {
             story.hasBug = null;
             story.icon = "💥";
             story.skillneeded = "ba";
+            story.rework = true;
             drawStory(storyId, game.Stories, true);
             return;
         }
@@ -707,16 +713,16 @@ function bankStory(storyId) {
     var story = game.Stories[storyId];
     //If story has a bug... customer will definitely find it! (it got past testing!)
     //and it will go back the dev column!
-    if (story.hasBug || story.hasSpecBug) {
+    //  //no bugs can be found until level 2, no spec bugs until level 3
+    if ((game.Level > 1 && story.hasBug) || (game.Level > 2 && story.hasSpecBug)) {
         //remove from board
         removeStory(storyId);
         drawMessage("Oops! The customer found a bug 🐞 in story '" + story.summary + "'");
         story.customerFoundBug = true;
         story.person = null;
-        //story.hasBug = null;
-        //story.hasSpecBug = null;
         story.icon = "🐞";
         story.skillneeded = "ba"; //goes all the way back to the BA column.
+        story.rework = true;
         drawStory(storyId, game.Stories, true); //at the top.
         return;
     }

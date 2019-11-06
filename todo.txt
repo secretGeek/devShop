@@ -131,6 +131,10 @@ DEFER
 
 Done
 
+[x] bugs can exist before level 2 - just can't be found by tester or customer (avoids a way of cheating/missing the point)
+[x] rework on a bug should be quicker than original work.
+[x] button text smaller, particularly at smaller sizes
+[x] vertical-center content in .button
 [x] store items should have an info icon that reveals their description.
 [x] bugs don't exist until level 2...
 [x] store: buy observation skills. 
