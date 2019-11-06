@@ -1,3 +1,10 @@
+// look after the cat at first
+// look after the dog at first
+// cat poops
+// dog poops
+// if have cat... less errors.
+// if have dog... work faster.
+// ? better tester and better skills generally.... how!?
 // guillotine bug on iOS (table too tall basically)
 // ? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
 // ? When is interest added to the loan!?
@@ -11,7 +18,7 @@
 // ? dual-skill cannot be better than "4/5" at either skill
 // ? how to show attributes/stats sheet of a person?
 // ? rename to 'tinykanban'
-var testMode = false; //true;//false;//true;
+var testMode = true; //false;//true;//false;//true;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
 var startingMoney = testMode ? 100 : 100;
@@ -463,6 +470,9 @@ function applyItem(person, item) {
             break;
         case ItemCode.dog:
         case ItemCode.cat:
+            //dog and cat make you busy....
+            person.busy = true;
+            setTimeout(function () { usingFinishedBusyPhase(person, item); }, item.activeDuration * 100);
         case ItemCode.banana:
         case ItemCode.coffee:
         case ItemCode.crystal:
@@ -470,21 +480,32 @@ function applyItem(person, item) {
         case ItemCode.pizza:
             person.has['i' + item.id] = item;
             if (item.activeDuration > 0) {
-                setTimeout(function () { usingFinished(person, item); }, item.activeDuration * 500);
+                setTimeout(function () { usingFinished(person, item); }, item.activeDuration * 1000);
             }
             break;
         default:
             log("Unknown type! " + item.icon + " " + item.code);
     }
 }
+function usingFinishedBusyPhase(person, item) {
+    person.busy = false;
+    drawPerson('p' + person.id, game.People);
+}
 function usingFinished(person, item) {
     //person.has['i'+item.id] = undefined;
     //jalert(person.has);
     delete person.has['i' + item.id];
     //jalert(person.has);
+    // the office cat and the office dog return to the in-tray when you are sick of them.
+    switch (item.code) {
+        case ItemCode.dog:
+        case ItemCode.cat:
+            //person.busy = false;
+            drawInboxItem('i' + item.id, item);
+            drawMessage(item.name + '' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
+            break;
+    }
     drawPerson('p' + person.id, game.People);
-    drawInboxItem('i' + item.id, item);
-    drawMessage(item.name + '' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
 }
 function doIt(doId, receiverId) {
     var story = game.Stories[receiverId];
@@ -950,7 +971,7 @@ function drawStore() {
     // add store items to #items  
     for (var _i = 0, _a = game.StoreItems; _i < _a.length; _i++) {
         var item = _a[_i];
-        var shtml = "<div class='storeItem'><div onclick='purchase(" + item.id + ");' class='button' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</div> " + item.name + " <span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span></div>";
+        var shtml = "<div class='storeItem-catalog'><div onclick='purchase(" + item.id + ");' class='button' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</div> " + item.name + " <span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span></div>";
         console.log("item html", shtml);
         var newItem = htmlToElement(shtml);
         itemList.appendChild(newItem);

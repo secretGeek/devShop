@@ -35,10 +35,10 @@ h1,th {
   margin-block-end:5px;
 }
 
-.button {
+.button, .story, .storeItem {
   font-size:0.7em;
   border:1px solid #333;
-  box-shadow:2px 2px 0 #AAA;
+  
   font-family: 'lucida console', monospace;
   border-radius:0;
   min-height:40px;
@@ -66,6 +66,20 @@ h1,th {
   text-align:center;
   padding:5px;
 }
+
+.button {
+  background-color:#EEE;
+  box-shadow:2px 2px 0 #AAA;
+}
+.story {
+  background-color:#FFF;
+  box-shadow:2px 2px 0 #DDD;
+  border:1px solid #666;
+}
+.person {
+  box-shadow:2px 2px 0 #DDD;
+}
+
 th {
   color:#666;
   font-size:10pt;
@@ -127,7 +141,13 @@ th {
   border-radius:10px;
 }
 
-.story, .storeItem {
+.story,.storeItem {
+  position:relative;
+  margin:3px 3px 0 3px;
+
+}
+
+.storeItem-catalog {
   font-family: 'lucida console', monospace;
   font-size: 8pt;
   float:left;
@@ -137,12 +157,12 @@ th {
   padding:5px;
   margin:3px 3px 0 3px;
   width:calc(100%-20px);
-}
-.storeItem {
+/*}
+.storeItem-catalog {*/
   display:block;
   float:none;
 }
-.storeItem .button {
+.storeItem-catalog .button {
   font-size:1.2em;
   min-height:40px;
   max-width:50px;
