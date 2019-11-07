@@ -24,7 +24,7 @@ body {
   clear:both;
   font-size:0.7em;
   position:absolute;
-  top:calc(100vh - 20px);
+  top:calc(100vh - 4ch);
 }
 
 h1,th {
@@ -93,9 +93,9 @@ th {
   border-collapse: collapse;
   width:calc(100% - 2ch);
   table-layout: fixed;
-  height:50%;
-  min-height:50%;
-  max-height:50%;
+  height:30vh;
+  min-height:30vh;
+  max-height:30vh;
 }
 
 #kanbanboard th, #kanbanboard td {
@@ -104,18 +104,18 @@ th {
 }
 
 #kanbanboard td {
-  min-height:40vh;
-  height:40vh;
-  max-height:40vh;
+  min-height:30vh;
+  height:30vh;
+  max-height:30vh;
   vertical-align:top;
 }
 
 #kanbanboard td .inner {
   padding:0;
   margin:0;
-  min-height:40vh;
-  height:40vh;
-  max-height:40vh;
+  min-height:30vh;
+  height:30vh;
+  max-height:30vh;
   width:100%;
   overflow-y: hidden;
 }
@@ -127,13 +127,12 @@ th {
 .possible {
   box-shadow:0 0 1px #FF0,0 0 2px #FF0,0 0 3px #FF0,0 0 4px #FF0,0 0 5px #FF0;
 }
-
 .person {
   display:inline-block;
   vertical-align:top;
   margin:5px;
   padding:5px;
-  width:120px;
+  width:100px;
   max-width:100px;
   min-height:50px;
   text-align:center;
@@ -154,9 +153,8 @@ th {
   border:1px solid #333;
   position:relative;
   display:block;
-  padding:5px;
-  margin:3px 3px 0 3px;
-  width:calc(100vw - 2ch);
+  margin:4px 0;
+  width:calc(100vw - 4ch);
   display:block;
   float:none;
 }
@@ -166,6 +164,7 @@ th {
   min-height:40px;
   max-width:50px;
   min-width:50px;
+  margin:5px;
 }
 
 .storeitem-icon {
@@ -273,6 +272,7 @@ th {
  display:inline-block;
  whitespace:pre-wrap;
  overflow-y: hidden;
+ overflow-x:hidden;
  margin-left:3px;
 }
 .points {
@@ -296,6 +296,7 @@ th {
   pointer:cursor;
   border-radius:5px;
   padding:5px;
+  margin:5px;
   min-width:20px;
   float:right;
 }
@@ -353,6 +354,13 @@ th {
     min-width:60px;
     font-size:8pt;
   }
+  .story-detail {
+    font-size:6pt;
+  }
+  .person {
+    width:80px;
+    max-width:80px;
+  }
 }
 </style>
 <body>
@@ -365,7 +373,7 @@ th {
 <div id='office' style='clear:left'>
   <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
   <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</div>
-  <div id='gettester' class='button getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</div>
+  <div id='gettest' class='button getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</div>
   <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</div>
   <div class='button visitStore hidden' onclick='visitStore();'>🏪 visit store</div>
   <table id='kanbanboard'>

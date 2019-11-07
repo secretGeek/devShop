@@ -126,8 +126,7 @@ function drawRoom() {
     drawPeople(game.People);
     drawStories(game.Stories);
     drawMoney(game.Money);
-    if (testMode)
-        drawButtons();
+    drawButtons();
 }
 function drawButtons() {
     //  <div class='button getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
@@ -641,7 +640,7 @@ function done(receiveId) {
     person.busy = false;
     person.XP += 1;
     incrementXP(1);
-    drawMessage(person.name + " finished " + person.summary.replace('...', '.'));
+    drawMessage(person.name + " finished " + person.summary.replace('...', '') + " " + story.logo + ".");
     $id('p' + game.People[story.person].id).classList.remove("busy");
     var skillNeeded = story.skillneeded;
     switch (skillNeeded) {
@@ -870,7 +869,7 @@ function bankStory(storyId) {
     if ((game.Level > 1 && story.hasBug) || (game.Level > 2 && story.hasSpecBug)) {
         //remove from board
         removeStory(storyId);
-        drawMessage("Oops! The customer found a bug 🐞 in story '" + story.summary + "'");
+        drawMessage("Oops! The customer found a bug \uD83D\uDC1E in story '" + story.summary + "'");
         story.customerFoundBug = true;
         story.person = null;
         story.icon = "🐞";
@@ -898,13 +897,13 @@ function bankStory(storyId) {
         //if there are no stories remaining then a bonus is paid.
         if (project.stories.length == 0) {
             bonus = Math.ceil(project.lead.points * game.PointPrice / 2);
-            message2 += " plus 💲" + bonus + " for completing '" + project.lead.summary + "'!";
+            message2 += " plus \uD83D\uDCB2" + bonus + " for completing '" + project.lead.summary + " " + project.lead.logo + "'!";
             incrementXP(10);
         }
     }
     incrementMoney(price + bonus);
     drawMoney(game.Money);
-    drawMessage("Earned 💲" + price + message2);
+    drawMessage("Earned \uD83D\uDCB2" + price + message2);
     removeStory(storyId);
 }
 /* utility functions */
@@ -995,6 +994,7 @@ function incrementXP(amount) {
         //LEVEL UP!
         game.XP -= game.LevelUpXP;
         game.Level += 1;
+        drawMessage("Level Up! " + game.Level + "\uD83E\uDD51");
         game.LevelUpXP = Inflate(game.Inflation, game.LevelUpXP);
         game.PointPrice = Inflate(game.SmallInflation, game.PointPrice);
         game.ProjectSize = Inflate(game.SmallInflation, game.ProjectSize);

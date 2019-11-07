@@ -255,7 +255,7 @@ function drawRoom() {
   drawPeople(game.People);
   drawStories(game.Stories);
   drawMoney(game.Money);
-  if (testMode) drawButtons();
+  drawButtons();
 }
 
 function drawButtons() {
@@ -290,10 +290,10 @@ function drawXP(xp: number, levelUpXP:number, level: number) {
   } else {
     s.classList.remove("negative");
   }
+
   s.innerText = "" + xp + "/" + levelUpXP + "🥓";
 
   let s2 = document.getElementById('level');
-  
   s2.innerText = "" + level + "🥑";
 }
 
@@ -830,7 +830,7 @@ function done(receiveId: string) {
   person.busy = false;
   person.XP += 1;
   incrementXP(1);
-  drawMessage(person.name + " finished " + person.summary.replace('...','.'));
+  drawMessage(person.name + " finished " + person.summary.replace('...','') + " " + story.logo + ".");
   $id('p' + game.People[story.person].id).classList.remove("busy");
 
   let skillNeeded = story.skillneeded;
@@ -1098,7 +1098,7 @@ function bankStory(storyId: string) {
   if ((game.Level > 1 && story.hasBug) || (game.Level > 2 && story.hasSpecBug)) {
     //remove from board
     removeStory(storyId);
-    drawMessage("Oops! The customer found a bug 🐞 in story '" + story.summary + "'");
+    drawMessage(`Oops! The customer found a bug 🐞 in story '${story.summary}'`);
     story.customerFoundBug = true;
     story.person = null;
     story.icon = "🐞";
@@ -1110,7 +1110,7 @@ function bankStory(storyId: string) {
   //But if there is no bug .. money will be paid... and if the project is thus completed, a completion payment is made.
   //TODO: set appropriate price based on # points.
   let price = story.points * game.PointPrice;
-  let message2 = " for '" + story.summary + "'";
+  let message2 = ` for '${story.summary}'`;
   incrementXP(5);
 
   if (story.customerFoundBug) {
@@ -1128,14 +1128,14 @@ function bankStory(storyId: string) {
     //if there are no stories remaining then a bonus is paid.
     if (project.stories.length == 0) {
       bonus = Math.ceil(project.lead.points * game.PointPrice / 2);
-      message2 += " plus 💲" + bonus + " for completing '" + project.lead.summary + "'!";
+      message2 += ` plus 💲${bonus} for completing '${project.lead.summary} ${project.lead.logo}'!`;
       incrementXP(10);
     }
   }
 
   incrementMoney(price + bonus);
   drawMoney(game.Money);
-  drawMessage("Earned 💲" + price + message2);
+  drawMessage(`Earned 💲${price}${message2}`);
   removeStory(storyId);
 }
 
@@ -1239,8 +1239,11 @@ function incrementXP(amount: number) {
 
   if (game.XP >= game.LevelUpXP) {
     //LEVEL UP!
+    
     game.XP -= game.LevelUpXP;
     game.Level += 1;
+    
+    drawMessage(`Level Up! ${game.Level}🥑`);
     game.LevelUpXP = Inflate(game.Inflation, game.LevelUpXP);
     game.PointPrice = Inflate(game.SmallInflation, game.PointPrice);
     game.ProjectSize = Inflate(game.SmallInflation, game.ProjectSize);
