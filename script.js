@@ -18,7 +18,7 @@
 // ? dual-skill cannot be better than "4/5" at either skill
 // ? how to show attributes/stats sheet of a person?
 // ? rename to 'tinykanban'
-var testMode = true; //false;//true;//false;//true;
+var testMode = false; //true;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 400;
 var startingMoney = testMode ? 100 : 100;
