@@ -12,7 +12,7 @@
 <style>
 body {
   font-family: 'lucida console', monospace;
-  max-width:70ch;
+  max-width:calc(100% - 2ch);
   padding:2ch;
   margin:auto;
   color:#333;
@@ -91,7 +91,7 @@ th {
   margin-top:5px;
   border:1px solid #666;
   border-collapse: collapse;
-  width:100%;
+  width:calc(100% - 2ch);
   table-layout: fixed;
   height:50%;
   min-height:50%;
@@ -156,7 +156,7 @@ th {
   display:block;
   padding:5px;
   margin:3px 3px 0 3px;
-  width:calc(100vw-20px);
+  width:calc(100vw - 2ch);
   display:block;
   float:none;
 }
@@ -305,9 +305,9 @@ th {
   overflow-y:auto;
   xbackground-color:white;
   xborder:1px solid red;
-  max-width:calc(100vw - 20px);
+  max-width:calc(100vw - 2ch);
   xwidth:70ch;
-  width:calc(100vw - 20px);
+  width:calc(100vw - 2ch);
 }
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
