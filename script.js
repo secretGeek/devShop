@@ -94,6 +94,7 @@ var Game = /** @class */ (function () {
         this.Items = {};
         this.SelectedDoer = null;
         this.SelectedReceiver = null;
+        this.DefaultSelfStartDelay = 10000; //10 second pause between polling the board.
     }
     return Game;
 }());
@@ -107,7 +108,12 @@ var Project = /** @class */ (function () {
 }());
 function initGameState() {
     game = new Game(startingMoney);
-    var player = { id: nextId(), skills: ["dev", "test", "ba"], name: "Founder", summary: "idle", icon: "🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0 };
+    var allSkills = {
+        "dev": { level: 1 },
+        "test": { level: 1 },
+        "ba": { level: 1 }
+    };
+    var player = { id: nextId(), skills: allSkills, name: "Founder", summary: "idle", icon: "🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay };
     game.People['p' + player.id] = player;
     incrementXP(0);
     incrementMoney(0);
@@ -203,7 +209,7 @@ function drawStories(stories) {
 function drawInboxItem(key, item) {
     var el = $id('kanbanboard');
     var s = el.querySelector('#' + key);
-    var shtml = "<span class='storeItem receiver " + item.skillneeded + "' id='" + key + "' onclick=\"clickReceiver('" + key + "');\">" + item.icon + " " + item.name + "</span>";
+    var shtml = "<span class='storeItem receiver " + item.skillneeded + "' id='" + key + "' onclick=\"clickReceiver('" + key + "');\"><span class='storeitem-icon'>" + item.icon + "</span> " + item.name + "</span>";
     if (s != null) {
         s.outerHTML = shtml;
     }
@@ -232,9 +238,9 @@ function drawPerson(key, people) {
     var items = Object.keys(person.has).map(function (k) { return person.has[k].icon; }).join(" ");
     var phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + " " + items + "<div class='summary'>" + person.summary + "</div></span>";
     var newPersonElement = htmlToElement(phtml);
-    for (var _i = 0, _a = person.skills; _i < _a.length; _i++) {
-        var skill = _a[_i];
-        newPersonElement.classList.add(skill);
+    for (var _i = 0, _a = Object.keys(person.skills); _i < _a.length; _i++) {
+        var key_1 = _a[_i];
+        newPersonElement.classList.add(key_1);
     }
     if (newPerson) {
         el.appendChild(newPersonElement);
@@ -245,18 +251,18 @@ function drawPerson(key, people) {
 }
 function getSkillsDiv(skills) {
     var result = "";
-    for (var _i = 0, skills_1 = skills; _i < skills_1.length; _i++) {
-        var s = skills_1[_i];
+    for (var _i = 0, _a = Object.entries(skills); _i < _a.length; _i++) {
+        var _b = _a[_i], key = _b[0], value = _b[1];
         var s1 = "";
-        switch (s) {
+        switch (key) {
             case "dev":
-                s1 = "<span class='skill dev' title='developer'>💻</span>";
+                s1 = "<span class='skill dev dev-" + value.level + "' title='developer'>\uD83D\uDCBB</span>";
                 break;
             case "test":
-                s1 = "<span class='skill test' title='tester'>🔬</span>";
+                s1 = "<span class='skill test test-" + value.level + "' title='tester'>\uD83D\uDD2C</span>";
                 break;
             case "ba":
-                s1 = "<span class='skill ba' title='business analyst'>🗣</span>";
+                s1 = "<span class='skill ba ba-" + value.level + "' title='business analyst'>\uD83D\uDDE3</span>";
                 break;
         }
         result += s1;
@@ -304,7 +310,9 @@ function getNewPerson(skill) {
     incrementMoney(personType.price * -1);
     incrementXP(10);
     var id = nextId();
-    var newEmployee = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0 };
+    var skillo = {};
+    skillo[skill] = { level: 1 };
+    var newEmployee = { id: id, skills: skillo, summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay };
     game.People['p' + id] = newEmployee;
     drawPerson('p' + id, game.People);
     // Every time you hire a person the price for that type inflates.
@@ -337,9 +345,12 @@ document.onkeypress = function (e) {
 function updatePossible() {
     if (game.SelectedDoer != undefined) {
         //As a 'doer' -- highlight everything I can do.  (where not busy)
-        for (var _i = 0, _a = game.People[game.SelectedDoer].skills; _i < _a.length; _i++) {
-            var skill = _a[_i];
-            addClass("." + skill + ".receiver:not(.busy)", 'possible');
+        var skills = game.People[game.SelectedDoer].skills;
+        //for(const skill of game.People[game.SelectedDoer].skills) {
+        for (var _i = 0, _a = Object.keys(skills); _i < _a.length; _i++) {
+            var key = _a[_i];
+            log(key);
+            addClass("." + key + ".receiver:not(.busy)", 'possible');
         }
         addClass(".any.receiver:not(.busy)", 'possible');
     }
@@ -350,6 +361,7 @@ function updatePossible() {
             addClass(".doer:not(.busy)", 'possible');
         }
         else {
+            //alert(receiver.skillneeded);
             addClass("." + receiver.skillneeded + ".doer:not(.busy)", 'possible');
         }
     }
@@ -419,7 +431,7 @@ function clickReceiver(id) {
 function tryDo(doId, receiverId, viaDoer) {
     var doer = game.People[doId];
     var receiver = game.Stories[receiverId] || game.Items[receiverId];
-    if (receiver.skillneeded != "any" && !doer.skills.includes(receiver.skillneeded)) {
+    if (receiver.skillneeded != "any" && !Object.keys(doer.skills).includes(receiver.skillneeded)) {
         if (viaDoer) {
             deselectReceiver();
         }
@@ -443,14 +455,13 @@ function tryDo(doId, receiverId, viaDoer) {
     removeAllClass("possible");
     game.SelectedReceiver = null;
     game.SelectedDoer = null;
-    if (doer.observantLevel > 0) {
-        doer.observeNow = doer.observantLevel;
-    }
+    doer.selfStartNow = doer.selfStarterLevel;
+    doer.observeNow = doer.observantLevel;
     doIt(doId, receiverId);
 }
 function useIt(doId, item) {
     var person = game.People[doId];
-    drawMessage(person.name + " " + person.icon + " is gonna use " + item.name + " " + item.icon);
+    //drawMessage(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
     //log(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
     //alert('person ' + doId + ' is gonna use the ' + JSON.stringify(item));
     applyItem(person, item);
@@ -464,14 +475,34 @@ function applyItem(person, item) {
             break;
         case ItemCode.selfstart:
             person.selfStarterLevel++;
+            if (person.selfStarterLevel == 1) {
+                drawMessage(person.name + " " + person.icon + " is now a self-starter.");
+            }
+            else {
+                drawMessage(person.name + " " + person.icon + " is now a self-starter (level " + person.selfStarterLevel + ").");
+            }
+            person.selfStartNow = person.selfStarterLevel;
+            if (person.busy == false) {
+                personFree(person);
+            }
             break;
         case ItemCode.seat:
             person.seatLevel++;
+            break;
+        case ItemCode.test:
+            if (person.skills["test"] != undefined) {
+                person.skills["test"].level++;
+            }
+            else {
+                person.skills["test"] = { level: 1 };
+            }
             break;
         case ItemCode.dog:
         case ItemCode.cat:
             //dog and cat make you busy....
             person.busy = true;
+            person.summary = "Tending to the " + item.name;
+            drawMessage(person.name + " " + person.icon + " has the " + item.icon + " " + item.name);
             setTimeout(function () { usingFinishedBusyPhase(person, item); }, item.activeDuration * 100);
         case ItemCode.banana:
         case ItemCode.coffee:
@@ -487,9 +518,60 @@ function applyItem(person, item) {
             log("Unknown type! " + item.icon + " " + item.code);
     }
 }
+// Some items (like the dog and the cat) have a short initially 'busy' phase after you grab them. 
+// Once that finishes, 
 function usingFinishedBusyPhase(person, item) {
     person.busy = false;
+    person.summary = "idle";
     drawPerson('p' + person.id, game.People);
+    personFree(person);
+}
+function personFree(person) {
+    log(person.name + " " + person.icon + " is now free");
+    if (person.selfStarterLevel > 0 && person.selfStartNow > 0) {
+        //person.selfStartNow = person.selfStarterLevel; // reset the countdown, so they will poll this many times.
+        log("WIll check board in " + person.selfStartDelay);
+        setTimeout(function () { selfStart(person); }, person.selfStartDelay);
+    }
+}
+function selfStart(person) {
+    //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
+    //TODO:
+    log("Self starter is awake...");
+    log("Person is busy? " + person.busy + "Start now? " + person.selfStartNow);
+    if (!person.busy && person.selfStartNow > 0) {
+        person.selfStartNow--;
+        log(person.name + " " + person.icon + " is checking the board now....");
+        //TODO: implement this. And log above instead of 'drawmessage'  
+        //TODO: get accurate skillneeded.... and make it a story
+        var columns = [];
+        // we prioritise self-starting from the back of the board.
+        if (person.skills["test"].level > 0) {
+            columns.push("test");
+        }
+        if (person.skills["dev"].level > 0) {
+            columns.push("dev");
+        }
+        if (person.skills["ba"].level > 0) {
+            columns.push("ba");
+        }
+        //check each column in the order of the array columns.
+        for (var _i = 0, columns_1 = columns; _i < columns_1.length; _i++) {
+            var column = columns_1[_i];
+            var nextCards = $("#" + column + " .inner .story.receiver:not(.busy)");
+            if (nextCards.length > 0) {
+                var nextCardId = nextCards[0].id;
+                log(person.name + " " + person.icon + " is doing " + nextCardId);
+                doIt('p' + person.id, nextCardId);
+                break;
+            }
+        }
+    }
+    if (!person.busy && person.selfStartNow > 0) {
+        //okay, we will check back later....
+        //consider: could do 'exponential backoff.
+        setTimeout(function () { selfStart(person); }, person.selfStartDelay);
+    }
 }
 function usingFinished(person, item) {
     //person.has['i'+item.id] = undefined;
@@ -500,9 +582,8 @@ function usingFinished(person, item) {
     switch (item.code) {
         case ItemCode.dog:
         case ItemCode.cat:
-            //person.busy = false;
             drawInboxItem('i' + item.id, item);
-            drawMessage(item.name + '' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
+            drawMessage(item.name + ' ' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
             break;
     }
     drawPerson('p' + person.id, game.People);
@@ -586,20 +667,26 @@ function done(receiveId) {
             drawMessage('unrecognised ' + skillNeeded);
     }
     //now that that's done....
-    if (person.observeNow > 0) {
-        //check if there's anything in the column where this ends up....
-        drawMessage(person.name + " is going to try and do some " + skillNeeded + "...");
-        var columnCards = $("#" + skillNeeded + " .inner .story.receiver:not(.busy):not(.selected)");
+    if (!person.busy && person.observeNow > 0) {
+        //check if there's anything in the column where this came from....
+        var skillToCheck = skillNeeded;
+        if (skillToCheck == "dev0")
+            skillToCheck = "dev";
+        drawMessage(person.name + " is going to try and do some " + skillToCheck + "...");
+        var columnCards = $("#" + skillToCheck + " .inner .story.receiver:not(.busy):not(.selected)");
         if (columnCards && columnCards.length > 0) {
             drawMessage(person.name + " will do... " + columnCards[0].innerText);
             person.observeNow--;
             doIt('p' + person.id, columnCards[0].id);
         }
         else {
-            drawMessage(person.name + " found nothing to do.");
+            drawMessage(person.name + " found nothing to do in the " + skillToCheck + " column.");
             person.observeNow = 0;
         }
     }
+    //made it to here without being assigned a task? then the person is now free!
+    if (!person.busy)
+        personFree(person);
 }
 function doneBa(storyId) {
     //okay -- we've done the ba work on it.

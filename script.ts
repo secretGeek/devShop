@@ -132,6 +132,7 @@ class Game {
     this.Items = {};
     this.SelectedDoer = null;
     this.SelectedReceiver = null;
+    this.DefaultSelfStartDelay = 10000; //10 second pause between polling the board.
   }
   Money: number;
   HighestMoney: number;
@@ -154,18 +155,19 @@ class Game {
   Items: { [id: string]: StoreItem; } //all items that have been purchased and added to the game, start with "i"
   SelectedDoer: string; //id of selected person
   SelectedReceiver: string; //id of selected story
+  DefaultSelfStartDelay: number;
 }
 
-/*
+
 interface SkillDetail {
   level:number;
 }
-*/
+
 
 interface Person {
   id: number;
-  skills: string[];
-  //skills: { [id:string]: SkillDetail;}
+  //skills: string[];
+  skills: { [id:string]: SkillDetail;}
   name: string;
   summary: string;
   icon: string;
@@ -175,6 +177,8 @@ interface Person {
   observantLevel: number; // how observant is this person?
   observeNow: number; // this number counts down from observantLevel to 0, each time an extra story is grabbed off the board.
   selfStarterLevel: number;
+  selfStartNow: number; // this number counts down from selfStartLevel to 0, each time they are looking for work to do.
+  selfStartDelay:number; //how long they wait between polling the board (shorter numbers are faster)
   seatLevel: number; //how good is your seat?
   has: { [id:string] : StoreItem; } // coffee, donuts and puppies go here.
 }
@@ -229,7 +233,14 @@ class Project {
 function initGameState()
 {
   game = new Game(startingMoney);
-  let player: Person = { id: nextId(), skills: ["dev","test","ba"], name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0};
+  let allSkills = 
+    {
+      "dev": { level: 1},
+      "test": {level: 1},
+      "ba": {level: 1}
+    };
+  
+  let player: Person = { id: nextId(), skills: allSkills, name: "Founder", summary: "idle", icon:"🤔", efficiency: 0.2, XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay};
   game.People['p' + player.id] = player;
   incrementXP(0);
   incrementMoney(0);
@@ -334,7 +345,7 @@ function drawInboxItem(key: string, item: StoreItem){
   let el = $id('kanbanboard')
   let s = el.querySelector('#' + key);
 
-  let shtml = `<span class='storeItem receiver ${item.skillneeded}' id='${key}' onclick="clickReceiver(\'${key}\');">${item.icon} ${item.name}</span>`;
+  let shtml = `<span class='storeItem receiver ${item.skillneeded}' id='${key}' onclick="clickReceiver(\'${key}\');"><span class='storeitem-icon'>${item.icon}</span> ${item.name}</span>`;
   if (s != null) {
     s.outerHTML = shtml;
   } else {
@@ -364,9 +375,11 @@ function drawPerson(key: string, people: { [x: string]: Person; }) {
   
   let phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + " " + items + "<div class='summary'>" + person.summary + "</div></span>";
   let newPersonElement = htmlToElement(phtml);
-  for(let skill of person.skills) {
-    newPersonElement.classList.add(skill);
+
+  for (let key of Object.keys(person.skills)) {
+    newPersonElement.classList.add(key);
   }
+  
   if (newPerson) {
     el.appendChild(newPersonElement);
   } else {
@@ -374,16 +387,16 @@ function drawPerson(key: string, people: { [x: string]: Person; }) {
   }
 }
 
-function getSkillsDiv(skills: string[]) {
+function getSkillsDiv(skills: {[id:string]: SkillDetail}) {
   let result = "";
-  for(let s of skills) {
+  for (let[key, value] of Object.entries(skills)) {
     let s1 = "";
-    switch(s) {
-      case "dev": s1 = "<span class='skill dev' title='developer'>💻</span>";
+    switch(key) {
+      case "dev": s1 = `<span class='skill dev dev-${value.level}' title='developer'>💻</span>`;
         break;
-      case "test": s1= "<span class='skill test' title='tester'>🔬</span>";
+      case "test": s1= `<span class='skill test test-${value.level}' title='tester'>🔬</span>`;
         break;
-      case "ba": s1 = "<span class='skill ba' title='business analyst'>🗣</span>";
+      case "ba": s1 = `<span class='skill ba ba-${value.level}' title='business analyst'>🗣</span>`;
         break;
     }
 
@@ -442,7 +455,9 @@ function getNewPerson(skill: string) {
   incrementMoney(personType.price * -1);
   incrementXP(10);
   let id = nextId();
-  let newEmployee: Person = { id: id, skills: [skill], summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, observeNow: 0, has: {}, seatLevel: 0};
+  let skillo = {};
+  skillo[skill] = { level: 1};
+  let newEmployee: Person = { id: id, skills: skillo, summary: "idle", icon: getIcon(), efficiency: 0.15, name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay};
   game.People['p' + id] = newEmployee;
   drawPerson('p' + id, game.People);
   // Every time you hire a person the price for that type inflates.
@@ -478,8 +493,11 @@ document.onkeypress = function(e) {
 function updatePossible() {
   if (game.SelectedDoer != undefined) {
     //As a 'doer' -- highlight everything I can do.  (where not busy)
-    for(const skill of game.People[game.SelectedDoer].skills) {
-      addClass("." + skill + ".receiver:not(.busy)", 'possible');
+    var skills = game.People[game.SelectedDoer].skills;
+    //for(const skill of game.People[game.SelectedDoer].skills) {
+    for(let key of Object.keys(skills)) {
+      log(key);
+      addClass("." + key + ".receiver:not(.busy)", 'possible');
     }
 
     addClass(".any.receiver:not(.busy)", 'possible');
@@ -491,8 +509,8 @@ function updatePossible() {
     if (receiver.skillneeded == "any") {
       addClass(".doer:not(.busy)", 'possible');
     } else {
+      //alert(receiver.skillneeded);
       addClass("." + receiver.skillneeded + ".doer:not(.busy)", 'possible');
-    
     }
   }
 }
@@ -577,7 +595,7 @@ function tryDo(doId: string, receiverId: string, viaDoer: boolean) {
   let doer = game.People[doId];
   let receiver = game.Stories[receiverId] || game.Items[receiverId];
   
-  if (receiver.skillneeded != "any" && !doer.skills.includes(receiver.skillneeded)) {
+  if (receiver.skillneeded != "any" && !Object.keys(doer.skills).includes(receiver.skillneeded)) {
     if (viaDoer) {
       deselectReceiver();
     } else {
@@ -605,16 +623,15 @@ function tryDo(doId: string, receiverId: string, viaDoer: boolean) {
   game.SelectedDoer = null;
 
 
-  if (doer.observantLevel > 0){
-    doer.observeNow = doer.observantLevel;
-  }
+  doer.selfStartNow = doer.selfStarterLevel;
+  doer.observeNow = doer.observantLevel;
 
   doIt(doId, receiverId);
 }
 
 function useIt(doId: string, item: StoreItem){
   let person = game.People[doId];
-  drawMessage(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
+  //drawMessage(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
   //log(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
   //alert('person ' + doId + ' is gonna use the ' + JSON.stringify(item));
   applyItem(person, item);
@@ -629,14 +646,32 @@ function applyItem(person:Person, item:StoreItem) {
       break;
     case ItemCode.selfstart:
       person.selfStarterLevel++;
+      if (person.selfStarterLevel == 1) {
+        drawMessage(`${person.name} ${person.icon} is now a self-starter.`);
+      } else {
+        drawMessage(`${person.name} ${person.icon} is now a self-starter (level ${person.selfStarterLevel}).`);
+      }
+      person.selfStartNow = person.selfStarterLevel;
+      if (person.busy == false) {
+        personFree(person);
+      }
       break;
     case ItemCode.seat:  
       person.seatLevel++;
+      break;
+    case ItemCode.test:
+      if (person.skills["test"] != undefined) {
+        person.skills["test"].level++;
+      } else {
+        person.skills["test"] = { level: 1};
+      }
       break;
     case ItemCode.dog:
     case ItemCode.cat:
       //dog and cat make you busy....
       person.busy = true;
+      person.summary = `Tending to the ${item.name}` ;
+      drawMessage(`${person.name} ${person.icon} has the ${item.icon} ${item.name}`);
       setTimeout(function() { usingFinishedBusyPhase(person, item);}, item.activeDuration*100);
     case ItemCode.banana:
     case ItemCode.coffee:
@@ -653,10 +688,67 @@ function applyItem(person:Person, item:StoreItem) {
   }
 }
 
+// Some items (like the dog and the cat) have a short initially 'busy' phase after you grab them. 
+// Once that finishes, 
 function usingFinishedBusyPhase(person:Person, item:StoreItem) {
   person.busy = false;
+  person.summary = "idle";
   drawPerson('p' + person.id, game.People);
+  personFree(person);
 }
+
+function personFree(person:Person) {
+  log(`${person.name} ${person.icon} is now free`);
+  if (person.selfStarterLevel > 0 && person.selfStartNow > 0) {
+    //person.selfStartNow = person.selfStarterLevel; // reset the countdown, so they will poll this many times.
+    log(`WIll check board in ${person.selfStartDelay}`);
+    setTimeout(function() { selfStart(person);}, person.selfStartDelay);
+  }
+}
+
+function selfStart(person:Person){
+  //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
+  //TODO:
+  log("Self starter is awake...");
+  log("Person is busy? " + person.busy + "Start now? " + person.selfStartNow);
+  if (!person.busy && person.selfStartNow > 0) {
+    person.selfStartNow--;
+    log(`${person.name} ${person.icon} is checking the board now....`);
+    //TODO: implement this. And log above instead of 'drawmessage'  
+    //TODO: get accurate skillneeded.... and make it a story
+    var columns:string[] = [];
+
+    // we prioritise self-starting from the back of the board.
+    if (person.skills["test"].level > 0) {
+      columns.push("test");
+    }
+    if (person.skills["dev"].level > 0) {
+      columns.push("dev");
+    }
+    if (person.skills["ba"].level > 0) {
+      columns.push("ba");
+    }
+
+    //check each column in the order of the array columns.
+    for(let column of columns) {
+      let nextCards = $(`#${column} .inner .story.receiver:not(.busy)`);
+      if (nextCards.length > 0) {
+        let nextCardId = nextCards[0].id;
+        log(`${person.name} ${person.icon} is doing ${nextCardId}`);
+        doIt('p' + person.id, nextCardId);
+        break;
+      }
+    }
+    
+  }
+
+  if (!person.busy && person.selfStartNow > 0) {
+    //okay, we will check back later....
+    //consider: could do 'exponential backoff.
+    setTimeout(function() { selfStart(person);}, person.selfStartDelay);
+  }
+}
+
 function usingFinished(person:Person, item:StoreItem) {
   //person.has['i'+item.id] = undefined;
   //jalert(person.has);
@@ -667,9 +759,8 @@ function usingFinished(person:Person, item:StoreItem) {
   switch(item.code){
     case ItemCode.dog:
     case ItemCode.cat:
-        //person.busy = false;
         drawInboxItem('i' + item.id, item);
-        drawMessage(item.name + '' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
+        drawMessage(item.name + ' ' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
         break;
   } 
 
@@ -690,7 +781,10 @@ function doIt(doId: string, receiverId: string) {
     return;
   }
 
+  
   let person = game.People[doId];
+
+
   story.busy = true;
   story.icon = person.icon;
   story.person = doId;
@@ -739,7 +833,7 @@ function done(receiveId: string) {
   drawMessage(person.name + " finished " + person.summary.replace('...','.'));
   $id('p' + game.People[story.person].id).classList.remove("busy");
 
-let skillNeeded = story.skillneeded;
+  let skillNeeded = story.skillneeded;
 
   switch(skillNeeded){
     case "ba":
@@ -765,20 +859,24 @@ let skillNeeded = story.skillneeded;
   }
 
   //now that that's done....
-  if (person.observeNow > 0){
-    //check if there's anything in the column where this ends up....
-    drawMessage(`${person.name} is going to try and do some ${skillNeeded}...`);
-    let columnCards = $(`#${skillNeeded} .inner .story.receiver:not(.busy):not(.selected)`);
+  if (!person.busy && person.observeNow > 0){
+    //check if there's anything in the column where this came from....
+    var skillToCheck = skillNeeded;
+    if (skillToCheck == "dev0") skillToCheck = "dev";
+    drawMessage(`${person.name} is going to try and do some ${skillToCheck}...`);
+    let columnCards = $(`#${skillToCheck} .inner .story.receiver:not(.busy):not(.selected)`);
     if (columnCards && columnCards.length > 0) {
       drawMessage(`${person.name} will do... ${columnCards[0].innerText}`);
       person.observeNow--;
       doIt('p'+person.id, columnCards[0].id);
     } else {
-      drawMessage(`${person.name} found nothing to do.`);
+      drawMessage(`${person.name} found nothing to do in the ${skillToCheck} column.`);
       person.observeNow = 0;
     }
-   
   }
+
+  //made it to here without being assigned a task? then the person is now free!
+  if (!person.busy ) personFree(person);
 }
 
 function doneBa(storyId: string) {

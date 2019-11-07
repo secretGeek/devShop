@@ -23,7 +23,7 @@ body {
   clear:both;
   font-size:0.7em;
   position:absolute;
-  top:calc(50vw);
+  top:calc(100vh - 20px);
 }
 
 h1,th {
@@ -104,19 +104,19 @@ th {
 }
 
 #kanbanboard td {
-  min-height:100%;
-  height:100%;
-  max-height:100%;
+  min-height:40vh;
+  height:40vh;
+  max-height:40vh;
   vertical-align:top;
 }
 
 #kanbanboard td .inner {
   padding:0;
   margin:0;
-  min-height:250px;
-  height:250px;
-  max-height:250px;
-  width:100%;
+  min-height:40vh;
+  height:40vh;
+	max-height:40vh;
+	width:100%;
   overflow-y: hidden;
 }
 
@@ -156,9 +156,7 @@ th {
   display:block;
   padding:5px;
   margin:3px 3px 0 3px;
-  width:calc(100%-20px);
-/*}
-.storeItem-catalog {*/
+  width:calc(100vw-20px);
   display:block;
   float:none;
 }
@@ -167,7 +165,10 @@ th {
   min-height:40px;
   max-width:50px;
   min-width:50px;
-
+}
+.storeitem-icon {
+  font-size:1.6em;
+  padding:2px;
 }
 .busy {
   opacity:0.5;
@@ -181,13 +182,13 @@ th {
 #money {
   text-shadow:0 2px 2px #CCC;
   float:right;
-  margin:5px 0;
+  margin:0 0;
 }
 
 #xp, #level {
   text-shadow:0 2px 2px #CCC;
   float:right;
-  margin:5px 20px 0 0;
+  margin:0 20px 0 0;
 }
 
 .hidden {
@@ -304,8 +305,9 @@ th {
   overflow-y:auto;
   xbackground-color:white;
   xborder:1px solid red;
-  max-width:70ch;
-  width:70ch;
+  max-width:calc(100vw - 20px);
+  xwidth:70ch;
+  width:calc(100vw - 20px);
 }
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
@@ -342,12 +344,12 @@ th {
     text-shadow:1px 1px #CCC;
   }
   #message {
-    font-size:10pt;
+    font-size:8pt;
   }
-  .button {
-    max-width:80px;
-    min-width:80px;
-    font-size:10pt;
+  .button,.story {
+    max-width:60px;
+    min-width:60px;
+    font-size:8pt;
   }
 }
 </style>
