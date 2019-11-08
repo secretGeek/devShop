@@ -50,7 +50,7 @@
 // - non-prop font for level etc.
 
 let testMode = false;//true;
-let storeFeatureFlag = true;//testMode;
+let storeFeatureFlag = false;//testMode;
 let debugOutput = (testMode || getParameterByName('debug') == "true");
 let avgDuration = testMode ? 4 : 800; 
 let startingMoney = testMode ? 100 : 100;

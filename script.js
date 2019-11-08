@@ -49,7 +49,7 @@
 // - if no activity detected for long time... show tip
 // - non-prop font for level etc.
 var testMode = false; //true;
-var storeFeatureFlag = true; //testMode;
+var storeFeatureFlag = false; //testMode;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 800;
 var startingMoney = testMode ? 100 : 100;
