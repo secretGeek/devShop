@@ -1,15 +1,8 @@
-TODO:
+# TODO
 
-
-[ ] when you click anywhere other than on a sender/receiver -- unselect whatever's selected.
 [ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
-
-
 [ ] A worker sometimes gets distracted. (Often). 
 		-- the dog/cat might decrease that.
-
-
-
 
 //TODO: Some items can only be purchased if you have the necessary target.
   // e.g. advanced developer training requires a dedicated developer (not just the founder)
@@ -120,17 +113,30 @@ A few ideas
 - Traits for employees, so when choosing employees to hire you have to balance their salary, traits and current level. For example devs can have a Cowboy trait that increases dev speed but also bug chance. No stats like Game Dev Story, an employee just has a level and their traits.
 
 
-DEFER
+# DEFER
+// show scores and levels in hexadecimal????
 
- ?  is there inflation?
+// ? only one dog in the office.
+// ? only one cat in the office.
+
+// ? cat poops
+// ? dog poops
+
+[ ] achievement when a thing is done for the first time?
+
+# DONE
+
+[x] instead of efficiency... have their skill level map so 1-10 is 0.3  0.4  ,0.5   ,0.6   ,0.77   ,0.83  ,0.90   ,0.95  ,0.99
+
+[x] if have cat... less errors.
+[x] if have dog... work faster.
+ [x]  is there inflation?
 		each time a thing is purchased, that thing becomes x% more expensive. i.e. compounding interest on prices.
 	levels:
 		each time an action is performed, you receive an experience point.
 		? the person also receives an experience point for that skill.
-[ ] achievement when a thing is done for the first time?
 
-Done
-
+[x] guillotine bug on iOS (table too tall basically)
 [x] bugs can exist before level 2 - just can't be found by tester or customer (avoids a way of cheating/missing the point)
 [x] rework on a bug should be quicker than original work.
 [x] button text smaller, particularly at smaller sizes
