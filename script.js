@@ -1,6 +1,13 @@
 // 
 // button hover should be light blue
 // do we have an id issue when selecting storeitem's in store versus inbox? clash of id's?
+// ensure chance of CREATING a bug or spec bug is lower for rework
+// drawMessage "You gave Alan a developer upgrade" 
+// ensure level of skills is visible
+// store... put ICON before name
+//StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
+//      calls them {original name} 1 and {original name} 2
+// level of observation training should be shown....
 /*
 
   cat = 1,
@@ -61,7 +68,7 @@
 // - if no activity detected for long time... show tip
 // - non-prop font for level etc.
 var testMode = false; //true;
-var storeFeatureFlag = testMode;
+var storeFeatureFlag = true; //testMode;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
 var avgDuration = testMode ? 4 : 800;
 var startingMoney = testMode ? 100 : 100;
@@ -101,47 +108,47 @@ function getAllLevelItems() {
     // TODO: ?? There could be a 'must not have skill' property... e.g. Beginning Development (only for non-developers)
     //The 'code' property is used in `function useIt` to decide how the card affects the player.
     var allItems = { "l2": //Level 2 Items
-        [{ id: 10, name: 'Tasty donut', price: 5, icon: "🍩", skillneeded: "any", busy: false, code: ItemCode.donut, activeDuration: 10, description: 'A sugary fix will speed you up... but beware the sugar crash.' },
-            { id: 190, name: 'Mechanical keyboard upgrade', price: 400, icon: "⌨", skillneeded: "dev", busy: false, code: ItemCode.keyboard, activeDuration: 30, description: 'This mechanical keyboard upgrade will boost your speed at developing.' },
+        [{ id: 10, name: 'Tasty donut', price: 5, icon: "🍩", skillneeded: "any", busy: false, code: ItemCode.donut, activeDuration: 10, description: 'A sugary fix will speed you up... but beware the sugar crash.', enabled: false },
+            { id: 12, name: 'Mechanical keyboard upgrade', price: 400, icon: "⌨", skillneeded: "dev", busy: false, code: ItemCode.keyboard, activeDuration: 30, description: 'This mechanical keyboard upgrade will boost your speed at developing.', enabled: false },
         ],
         "l3": //Level 3 Items
-        [{ id: 20, name: 'Developer Upgrade: Unit testing', price: 300, icon: "📗", skillneeded: "dev", busy: false, code: ItemCode.unitt, activeDuration: 0, description: 'Already a developer? This advanced training course will reduce the number of bugs you create.' },
-            { id: 40, name: 'Cup of coffee', price: 10, icon: "☕", skillneeded: "any", busy: false, code: ItemCode.coffee, activeDuration: 30, description: 'A cup of joe will speed up any worker ...if only for a little while.' },
+        [{ id: 20, name: 'Developer Upgrade: Unit testing', price: 300, icon: "📗", skillneeded: "dev", busy: false, code: ItemCode.unitt, activeDuration: 0, description: 'Already a developer? This advanced training course will reduce the number of bugs you create.', enabled: false },
+            { id: 40, name: 'Cup of coffee', price: 10, icon: "☕", skillneeded: "any", busy: false, code: ItemCode.coffee, activeDuration: 30, description: 'A cup of joe will speed up any worker ...if only for a little while.', enabled: false },
         ],
         "l4": [
-            { id: 60, name: 'Analysis for Testers', price: 300, icon: "📕", skillneeded: "test", busy: false, code: ItemCode.bafortest, activeDuration: 50, description: 'Any tester can learn to be a business analysis with this exciting new course from Thinkstra™.' },
-            { id: 90, name: 'Pizza', price: 5, icon: "🍕", skillneeded: "any", busy: false, code: ItemCode.pizza, activeDuration: 50, description: 'Trap your workers in the office by giving them no reason to leave' },
-            { id: 160, name: 'Banana', price: 5, icon: "🍌", skillneeded: "any", busy: false, code: ItemCode.banana, activeDuration: 20, description: 'This healthy snack gives a short-lived energy boost' },
+            { id: 60, name: 'Analysis for Testers', price: 300, icon: "📕", skillneeded: "test", busy: false, code: ItemCode.bafortest, activeDuration: 50, description: 'Any tester can learn to be a business analysis with this exciting new course from Thinkstra™.', enabled: false },
+            { id: 90, name: 'Pizza', price: 50, icon: "🍕", skillneeded: "any", busy: false, code: ItemCode.pizza, activeDuration: 50, description: 'Trap your workers in the office by giving them no reason to leave', enabled: false },
+            { id: 100, name: 'Banana', price: 25, icon: "🍌", skillneeded: "any", busy: false, code: ItemCode.banana, activeDuration: 20, description: 'This healthy snack gives a short-lived energy boost', enabled: false },
+            { id: 105, name: 'Cupcake', price: 100, icon: "🧁", skillneeded: "any", busy: false, code: ItemCode.cupcake, activeDuration: 10, description: 'A cupcake to enjoy. Increase motivation, but not for long.', enabled: false },
         ],
         "l5": [
-            { id: 80, name: 'Office Cat', price: 5000, icon: "🐱", skillneeded: "dev", busy: false, code: ItemCode.cat, activeDuration: 100, description: 'This friendly feline will stop one person at a time from getting distracted.' },
-            { id: 100, name: 'Seat upgrade', price: 200, icon: "💺", skillneeded: "any", busy: false, code: ItemCode.seat, activeDuration: 0, description: 'A comfortable seat upgrade makes any worker more efficient.' },
-            { id: 110, name: 'Observation Training', price: 200, icon: "🕵️‍♀️", skillneeded: "any", busy: false, code: ItemCode.observe, activeDuration: 0, description: 'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.' },
+            { id: 110, name: 'Office Cat', price: 5000, icon: "🐱", skillneeded: "dev", busy: false, code: ItemCode.cat, activeDuration: 100, description: 'This friendly feline will stop one person at a time from getting distracted.', enabled: false },
+            { id: 120, name: 'Seat upgrade', price: 200, icon: "💺", skillneeded: "any", busy: false, code: ItemCode.seat, activeDuration: 0, description: 'A comfortable seat upgrade makes any worker more efficient.', enabled: false },
+            { id: 130, name: 'Observation Training', price: 200, icon: "🕵️‍♀️", skillneeded: "any", busy: false, code: ItemCode.observe, activeDuration: 0, description: 'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.', enabled: false },
         ],
         "l6": [
-            { id: 120, name: 'Be a Better Tester', price: 200, icon: "📘", skillneeded: "test", busy: false, code: ItemCode.test, activeDuration: 0, description: 'Already a tester? Be a better tester!' },
-            { id: 150, name: 'Self-Starter', price: 500, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.' },
+            { id: 140, name: 'Be a Better Tester', price: 200, icon: "📘", skillneeded: "test", busy: false, code: ItemCode.test, activeDuration: 0, description: 'Already a tester? Be a better tester!', enabled: false },
+            { id: 150, name: 'Self-Starter', price: 500, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.', enabled: false },
         ],
         "l7": [
-            { id: 130, name: 'Office Dog', price: 6000, icon: "🐶", skillneeded: "test", busy: false, code: ItemCode.dog, activeDuration: 100, description: 'Bring joy and efficiency to the workplace.' },
+            { id: 160, name: 'Office Dog', price: 6000, icon: "🐶", skillneeded: "test", busy: false, code: ItemCode.dog, activeDuration: 100, description: 'Bring joy and efficiency to the workplace.', enabled: false },
         ],
-        "l8": [
-            { id: 140, name: 'Crystal ball', price: 50000, icon: "🔮", skillneeded: "any", busy: false, code: ItemCode.crystal, activeDuration: 0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.' },
-        ],
+        "l8": [],
         "l9": [],
         "l10": [
-            { id: 170, name: 'Coffee machine', price: 10, icon: "☕", skillneeded: "any", busy: false, code: ItemCode.coffeemachine, activeDuration: 30, description: 'A cup of joe will speed up any worker ...if only for a little while.' },
-            { id: 180, name: 'Cupcake', price: 10, icon: "🧁", skillneeded: "any", busy: false, code: ItemCode.cupcake, activeDuration: 10, description: 'A cupcake to enjoy. Increase motivation, but not for long.' },
+            { id: 180, name: 'Coffee machine', price: 4000, icon: "⛽", skillneeded: "any", busy: false, code: ItemCode.coffeemachine, activeDuration: 30, description: 'A coffee machine at your desk, your performance will be irreparably improved.', enabled: false },
         ],
         "l11": [
             //inspirational poster
-            { id: 200, name: 'Inspirational poster', price: 400, icon: "🖼", skillneeded: "any", busy: false, code: ItemCode.poster, activeDuration: 10, description: 'Enhance your cubicle and improve your concentration.' },
+            { id: 200, name: 'Inspirational poster', price: 40000, icon: "🌄", skillneeded: "any", busy: false, code: ItemCode.poster, activeDuration: 10, description: 'Enhance your cubicle and improve your concentration.', enabled: false },
         ],
         "l12": [],
         "l13": [],
         "l14": [],
         "l15": [],
-        "l16": [],
+        "l16": [
+            { id: 250, name: 'Crystal ball', price: 50000, icon: "🔮", skillneeded: "any", busy: false, code: ItemCode.crystal, activeDuration: 0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.', enabled: false },
+        ],
         "l17": [],
         "l18": [],
         "l19": [],
@@ -175,8 +182,14 @@ var Game = /** @class */ (function () {
         this.People = {};
         this.Stories = {};
         this.Projects = {};
-        this.StoreItems = [];
         this.AllLevelItems = getAllLevelItems();
+        this.StoreItems = {};
+        for (var k in this.AllLevelItems) {
+            for (var x in this.AllLevelItems[k]) {
+                this.StoreItems[this.AllLevelItems[k][x].id] = this.AllLevelItems[k][x];
+            }
+        }
+        //this.StoreItems =  getAllLevelitems().each()
         this.AllPeopleTypes = getAllPeopleTypes();
         this.Items = {};
         this.SelectedDoer = null;
@@ -412,6 +425,7 @@ function getNewPerson(skill) {
         drawMessage("Cannot afford a new " + personType.title + ".");
         return;
     }
+    removeClass('.getPerson.' + skill, 'hint');
     incrementMoney(personType.price * -1);
     incrementXP(10);
     var id = nextId();
@@ -747,11 +761,12 @@ function doIt(doId, receiverId) {
     setTimeout(function () { done(receiverId); }, duration);
 }
 function getBuginess(person, skill) {
-    var eff = getEfficiency(person, skill);
-    //log ("" + person.skills[skill].level);
-    //log("Effectiveness: " + eff);
-    var result = 1 - ((eff * 3 / 7) + 0.57);
-    //log("Result: " + result);
+    // see also function canFindBug
+    var efficiency = getEfficiency(person, skill);
+    // efficiency is from 0.3 to 0.999
+    var result = 1 - (0.57 + (efficiency * 3 / 7));
+    // efficiency = 0.3 gives buginess of 0.3
+    // efficiency = 0.999 gives buginess of 0.005
     return result;
 }
 function getEfficiency(person, skill) {
@@ -900,8 +915,8 @@ function doneBa(storyId) {
 function determineIfHasSkillBug(person, story, skill) {
     var skillPointBugLikelihood = 100.0 * getBuginess(person, skill);
     if (story.rework) {
-        // an item being reworked is quicker to work on, and has less chance of new bugs being introduced.
-        skillPointBugLikelihood = skillPointBugLikelihood / 2;
+        // an item being reworked is quicker to work on (handled elsewhere), and has MUCH less chance of new bugs being introduced.
+        skillPointBugLikelihood = skillPointBugLikelihood / 2.5;
     }
     // it is a truth universally told that a person in possession of a cat is half as likely to create a spec bug.
     if (personHas(person, ItemCode.cat)) {
@@ -959,9 +974,9 @@ function doneDev(storyId) {
     var story = game.Stories[storyId];
     // no spec bugs can be found until level 3.
     if (game.Level > 2 && story.hasSpecBug) {
-        var chanceOfFindingSpecBug = canFindBug(person, "dev");
-        log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of the developer finding it.");
-        var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
+        var percentChanceOfFindingSpecBug = 100.0 * canFindBug(person, "dev");
+        log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(percentChanceOfFindingSpecBug) + "% chance of the developer finding it.");
+        var foundSpecBug = (Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug);
         if (foundSpecBug) {
             person.busy = false;
             person.summary = "💤";
@@ -1012,9 +1027,9 @@ function doneTest(storyId) {
     var tester = game.People[story.person];
     //no bugs can be found until level 2.
     if (game.Level > 1 && story.hasBug) {
-        var chanceOfFindingBug = canFindBug(person, "test");
-        log("Story: " + story.summary + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
-        var foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
+        var percentChanceOfFindingBug = 100.0 * canFindBug(person, "test");
+        log("Story: " + story.summary + " has a bug, there is a " + Math.floor(percentChanceOfFindingBug) + "% chance of finding it.");
+        var foundBug = (Math.floor(Math.random() * 100) < percentChanceOfFindingBug);
         if (foundBug) {
             drawMessage(tester.name + " found a bug 🐛 in story '" + story.summary + "'");
             story.person = null;
@@ -1031,7 +1046,7 @@ function doneTest(storyId) {
     if (game.Level > 2 && story.hasSpecBug) {
         var chanceOfFindingSpecBug = canFindBug(tester, "test");
         log("Story: " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
-        var foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
+        var foundSpecBug = (Math.floor(Math.random() * 100) < chanceOfFindingSpecBug);
         if (foundSpecBug) {
             drawMessage(tester.name + " found a spec bug 💥 in story '" + story.summary + "'");
             story.person = null;
@@ -1053,7 +1068,12 @@ function doneTest(storyId) {
     setTimeout(function () { bankStory(storyId); }, avgDuration * 5);
 }
 function canFindBug(person, skill) {
-    var chanceOfFindingBug = (50 + getEfficiency(person, skill) * 50.0);
+    // see also `function getBuginess`
+    // at level 1 -- efficiency is 0.3
+    // at level 10 -- efficiency is 0.99
+    var efficiency = getEfficiency(person, skill);
+    log('Efficiency of ' + person.name + ' at ' + skill + ' is ' + efficiency);
+    var chanceOfFindingBug = getEfficiency(person, skill);
     return chanceOfFindingBug;
 }
 function bankStory(storyId) {
@@ -1199,23 +1219,28 @@ function LevelUp() {
     if (items != undefined) {
         for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
             var item = items_1[_i];
-            game.StoreItems.push(item);
+            game.StoreItems[item.id].enabled = true; //.push(item);
         }
+        addClass(".visitStore", 'hint');
     }
     console.log("StoreItems", game.StoreItems);
     switch (game.Level) {
         case 2:
             //show 'hire dev/tester/ba' buttons
             removeClass('.getPerson.dev', 'hidden');
+            addClass(".getPerson.dev", 'hint');
             if (storeFeatureFlag) {
                 removeClass('.visitStore', 'hidden');
+                addClass(".visitStore", 'hint');
             }
             break;
         case 3:
-            removeClass('.getPerson.tester', 'hidden');
+            removeClass('.getPerson.test', 'hidden');
+            addClass('.getPerson.test', 'hint');
             break;
         case 4:
             removeClass('.getPerson.ba', 'hidden');
+            addClass('.getPerson.ba', 'hint');
             break;
     }
 }
@@ -1251,6 +1276,7 @@ function incrementMoney(amount) {
 }
 function visitStore() {
     DeSelectDoerAndReceiver();
+    removeClass('.visitStore', 'hint');
     //change title to 'DevStore'
     $('h1')[0].innerText = "DevStore";
     drawStore();
@@ -1258,7 +1284,11 @@ function visitStore() {
     $id('office').classList.add('hidden');
 }
 function describe(itemId) {
-    var item = game.StoreItems.filter(function (i) { return i.id == itemId; })[0];
+    var item = game.StoreItems[itemId];
+    if (!item.enabled) {
+        drawMessage("\"" + item.name + " " + item.icon + "\" is not available until a higher level");
+        return;
+    }
     drawMessage("\"" + item.name + " " + item.icon + "\" " + item.description);
 }
 function drawStore() {
@@ -1266,9 +1296,11 @@ function drawStore() {
     // clear store items from #items
     itemList.innerText = "";
     // add store items to #items  
-    for (var _i = 0, _a = game.StoreItems; _i < _a.length; _i++) {
-        var item = _a[_i];
-        var shtml = "<div class='storeItem-catalog'><div onclick='purchase(" + item.id + ");' class='button' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</div> " + item.name + " <span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span></div>";
+    //for(const item of game.StoreItems){
+    for (var _i = 0, _a = Object.keys(game.StoreItems); _i < _a.length; _i++) {
+        var key = _a[_i];
+        var item = game.StoreItems[key];
+        var shtml = "<div class='storeItem-catalog " + (item.enabled ? 'item-enabled' : 'item-disabled') + "'><div onclick='purchase(" + item.id + ");' class='button' id='store-button-" + item.id + "'>\uD83D\uDCB2" + item.price + "</div> " + item.name + " <span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span></div>";
         console.log("item html", shtml);
         var newItem = htmlToElement(shtml);
         itemList.appendChild(newItem);
@@ -1283,7 +1315,12 @@ function leaveStore() {
     $('h1')[0].innerText = "DevShop";
 }
 function purchase(itemId) {
-    var item = game.StoreItems.filter(function (i) { return i.id == itemId; })[0];
+    var item = game.StoreItems[itemId]; //.filter(i => i.id == itemId)[0];
+    console.log(item);
+    if (!item.enabled) {
+        drawMessage("The " + item.name + " " + item.icon + " is not yet available");
+        return;
+    }
     if (game.Money < item.price) {
         drawMessage("You cannot afford the " + item.name + " " + item.icon + " for \uD83D\uDCB2" + item.price);
         return;

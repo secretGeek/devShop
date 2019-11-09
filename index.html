@@ -10,6 +10,13 @@
 <title>DevShop</title>
 </head>
 <style>
+.item-enabled {
+ xbackground-color:green;
+}
+.item-disabled {
+xbackground-color:#CCC;
+opacity:0.4;
+}
 body {
   font-family: 'lucida console', monospace;
   max-width:calc(100% - 2ch);
@@ -71,6 +78,13 @@ h1,th {
   background-color:#EEE;
   box-shadow:2px 2px 0 #AAA;
 }
+
+.hint {
+  box-shadow:2px 2px 0 #CCC, 1px 1px 2px cyan inset;
+	background-color:#D0F0FF;
+	
+}
+
 .story {
   background-color:#FFF;
   box-shadow:2px 2px 0 #DDD;
@@ -378,7 +392,7 @@ th {
 <div id='buttons'>
   <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
   <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</div>
-  <div id='gettest' class='button getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</div>
+  <div id='gettest' class='button getPerson hidden test' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</div>
   <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</div>
   <div class='button visitStore hidden' onclick='visitStore();'>🏪 visit store</div>
 </div>
