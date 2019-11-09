@@ -126,6 +126,28 @@ A few ideas
 
 # DONE
 
+
+
+[x] When a .button is clicked at top, deselect doer or receiver and possible 
+[x] Price of staff should double each time. At least. If not 5x. Or 3x 
+
+Memory management:
+ When a project is complete:
+   [x] Delete each of its stories from game.stories
+   [x] Delete it from projects. 
+[x] Initial dog cat duration double
+[x] And double it every time there after 
+[x]If money is negative then XP is not added to XP. Instead it is multiplied by -1 and added to money
+[x] And lock in the per point price of the story (lead) when it is purchased then pass it into the children when. They are spawned. 
+[x] When the customer finds a bug... the return of the card is immediately halved.
+
+
+
+[x] Don't say idle if they are just waiting to self start
+[x] Show self start icon 
+
+
+[x] Shouldn't be able to select items that are in the done column
 [x] instead of efficiency... have their skill level map so 1-10 is 0.3  0.4  ,0.5   ,0.6   ,0.77   ,0.83  ,0.90   ,0.95  ,0.99
 
 [x] if have cat... less errors.
@@ -181,6 +203,13 @@ A few ideas
 		[x] you buy them.
 [x] top align cards in columns.
 
+
+Answered/resolved (in a different topic)
+// ? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
+// ? When is interest added to the loan!?
+//    after a certain amount of time.... (is it a turn based game or a time-based game?)
+//      some things about it are time based... delays for example
+//    whenever levelling up... whenever a story is finished? whenever an action occurs
 
 
 Unlikely:

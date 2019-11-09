@@ -1,4 +1,5 @@
 // 
+// button hover should be light blue
 // do we have an id issue when selecting storeitem's in store versus inbox? clash of id's?
 /*
 
@@ -24,16 +25,29 @@
   devforba,
   devfortest,
   coffeemachine
-
+  statue 🗽
+  statue2 🗿
 
 */
-// if > 1, show skill level number top right of skill icon on person card. (in Hexadecimal?)
-// ? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
-// ? When is interest added to the loan!?
-//    after a certain amount of time.... (is it a turn based game or a time-based game?)
-//      some things about it are time based... delays for example
-//    whenever levelling up... whenever a story is finished? whenever an action occurs
-// ? Show count of items in top of column
+// defer: stats button lower right 📈 : each person's skills and description. point per minute described for every minute of the game (excluded minutes with 0 points)
+// mechanical keyboard should be an early level item -- dev level up
+// mech keyboard should be added
+// test-management suite -- test level up
+// powerful IDE -- dev level up
+// spreadsheet skills -- be a better BA
+// email etiquette course -- be a better BA
+
+//every time you buy something it triples in price. Better idea!
+
+// when you buy a self-starter card (or any card) that should not be enough to kick off the self-starting behaviour. (or should it!?)
+// [x] icon to indicate has seat after seat upgrade: should show up on the person
+// seat upgrade should make you more effective
+// chance of finding a bug or specBug -- need to be same mathematical model as creating bug or spec bug
+// more technical names for tasks
+// Limit dog/cat numbers
+// icon to indicate Observation training 🔍
+// if > 1, show skill level number top right of skill icon on person card.
+// ? Show count of stories in top of column
 // ? limited number of slots for people. cannot hire more than level number... until 
 // ? Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
 // consider: the store should show level n+1 items, disabled.
@@ -50,7 +64,7 @@
 // - non-prop font for level etc.
 
 let testMode = false;//true;
-let storeFeatureFlag = false;//testMode;
+let storeFeatureFlag = testMode;
 let debugOutput = (testMode || getParameterByName('debug') == "true");
 let avgDuration = testMode ? 4 : 800; 
 let startingMoney = testMode ? 100 : 100;
@@ -94,22 +108,21 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
   let allItems: { [id: string]: StoreItem[]; } = 
       { "l2": //Level 2 Items
        [{id:10,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:10, description: 'A sugary fix will speed you up... but beware the sugar crash.'},
+       {id:190,name:'Mechanical keyboard upgrade', price:400, icon:"⌨", skillneeded:"dev", busy:false, code:ItemCode.keyboard, activeDuration:30, description: 'This mechanical keyboard upgrade will boost your speed at developing.'},
        ],
         "l3": //Level 3 Items
-       [{id:20,name:'Guide to Unit testing', price:300, icon:"📗", skillneeded:"dev", busy:false, code:ItemCode.unitt, activeDuration:0, description:'Already a developer? The power of unit testing will lower your speed but increase your accuracy leading to fewer costly bugs.'},
-        {id:40,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:30, description: 'A cup of joe will speed up any worker ...if only for a little while.'},
-      
+       [{id:20,name:'Developer Upgrade: Unit testing', price:300, icon:"📗", skillneeded:"dev", busy:false, code:ItemCode.unitt, activeDuration:0, description:'Already a developer? This advanced training course will reduce the number of bugs you create.'},
+        {id:40,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:30, description: 'A cup of joe will speed up any worker ...if only for a little while.'},      
        ],
         "l4":
        [
         {id:60,name:'Analysis for Testers', price:300, icon:"📕", skillneeded:"test", busy:false, code:ItemCode.bafortest, activeDuration:50, description:'Any tester can learn to be a business analysis with this exciting new course from Thinkstra™.'},
-         
-        {id:80,name:'Office Cat', price:2000, icon:"🐱", skillneeded:"dev", busy:false, code:ItemCode.cat, activeDuration:50, description:'This friendly feline will stop one person at a time from getting distracted.'},
         {id:90,name:'Pizza', price:5, icon:"🍕", skillneeded:"any", busy:false, code:ItemCode.pizza, activeDuration:50, description: 'Trap your workers in the office by giving them no reason to leave'},
-        
+        {id:160,name:'Banana', price:5, icon:"🍌", skillneeded:"any", busy:false, code:ItemCode.banana, activeDuration:20, description: 'This healthy snack gives a short-lived energy boost'},
        ],
         "l5":
        [
+        {id:80,name:'Office Cat', price:5000, icon:"🐱", skillneeded:"dev", busy:false, code:ItemCode.cat, activeDuration:100, description:'This friendly feline will stop one person at a time from getting distracted.'},
         {id:100,name:'Seat upgrade', price:200, icon:"💺", skillneeded:"any", busy:false, code:ItemCode.seat, activeDuration:0, description: 'A comfortable seat upgrade makes any worker more efficient.'},
         {id:110,name:'Observation Training', price:200, icon:"🕵️‍♀️", skillneeded:"any", busy:false, code:ItemCode.observe, activeDuration:0, description:'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.'},
         
@@ -117,22 +130,21 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
         "l6":
        [
         {id:120,name:'Be a Better Tester', price:200, icon:"📘", skillneeded:"test", busy:false, code:ItemCode.test, activeDuration:0, description:'Already a tester? Be a better tester!'},
-        {id:130,name:'Office Dog', price:3000, icon:"🐶", skillneeded:"test", busy:false, code:ItemCode.dog, activeDuration:50, description:'Bring joy and efficiency to the workplace.'},
+        {id:150,name:'Self-Starter', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.'},
 
        ],
        "l7":
        [
-        {id:140,name:'Crystal ball', price:5, icon:"🔮", skillneeded:"any", busy:false, code:ItemCode.crystal, activeDuration:0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.'},
+        {id:130,name:'Office Dog', price:6000, icon:"🐶", skillneeded:"test", busy:false, code:ItemCode.dog, activeDuration:100, description:'Bring joy and efficiency to the workplace.'},
  
        ],
        "l8":
        [
-        {id:150,name:'Self-Starter', price:200, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.'},
+        {id:140,name:'Crystal ball', price:50000, icon:"🔮", skillneeded:"any", busy:false, code:ItemCode.crystal, activeDuration:0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.'},
 
        ],
        "l9":
        [
-        {id:160,name:'Banana', price:5, icon:"🍌", skillneeded:"any", busy:false, code:ItemCode.banana, activeDuration:20, description: 'This healthy snack gives an energy boost'},
 
        ],
        "l10":
@@ -143,7 +155,6 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l11":
        [
-        {id:190,name:'Mechanical keyboard upgrade', price:400, icon:"⌨", skillneeded:"dev", busy:false, code:ItemCode.keyboard, activeDuration:30, description: 'This mechanical keyboard upgrade will boost your speed at developing.'},
 //inspirational poster
         {id:200,name:'Inspirational poster', price:400, icon:"🖼", skillneeded:"any", busy:false, code:ItemCode.poster, activeDuration:10, description: 'Enhance your cubicle and improve your concentration.'},
 
@@ -240,6 +251,7 @@ class Game {
     this.HighestMoney = startingMoney;
     this.Inflation = testMode? 1.3 : 1.3; // 30 %
     this.SmallInflation = testMode? 1.05 : 1.05; // 5 %
+    this.HyperInflation = testMode? 3 : 3; //300%
     this.Level = 1;
     this.XP = 0;
     this.TotalXP = 0;
@@ -257,12 +269,13 @@ class Game {
     this.Items = {};
     this.SelectedDoer = null;
     this.SelectedReceiver = null;
-    this.DefaultSelfStartDelay = 10000; //10 second pause between polling the board.
+    this.DefaultSelfStartDelay = testMode? 100 : 5000; //5 second pause between polling the board.
   }
   Money: number;
   HighestMoney: number;
   Inflation: number;
   SmallInflation: number;
+  HyperInflation: number; 
   Level: number;
   XP: number;
   LevelUpXP: number;
@@ -329,7 +342,8 @@ interface Story {
   hasSpecBug: boolean;
   customerFoundBug: boolean;
   rework: boolean;  // when a card is being reworked due to a found bug or spec bug, it is rework. (And is less time than the original work). 
-  projectId: string;
+  projectId: string; //contains 'r'
+  pointPrice: number;
 }
 
 interface StoreItem {
@@ -352,38 +366,38 @@ class Project {
     this.stories = [];
   }
   lead: Story; // the sales lead that sparked this project
-  stories: string[] = []; //storyid's of the subsequent stories created by the BA
+  stories: string[] = []; //storyid's of the subsequent stories created by the BA (start with 'r')
 }
 
-function initGameState()
+function initGameState():void
 {
   game = new Game(startingMoney);
   let allSkills = 
     {
-      "dev": { level: 10},
-      "test": {level: 10},
-      "ba": {level: 10}
+      "dev": { level: 1},
+      "test": {level: 1},
+      "ba": {level: 1}
     };
   
-  let player: Person = { id: nextId(), skills: allSkills, name: "Founder", summary: "idle", icon:"🤔", XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay};
+  let player: Person = { id: nextId(), skills: allSkills, name: "Founder", summary: "💤", icon:"🤔", XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay};
   game.People['p' + player.id] = player;
   incrementXP(0);
   incrementMoney(0);
 }
 
 // todo: put this function onto the game object
-function nextId() {
+function nextId():number {
   return ++game.NextId;
 }
 
-function drawRoom() {
+function drawRoom():void {
   drawPeople(game.People);
   drawStories(game.Stories);
   drawMoney(game.Money);
   drawButtons();
 }
 
-function drawButtons() {
+function drawButtons():void {
 //  <div class='button getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
   let getLead = $id('getLead');
   getLead.innerHTML = `🎁 find project (💲${game.LeadPrice})`;
@@ -398,7 +412,7 @@ function drawButtons() {
   
 }
 
-function drawMoney(money: string | number) {
+function drawMoney(money: string | number):void {
   let s = document.getElementById('money');
   if (money < 0) {
     s.classList.add("negative");
@@ -408,7 +422,7 @@ function drawMoney(money: string | number) {
   s.innerText = "💲" + money;
 }
 
-function drawXP(xp: number, levelUpXP:number, level: number) {
+function drawXP(xp: number, levelUpXP:number, level: number):void {
   let s = document.getElementById('xp');
   if (xp < 0) {
     s.classList.add("negative");
@@ -422,13 +436,13 @@ function drawXP(xp: number, levelUpXP:number, level: number) {
   s2.innerText = "" + level + "🥑";
 }
 
-function removeStory(key: string) {
+function removeStory(key: string):void {
   const el = document.getElementById('kanbanboard');
   let s = el.querySelector('#' + key);
   s.parentNode.removeChild(s);
 }
 
-function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean) {
+function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean):void {
   const el = document.getElementById('kanbanboard');
   let s = el.querySelector('#' + key);
   let avatar = "";
@@ -446,7 +460,12 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean) 
   }
 
   let points = "<span class='points'>" + story.points + "</span>";
-  let shtml = `<span class='story receiver ${story.skillneeded}${busy}' id='${key}' onclick='clickReceiver(\"${key}\");'><span class='story-detail'>${logo} ${story.summary}</span>${avatar}${points}</span>`;
+
+  //if the story is done, don't add a click handler.
+  let handler = story.skillneeded == "done" ? "" : `onclick='clickReceiver(\"${key}\");'`;
+
+  let shtml = `<span class='story receiver ${story.skillneeded}${busy}' id='${key}' ${handler}><span class='story-detail'>${logo} ${story.summary}</span>${avatar}${points}</span>`;
+
   if (s != null) {
     s.outerHTML = shtml;
   } else {
@@ -460,13 +479,13 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean) 
   }
 }
 
-function drawStories(stories: {}) {
+function drawStories(stories: {}):void {
   for(const key in stories) {
     drawStory(key, stories, false);
   }
 }
 
-function drawInboxItem(key: string, item: StoreItem){
+function drawInboxItem(key: string, item: StoreItem):void {
   let el = $id('kanbanboard')
   let s = el.querySelector('#' + key);
 
@@ -481,7 +500,7 @@ function drawInboxItem(key: string, item: StoreItem){
   }
 }
 
-function drawPerson(key: string, people: { [x: string]: Person; }) {
+function drawPerson(key: string, people: { [x: string]: Person; }):void {
   let el = document.getElementById('people');
   let p = el.querySelector('#' + key);
   //if the person is listed in #id already then update it.
@@ -512,7 +531,7 @@ function drawPerson(key: string, people: { [x: string]: Person; }) {
   }
 }
 
-function getSkillsDiv(skills: {[id:string]: SkillDetail}) {
+function getSkillsDiv(skills: {[id:string]: SkillDetail}):string {
   let result = "";
   for (let[key, value] of Object.entries(skills)) {
     let s1 = "";
@@ -530,13 +549,13 @@ function getSkillsDiv(skills: {[id:string]: SkillDetail}) {
   return "<div class='skills'>" + result + "</div>";
 }
 
-function drawPeople(people: {}) {
+function drawPeople(people: {}):void {
   for(const key in people) {
      drawPerson(key, people);
   }
 }
 
-function go() {
+function go():void {
   initGameState();
   drawRoom();
   $id('start').classList.add("hidden");   //hide 'start' button
@@ -545,10 +564,15 @@ function go() {
   drawMessage("STEP 1: press '🎁 find project'");
 }
 
-function getNewLead() {
+function getNewLead():void {
+  
+  DeSelectDoerAndReceiver();
+
   let price = game.LeadPrice;
   
-  if (game.Money < price) {
+  if (game.Money < 0) {
+    drawMessage("Will need to go FURTHER into debt to get this lead.");
+  } else if (game.Money < price) {
     drawMessage("Will need to go into debt to get this lead.");
   }
 
@@ -556,7 +580,7 @@ function getNewLead() {
   incrementXP(5);
   // TODO: instead of 10 points and value 1000....
   // should be based on current level... some randomness.
-  let newLead = { id: nextId(), points:game.ProjectSize, value:1000, status:"lead", skillneeded:"ba", summary:projectName(), logo: getLogo() , person: null, busy: false, icon: null, hasBug: false, hasSpecBug: false, customerFoundBug: null, projectId: null, rework:false};
+  let newLead = { id: nextId(), points:game.ProjectSize, pointPrice:game.PointPrice, value:1000, status:"lead", skillneeded:"ba", summary:projectName(), logo: getLogo() , person: null, busy: false, icon: null, hasBug: false, hasSpecBug: false, customerFoundBug: null, projectId: null, rework:false};
   if (isEmpty(game.Stories)) {
     // this was the first lead ever! give them a tip...
     drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the Founder " + game.People["p1"].icon + " (or vice-versa)");
@@ -578,9 +602,15 @@ function getNewLead() {
 
 }
 
-function getNewPerson(skill: string) {
-  let personType = game.AllPeopleTypes[skill];
 
+function DeSelectDoerAndReceiver():void {
+  deselectDoer();
+  deselectReceiver();
+}
+
+function getNewPerson(skill: string):void {
+  DeSelectDoerAndReceiver();
+  let personType = game.AllPeopleTypes[skill];
   if (game.Money < personType.price) {
     drawMessage(`Cannot afford a new ${personType.title}.`);
     return;
@@ -591,22 +621,23 @@ function getNewPerson(skill: string) {
   let id = nextId();
   let skillo = {};
   skillo[skill] = { level: 1};
-  let newEmployee: Person = { id: id, skills: skillo, summary: "idle", icon: getIcon(), name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay};
+  let newEmployee: Person = { id: id, skills: skillo, summary: "💤", icon: getIcon(), name: getName(), XP: 0, busy: false, observantLevel: 0, selfStarterLevel: 0, selfStartNow: 0, observeNow: 0, has: {}, seatLevel: 0, selfStartDelay: game.DefaultSelfStartDelay};
   game.People['p' + id] = newEmployee;
   drawPerson('p' + id, game.People);
-  // Every time you hire a person the price for that type inflates.
-  personType.price = Inflate(game.Inflation, personType.price);
+  // Every time you hire a person the price for that type inflates by a LOT.
+  personType.price = Inflate(game.HyperInflation, personType.price);
   drawButtons();
+
 }
 
-function clickFirstAvailableCard(column:string){
+function clickFirstAvailableCard(column:string):void{
   let columnCards = $(`#${column} .inner .receiver:not(.busy)`);
   if (columnCards && columnCards.length > 0) {
     clickReceiver(columnCards[0].id);
   }
 }
 
-document.onkeypress = function(e) {
+document.onkeypress = function(e):void {
   switch (e.key) {
     case "1":
       clickFirstAvailableCard('ba');
@@ -624,10 +655,10 @@ document.onkeypress = function(e) {
   }
 }
 
-function updatePossible() {
-  if (game.SelectedDoer != undefined) {
+function updatePossible():void {
+  if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
     //As a 'doer' -- highlight everything I can do.  (where not busy)
-    var skills = game.People[game.SelectedDoer].skills;
+    let skills = game.People[game.SelectedDoer].skills;
     //for(const skill of game.People[game.SelectedDoer].skills) {
     for(let key of Object.keys(skills)) {
       log(key);
@@ -638,7 +669,7 @@ function updatePossible() {
   }
 
   // As a 'receiver' -- highlight everything that can do this (where not busy)
-  if (game.SelectedReceiver != undefined) {
+  if (game.SelectedReceiver != undefined && game.SelectedReceiver != null) {
     let receiver:IReceiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
     if (receiver.skillneeded == "any") {
       addClass(".doer:not(.busy)", 'possible');
@@ -649,15 +680,21 @@ function updatePossible() {
   }
 }
 
-function deselectDoer() {
+function deselectDoer():void {
+  if (game.SelectedDoer == undefined || game.SelectedDoer == null) return;
+
   let doer = $id(game.SelectedDoer);
-  if (doer != undefined) doer.classList.remove('selected');
-  removeAllClass("possible");
+
   game.SelectedDoer = null;
+  
+  if (doer == undefined) return;
+
+  doer.classList.remove('selected');
+  removeAllClass("possible");
   updatePossible();
 }
 
-function selectDoer() {
+function selectDoer():void {
   $id(game.SelectedDoer).classList.add('selected');
   updatePossible();
 }
@@ -687,11 +724,18 @@ function clickDoer(id: string) {
   }
 }
 
-function deselectReceiver() {
+function deselectReceiver():void {
+  if (game.SelectedReceiver == undefined || game.SelectedReceiver == null) return;
+
   let receiver = $id(game.SelectedReceiver);
-  if (receiver != undefined) receiver.classList.remove('selected');
-  removeAllClass("possible");
+
   game.SelectedReceiver = null;
+
+  if (receiver == undefined) return;
+  
+  receiver.classList.remove('selected');
+
+  removeAllClass("possible");
   updatePossible();
 }
 
@@ -777,6 +821,12 @@ function applyItem(person:Person, item:StoreItem) {
   switch(item.code){
     case ItemCode.observe:
       person.observantLevel++;
+      if (person.observantLevel == 1){
+        person.has['i'+item.id] = item;
+        drawMessage(`${person.name} ${person.icon} is now observant 🔍.`);
+      } else {
+        drawMessage(`${person.name} ${person.icon} is now more observant 🔍 (level ${person.observantLevel}).`);
+      }
       break;
     case ItemCode.selfstart:
       person.selfStarterLevel++;
@@ -792,6 +842,9 @@ function applyItem(person:Person, item:StoreItem) {
       break;
     case ItemCode.seat:  
       person.seatLevel++;
+      if (person.seatLevel == 1) {
+        person.has['i'+item.id] = item;
+      }
       break;
     case ItemCode.test:
       if (person.skills["test"] != undefined) {
@@ -807,6 +860,8 @@ function applyItem(person:Person, item:StoreItem) {
       person.summary = `Tending to the ${item.name}` ;
       drawMessage(`${person.name} ${person.icon} has the ${item.icon} ${item.name}`);
       setTimeout(function() { usingFinishedBusyPhase(person, item);}, item.activeDuration*100);
+      // length of time cat/dog spends with someone doubles each time they visit.
+      item.activeDuration *= 2;
     case ItemCode.banana:
     case ItemCode.coffee:
     case ItemCode.crystal:
@@ -826,7 +881,7 @@ function applyItem(person:Person, item:StoreItem) {
 // Once that finishes, 
 function usingFinishedBusyPhase(person:Person, item:StoreItem) {
   person.busy = false;
-  person.summary = "idle";
+  person.summary = "💤";
   drawPerson('p' + person.id, game.People);
   personFree(person);
 }
@@ -834,8 +889,10 @@ function usingFinishedBusyPhase(person:Person, item:StoreItem) {
 function personFree(person:Person) {
   log(`${person.name} ${person.icon} is now free`);
   if (person.selfStarterLevel > 0 && person.selfStartNow > 0) {
-    //person.selfStartNow = person.selfStarterLevel; // reset the countdown, so they will poll this many times.
-    log(`WIll check board in ${person.selfStartDelay}`);
+    // show this many eyes, that count down each time they check the board...
+    person.summary = "👁".repeat(person.selfStartNow);
+    drawPerson('p' + person.id, game.People);
+    log(`Will check board in ${person.selfStartDelay}`);
     setTimeout(function() { selfStart(person);}, person.selfStartDelay);
   }
 }
@@ -844,31 +901,33 @@ function selfStart(person:Person){
   //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
   //TODO:
   log("Self starter is awake...");
-  log("Person is busy? " + person.busy + "Start now? " + person.selfStartNow);
+  log(person.name + " " + person.icon + " is busy? " + person.busy + "; Start now? " + person.selfStartNow);
   if (!person.busy && person.selfStartNow > 0) {
     person.selfStartNow--;
     log(`${person.name} ${person.icon} is checking the board now....`);
     //TODO: implement this. And log above instead of 'drawmessage'  
     //TODO: get accurate skillneeded.... and make it a story
-    var columns:string[] = [];
+    let columns:string[] = [];
 
     // we prioritise self-starting from the back of the board.
-    if (person.skills["test"].level > 0) {
+    if (person.skills["test"] && person.skills["test"].level > 0) {
       columns.push("test");
     }
-    if (person.skills["dev"].level > 0) {
+    if (person.skills["dev"] && person.skills["dev"].level > 0) {
       columns.push("dev");
     }
-    if (person.skills["ba"].level > 0) {
+    if (person.skills["ba"] && person.skills["ba"].level > 0) {
       columns.push("ba");
     }
+
+    if (columns.length == 0)  log(`${person.name} ${person.icon} has no skills worth a damn, apparently!`);
 
     //check each column in the order of the array columns.
     for(let column of columns) {
       let nextCards = $(`#${column} .inner .story.receiver:not(.busy)`);
       if (nextCards.length > 0) {
         let nextCardId = nextCards[0].id;
-        log(`${person.name} ${person.icon} is doing ${nextCardId}`);
+        log(`${person.name} ${person.icon} is doing ${game.Stories[nextCardId].summary}`);
         doIt('p' + person.id, nextCardId);
         break;
       }
@@ -876,10 +935,17 @@ function selfStart(person:Person){
     
   }
 
-  if (!person.busy && person.selfStartNow > 0) {
-    //okay, we will check back later....
-    //consider: could do 'exponential backoff.
-    setTimeout(function() { selfStart(person);}, person.selfStartDelay);
+  if (!person.busy) {
+    if (person.selfStartNow > 0) {
+      // show this many eyes, that count down each time they check the board...
+      person.summary = "👁".repeat(person.selfStartNow);
+      log(`Will check board in ${person.selfStartDelay}`);
+      setTimeout(function() { selfStart(person);}, person.selfStartDelay);
+    } else {
+      person.summary = "💤";
+    }
+
+    drawPerson('p' + person.id, game.People);
   }
 }
 
@@ -933,7 +999,16 @@ function doIt(doId: string, receiverId: string) {
   setTimeout(function() { done(receiverId);}, duration);
 }
 
-function getEfficiency(person:Person, skill:string) {
+function getBuginess(person:Person, skill:string):number {
+  let eff = getEfficiency(person, skill);
+  //log ("" + person.skills[skill].level);
+  //log("Effectiveness: " + eff);
+  let result = 1 - ((eff * 3/7) + 0.57);
+  //log("Result: " + result);
+  return result;
+}
+
+function getEfficiency(person:Person, skill:string):number {
   log("skill:" + skill);
 
   if (skill == "dev0") skill = "dev";
@@ -957,6 +1032,7 @@ function getEfficiency(person:Person, skill:string) {
 // how long will this task take this person?
 function getDuration(person:Person, story:Story):number {
   let duration = story.points * avgDuration * (1.0 / getEfficiency(person, story.skillneeded)) * getTaskFactor(story.skillneeded);
+
 
   // All rework is faster. This is a little over-simplified, but it will do.
   // rework also has a lower chance of introducing fresh bugs (that is covered elsewhere)
@@ -1040,7 +1116,7 @@ function done(receiveId: string) {
   //now that that's done....
   if (!person.busy && person.observeNow > 0){
     //check if there's anything in the column where this came from....
-    var skillToCheck = skillNeeded;
+    let skillToCheck = skillNeeded;
     if (skillToCheck == "dev0") skillToCheck = "dev";
     drawMessage(`${person.name} is going to try and do some ${skillToCheck}...`);
     let columnCards = $(`#${skillToCheck} .inner .story.receiver:not(.busy):not(.selected)`);
@@ -1084,7 +1160,7 @@ function doneBa(storyId: string) {
   let newCards = ElaborateProject(oldStory, person);
   
   person.busy = false;
-  person.summary = "idle";
+  person.summary = "💤";
   drawPerson('p' + person.id, game.People);
   
   //The original lead is removed from the board.
@@ -1095,30 +1171,29 @@ function doneBa(storyId: string) {
   }
 }
 
-
-
-function determineIfHasSpecBug(person: Person, story: Story, numCards:number):boolean {
-
-  let specBugLikelihood = (story.points / (numCards * 12.0))  * (1.0 - getEfficiency(person, "ba")) * 100.0;
+function determineIfHasSkillBug(person: Person, story: Story, skill:string):boolean { 
   
-  //(story.points / 12.0)   * (1.0 - person.efficiency) * 100.0;
-
+  let skillPointBugLikelihood = 100.0 * getBuginess(person, skill);
   if (story.rework) {
     // an item being reworked is quicker to work on, and has less chance of new bugs being introduced.
-    specBugLikelihood = specBugLikelihood / 2;
+    skillPointBugLikelihood = skillPointBugLikelihood / 2;
   }
 
-  // it is a truth universally known that a person in possession of a cat is half as likely to create a spec bug.
+  // it is a truth universally told that a person in possession of a cat is half as likely to create a spec bug.
   if (personHas(person, ItemCode.cat)) {
-    log("Lower likelihood of spec bugs when you have that 😸!")
-    specBugLikelihood = specBugLikelihood / 2;
+    log("Lower likelihood of " + skill + " bugs when you have that 😸!")
+    skillPointBugLikelihood = skillPointBugLikelihood / 2;
   }
 
-  //TODO: bug Likelihood could additionally be related to person.skills['ba'].level
-  
-  log(`A spec bug 💥 is ${Math.floor(specBugLikelihood)}% likely on ${story.points} point project with ${numCards} cards`);
+  log(`A ${skill} bug is ${Math.floor(skillPointBugLikelihood)}% likely on each point of this ${story.points} point card`);
 
-  return (Math.floor(Math.random() * 100) < specBugLikelihood);
+  for(let i:number = 0; i < story.points; i++) {
+    if (Math.floor(Math.random() * 100) < skillPointBugLikelihood) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 
@@ -1131,18 +1206,8 @@ function ElaborateProject(story: Story, person: Person): Story[] {
   
   // Deal out starting cards worth 1 point each.
   for(let i = 0; i<numCards; i++) {
-    
     let summary = getTask();
-
-    let hasSpecBug = false;
-    
-    //chance of adding a bug relates to effectiveness of dev, and size of story.
-    if (determineIfHasSpecBug(person, story, numCards)) {
-      hasSpecBug = true;
-      log("Spec bug 💥 added to '" + summary + "'");
-    }
-  
-    let newCard = { id: nextId(), points: 1, value: 200, status:"story", skillneeded:"dev", summary: summary, logo:story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: hasSpecBug, customerFoundBug: null, rework:false };
+    let newCard = { id: nextId(), pointPrice:story.pointPrice, points: 1, value: 200, status:"story", skillneeded:"dev", summary: summary, logo:story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: false, customerFoundBug: null, rework:false };
 
     game.Stories['r' + newCard.id] = newCard;
     newCards.push(newCard);
@@ -1159,26 +1224,40 @@ function ElaborateProject(story: Story, person: Person): Story[] {
     remainingPointsToAllocate--;
   }
 
+  for(let cardId of game.Projects['r' + story.id].stories) {
+    let hasSpecBug = false;
+    //jalert(cardId);
+    let card = game.Stories[cardId];
+    //chance of adding a bug relates to effectiveness of ba, and size of story.
+    if (determineIfHasSkillBug(person, card, "ba")) {
+      hasSpecBug = true;
+      log("Spec bug 💥 added to '" + card.summary + "'");
+    }
+
+    card.hasSpecBug = hasSpecBug;
+  }
+
   return newCards;
 }
-function doneDev(storyId: string) {
 
-  
+function doneDev(storyId: string) {
   //okay -- it's done being in the backlog
-  //maybe add it to dev -- or send it back to be clarified.
+  //either add it to dev -- or send it back to be clarified (if you find a spec bug)
   let person = game.People[game.Stories[storyId].person];
-  //console.log("Story: " + storyId + " is now being developed.");
   let story = game.Stories[storyId];
   
   // no spec bugs can be found until level 3.
   if (game.Level > 2 && story.hasSpecBug) {
-    let chanceOfFindingSpecBug = (50 + getEfficiency(person, "test") * 50.0);
-    log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of realising this.");
+
+    let chanceOfFindingSpecBug = canFindBug(person, "dev");
+
+    log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of the developer finding it.");
+
     let foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
     if (foundSpecBug) {
     
       person.busy = false;
-      person.summary = "idle";
+      person.summary = "💤";
       drawPerson('p' + person.id, game.People);
 	
       drawMessage(person.name + " discovered a spec bug 💥 in story '" + story.summary + "'");
@@ -1193,10 +1272,6 @@ function doneDev(storyId: string) {
     }
   }
 
-
-  //person.busy = null; //it continues straight into the dev0 role... so no need to mark the person idle.
-  //person.summary = "idle";
-  //drawPerson('p' + person.id, game.People, document.getElementById('people'));
   removeStory(storyId);
   story.skillneeded = "dev0";
   doIt(story.person, storyId);
@@ -1208,7 +1283,7 @@ function doneDev0(storyId: string) {
   let story = game.Stories[storyId];
   let person = game.People[story.person];
   
-  if (determineIfHasBug(person, story)) {
+  if (determineIfHasSkillBug(person, story, "dev")) {
     story.hasBug = true;
     // Note the bug may or may not be found later. If tester doesn't find it, the customer *will* find it.
     log(`A bug 🐛 was added to ${story.summary}`);
@@ -1221,52 +1296,30 @@ function doneDev0(storyId: string) {
   log("Story: " + story.summary + " is ready for testing.");
   drawStory(storyId, game.Stories, false);
   person.busy = false;
-  person.summary = "idle";
+  person.summary = "💤";
   drawPerson('p' + person.id, game.People);
-}
-
-function determineIfHasBug(person: Person, story: Story):boolean {
-
-  let bugLikelihood = (story.points / 12.0)   * (1.0 - getEfficiency(person, "dev")) * 100.0;
-
-  if (story.rework) {
-    // an item being reworked is quicker to work on, and has less chance of new bugs being introduced.
-    bugLikelihood = bugLikelihood / 2;
-  }
-
-  // it is a truth universally known that a person in possession of a cat is half as likely to create bugs.
-  if (personHas(person, ItemCode.cat)){
-    log("Lower likelihood of bugs when you have that 😸!")
-    bugLikelihood = bugLikelihood / 2;
-  }
-
-  log(`A bug 🐛 is ${Math.floor(bugLikelihood)}% likely`);
-
-  return (Math.floor(Math.random() * 100) < bugLikelihood);
 }
 
 function doneTest(storyId: string) {
   //okay -- test is done
   removeStory(storyId);
   let story = game.Stories[storyId];
-  //chance of finding bug relates to:
-  // 1. is there a bug? If so, 2. how effective is the tester?
   let person = game.People[story.person];
   person.busy = false;
-  person.summary = "idle";
+  person.summary = "💤";
   drawPerson('p' + person.id, game.People);
   let tester = game.People[story.person];
-  
 
   //no bugs can be found until level 2.
   if (game.Level > 1 && story.hasBug) {
-    let chanceOfFindingBug = (50 + getEfficiency(tester, "test") * 50.0);
+    let chanceOfFindingBug = canFindBug(person, "test");
     log("Story: " + story.summary + " has a bug, there is a " + Math.floor(chanceOfFindingBug) + "% chance of finding it.");
     let foundBug = (Math.floor(Math.random() * 100) > chanceOfFindingBug);
     if (foundBug) {
       drawMessage(tester.name + " found a bug 🐛 in story '" + story.summary + "'");
       story.person = null;
       story.hasBug = null;
+      story.hasSpecBug = null;
       story.icon = "🐛";
       story.skillneeded = "dev";
       story.rework = true;
@@ -1277,13 +1330,15 @@ function doneTest(storyId: string) {
 
   // no spec bugs can be found until level 3.
   if (game.Level > 2 && story.hasSpecBug) {
-    let chanceOfFindingSpecBug = (50 + getEfficiency(tester, "test") * 50.0);
+    
+    let chanceOfFindingSpecBug = canFindBug(tester, "test");
     log("Story: " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it.");
     let foundSpecBug = (Math.floor(Math.random() * 100) > chanceOfFindingSpecBug);
     if (foundSpecBug) {
       drawMessage(tester.name + " found a spec bug 💥 in story '" + story.summary + "'");
       story.person = null;
       story.hasBug = null;
+      story.hasSpecBug = null;
       story.icon = "💥";
       story.skillneeded = "ba";
       story.rework = true;
@@ -1300,18 +1355,27 @@ function doneTest(storyId: string) {
   setTimeout(function() { bankStory(storyId);}, avgDuration*5);
 }
 
+function canFindBug(person:Person, skill:string){
+ 
+  let chanceOfFindingBug = (50 + getEfficiency(person, skill) * 50.0);
+  
+  return chanceOfFindingBug;
+}
+
 function bankStory(storyId: string) {
   let story = game.Stories[storyId];
+
   //If story has a bug... customer will definitely find it! (it got past testing!)
-  //and it will go back the dev column!
+  //and it will go all the way back to the ba column, even if it wasn't a spec bug!
 
-
-  //  //no bugs can be found until level 2, no spec bugs until level 3
+  //no bugs can be found until level 2, no spec bugs until level 3
   if ((game.Level > 1 && story.hasBug) || (game.Level > 2 && story.hasSpecBug)) {
     //remove from board
     removeStory(storyId);
     drawMessage(`Oops! The customer found a bug 🐞 in story '${story.summary}'`);
     story.customerFoundBug = true;
+    //HALVE the amount this card is worth! (hope the customer doesn't find ANOTHER bug in this one......)
+    story.pointPrice = story.pointPrice / 2;
     story.person = null;
     story.icon = "🐞";
     story.skillneeded = "ba"; //goes all the way back to the BA column.
@@ -1321,13 +1385,12 @@ function bankStory(storyId: string) {
   }
   //But if there is no bug .. money will be paid... and if the project is thus completed, a completion payment is made.
   //TODO: set appropriate price based on # points.
-  let price = story.points * game.PointPrice;
-  if (price != Math.floor(story.points * game.PointPrice)) log(`💖PRICE MISMATCH: ${price}💖`);
+  let price = Math.floor(story.points * story.pointPrice);
   let message2 = ` for '${story.summary}'`;
   incrementXP(5);
 
   if (story.customerFoundBug) {
-    price = Math.floor(price/2);
+    //price = Math.floor(price/2);
     message2 += " (reduced as customer found that bug)";
     //price is reduced because customer previously found a bug in this!.
   }
@@ -1338,10 +1401,14 @@ function bankStory(storyId: string) {
 
   if (project.stories.includes(storyId)) {
     project.stories.splice(project.stories.indexOf(storyId), 1);
-    //if there are no stories remaining then a bonus is paid.
+    //if there are no stories remaining then a project completion bonus is paid.
     if (project.stories.length == 0) {
-      bonus = Math.ceil(project.lead.points * game.PointPrice / 2);
+      bonus = Math.ceil(project.lead.points * project.lead.pointPrice / 2);
       message2 += ` plus 💲${bonus} for completing '${project.lead.summary} ${project.lead.logo}'!`;
+      for(const s in project.stories){
+        delete game.Stories[s];
+      }
+      delete game.Projects[projectId];
       incrementXP(10);
     }
   }
@@ -1420,7 +1487,7 @@ function getName() {
   return randomItem(names);
 }
 
-let projectPart0 = ['project', 'operation', 'system', 'the','strategem'];
+let projectPart0 = ['project', 'operation', 'system', 'the','strategem'];//,'account','group'];
 let projectPart1 = ['robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry'];
 let projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi'];
 
@@ -1436,11 +1503,11 @@ function getLogo() {
   return randomItem(logos);
 }
 // todo: alphabetic ordering
-let taskParts = ['validation','logical','virtual','structural','micro','hyper','accessible','indirect','pointer','truth','business','customer','person','manipulation','pure','seamless','crypto','interactive','SEO','custom','web','auto','digital','cyber','secure','3D','enterprise','pro','developer','augmented','robo','productivity','neural','positronic','computery','deep','immutable','functional','lock-free','meta','native','non-virtual','opinionated','recursive','p2p','yet another','distributed','reticulated','hierarchical','obfuscated','weaponised','graphical','cloud-based','ethical','point-free','chat','social','mobile'];
+let taskParts = ['validation','logical','virtual','structural','micro','hyper','accessible','indirect','pointer','truth','business','customer','person','manipulation','pure','seamless','crypto','interactive','SEO','custom','web','auto','digital','cyber','secure','3D','enterprise','pro','developer','augmented','robo','productivity','neural','positronic','computery','deep','immutable','functional','lock-free','meta','native','non-virtual','opinionated','recursive','p2p','yet another','distributed','reticulated','hierarchical','obfuscated','weaponised','graphical','cloud-based','ethical','point-free','chat','social','mobile','embedded','critical','organic','user-generated','self-service','nano','pico','femto','keyword','A/B','optimal','high-res','retina','vector','raster','semantic','structural','self-closing','reverse','responsive','progressive','hybrid','pseudo','shadow','no-sql','big-data','uptime','offline','satellite','nuclear','hydrogen','batch','bulk','excessive'];
 
 // todo: alphabetic ordering
 // note: should be singular.
-let taskParts2 = ['logic','algo','mesh','structure','form','service','container','data','DB','UX','UI','layer','component','system','diagram','app','client','server','host','class','object','function','job','part','platform','framework','foundation','emailer','pager','plugin','addin','2.0','automation','cybernetics','drone','graphic','artwork','architecture','collector','list','heuristic','solver','network','net','9000','2001','multiplexor','switch','hub','paradigm','catalog','registry','RIA','SPA','IP','JSON','XML','CSV','Yaml','Macro','analytics','cluster','node','graph','avatar','reticulator','spline','hierarchy','thread','logging','engine','blockchain','map-reduce','content','exploit','hack','style','customization','RAM','DRM','GPGPU','wiki'];
+let taskParts2 = ['logic','algo','mesh','structure','form','service','container','data','DB','UX','UI','layer','component','system','diagram','app','client','server','host','class','object','function','job','part','platform','framework','foundation','emailer','pager','plugin','addin','2.0','automation','cybernetics','drone','graphic','artwork','architecture','collector','list','heuristic','solver','network','net','9000','2001','multiplexor','switch','hub','paradigm','catalog','registry','RIA','SPA','IP','JSON','XML','CSV','Yaml','Macro','analytics','cluster','node','graph','avatar','reticulator','spline','hierarchy','thread','logging','engine','blockchain','map-reduce','content','exploit','hack','style','customization','RAM','DRM','GPGPU','wiki','devops','devoops','cta','funnel','theory','pixels','persona','parser','combinator','property','fields','attribute','column','sheet','datamodel','controller','sdk','DOM','RDBMS','vpn','vm','firewall','proxy','cache','laser','reactor','core','accelerator'];
 
 function getTask() {
   return randomItem(taskParts) + ' ' + randomItem(taskParts2);
@@ -1484,6 +1551,13 @@ function LevelUp() {
 
 //TODO: add this to game class
 function incrementXP(amount: number) {
+
+  if (game.Money < 0){
+    //You owe money? Then you don't get to grow your XP.
+    // instead, you grow your debt! Mwuahahahaha.
+    incrementMoney(amount * -2);
+    return;
+  }
   game.XP += amount;
 
   if (game.XP >= game.LevelUpXP) {
@@ -1513,6 +1587,7 @@ function incrementMoney(amount: number) {
 }
 
 function visitStore() {
+  DeSelectDoerAndReceiver();
   //change title to 'DevStore'
   $('h1')[0].innerText = "DevStore";
   drawStore();
@@ -1539,6 +1614,7 @@ function drawStore() {
 }
 
 function leaveStore() {
+  DeSelectDoerAndReceiver();
   $id('store').classList.add('hidden');
   $id('office').classList.remove('hidden');
   //change title back to 'DevShop'

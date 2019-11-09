@@ -245,12 +245,12 @@ th {
 
 #message {
   position:absolute;
-  bottom:5px;
+  bottom:2ch;
   border:1px solid #CCC;
   left: 50%;
   transform:translateX(-50%);
   background-color:#FFC;
-  padding:5px;
+	padding:1ch;
   box-shadow:2px 2px #CCC;
   font-size:10pt;
 }
@@ -349,11 +349,15 @@ th {
   #message {
     font-size:8pt;
   }
+	#buttons { font-size:0;}
   .button,.story {
-    max-width:60px;
-    min-width:60px;
+    max-width:50px;
+    min-width:50px;
     font-size:8pt;
   }
+	.button {
+	  margin:2px;
+	}
   .story-detail {
     font-size:6pt;
   }
@@ -371,11 +375,13 @@ th {
 
 <div class='button' id='start' onclick='go();'>🌟 start</div>
 <div id='office' style='clear:left'>
+<div id='buttons'>
   <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
   <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");'>💻 hire dev (💲300)</div>
   <div id='gettest' class='button getPerson hidden tester' onclick='getNewPerson("test");'>🔬 hire tester (💲300)</div>
   <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");'>🗣 hire BA (💲300)</div>
   <div class='button visitStore hidden' onclick='visitStore();'>🏪 visit store</div>
+</div>
   <table id='kanbanboard'>
   <thead>
   <tr>
