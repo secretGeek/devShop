@@ -26,12 +26,11 @@ Play it online here:
 
 Repeat this until you have enough money to buy a dev or a tester or a ba. 
 
-Not yet implemented:
+Features include:
 
 - upskilling people 📕 📗
 - training people to increase their efficiency
 - giving them 'automated' skills so they can sometimes grab cards for themselves.
-- achievements and goals
 - having animated people instead of simple boxes
 - ☕ coffee and donuts 🍩
 - 🐶 dogs and cats 😸
