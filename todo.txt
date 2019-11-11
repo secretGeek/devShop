@@ -126,9 +126,20 @@ A few ideas
 
 # DONE
 
-
-
+[x] ability to see skill level
+[x] dog/cat never seem to return!
+[x] there is a 0% chance of finding it (spec bug)
+[x] starting price of tester and dev should be 200 not 300
+[x] add "piece of toast 🍞 $10"
+[x] BA retained message after stopping rework on a specbug
+[x] ensure Dog and cat are for "any" not just "ba" or "dev"
+[x] every time you buy something it triples in price. Better idea! Not triple, but high price.
+[x] store... put ICON before name
+[x] Add  statue 🗽
+[x] Add   statue2 🗿
+[x]  mechanical keyboard should be an early level item -- level up anyone
 [x] When a .button is clicked at top, deselect doer or receiver and possible 
+[x] mech keyboard should be added
 [x] Price of staff should double each time. At least. If not 5x. Or 3x 
 
 Memory management:

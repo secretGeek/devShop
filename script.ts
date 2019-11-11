@@ -1,26 +1,26 @@
-// there is a 0% chance of finding it (spec bug)
-// starting price of tester and dev should be 200 not 300
+// [ ] Words wrap in store
+// [ ] Icons and help icon are not vertically centered in store (other content is?)
 // button hover should be light blue
 // do we have an id issue when selecting storeitem's in store versus inbox? clash of id's?
 // ensure chance of CREATING a bug or spec bug is lower for rework
 // drawMessage "You gave Alan a developer upgrade" 
 // drawMessagw "Founder is enjoying that donut"
 // ensure level of skills is visible
-// store... put ICON before name
+//
 //StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
 //      calls them {original name} 1 and {original name} 2
 // level of observation training should be shown....
-//Add  statue 🗽
-//Add   statue2 🗿
+//
+//
 // defer: stats button lower right 📈 : each person's skills and description. point per minute described for every minute of the game (excluded minutes with 0 points)
-// mechanical keyboard should be an early level item -- dev level up
-// mech keyboard should be added
+//
+//
 // test-management suite -- test level up
 // powerful IDE -- dev level up
 // spreadsheet skills -- be a better BA
 // email etiquette course -- be a better BA
 
-//every time you buy something it triples in price. Better idea!
+// 
 
 // when you buy a self-starter card (or any card) that should not be enough to kick off the self-starting behaviour. (or should it!?)
 // [x] icon to indicate has seat after seat upgrade: should show up on the person
@@ -73,6 +73,7 @@ enum ItemCode {
   donut,
   pizza,
   banana,
+  toast,
   keyboard,
   x_bafortest,//TODO: defer cross skilling items
   x_bafordev,//TODO: defer cross skilling items
@@ -117,7 +118,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
         {id:107,name:'Upskill BA: Powerful communication book series', price:70, icon:"📕", skillneeded:"ba", busy:false, code:ItemCode.upskillBA, activeDuration:0, description:'Improves your Business Analysis Skills, for faster better work!', enabled:false},
         {id:110,name:'Self-Starter', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do.', enabled:false},
 
-        {id:120,name:'Office Cat', price:5000, icon:"🐱", skillneeded:"dev", busy:false, code:ItemCode.cat, activeDuration:100, description:'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled:false},
+        {id:120,name:'Office Cat', price:5000, icon:"🐱", skillneeded:"any", busy:false, code:ItemCode.cat, activeDuration:200, description:'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled:false},
         {id:130,name:'Observation Training', price:200, icon:"🕵️‍♀️", skillneeded:"any", busy:false, code:ItemCode.observe, activeDuration:0, description:'When a person finishes a card, train them to look for another card. If trained multiple times, they will look for multiple cards.', enabled:false},
         
        ],
@@ -128,11 +129,12 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l7":
        [
-        {id:160,name:'Office Dog', price:6000, icon:"🐶", skillneeded:"test", busy:false, code:ItemCode.dog, activeDuration:100, description:'Bring joy and efficiency to the workplace. Care for a dog and double your speed', enabled:false},
+        {id:160,name:'Office Dog', price:6000, icon:"🐶", skillneeded:"any", busy:false, code:ItemCode.dog, activeDuration:200, description:'Bring joy and efficiency to the workplace. Care for a dog and double your speed', enabled:false},
  
        ],
        "l8":
        [
+        {id:170,name:'Piece of Toast', price:10, icon:"🍞", skillneeded:"any", busy:false, code:ItemCode.toast, activeDuration:15, description: 'It\'s a piece of toast. How much could it be?', enabled:false},
 
        ],
        "l9":
@@ -266,7 +268,7 @@ class Game {
     this.Items = {};
     this.SelectedDoer = null;
     this.SelectedReceiver = null;
-    this.DefaultSelfStartDelay = testMode? 100 : 5000; //5 second pause between polling the board.
+    this.DefaultSelfStartDelay = testMode? 100 : 3000; //3 second pause between polling the board.
   }
   Money: number;
   HighestMoney: number;
@@ -411,7 +413,7 @@ function drawButtons():void {
   
 }
 
-function drawMoney(money: string | number):void {
+function drawMoney(money: number):void {
   let s = document.getElementById('money');
   if (money < 0) {
     s.classList.add("negative");
@@ -478,9 +480,9 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean):
   }
 }
 
-function drawStories(stories: {}):void {
+function drawStories(stories: {[id: string] : Story}):void {
   for(const key in stories) {
-    drawStory(key, stories, false);
+    drawStory(key, stories, stories[key].rework);
   }
 }
 
@@ -535,11 +537,11 @@ function getSkillsDiv(skills: {[id:string]: SkillDetail}):string {
   for (let[key, value] of Object.entries(skills)) {
     let s1 = "";
     switch(key) {
-      case "dev": s1 = `<span class='skill dev dev-${value.level}' title='developer'>💻</span>`;
+      case "dev": s1 = `<span class='skill dev dev-${value.level}' data-level='${value.level}' title='developer'>💻</span>`;
         break;
-      case "test": s1= `<span class='skill test test-${value.level}' title='tester'>🔬</span>`;
+      case "test": s1= `<span class='skill test test-${value.level}' data-level='${value.level}' title='tester'>🔬</span>`;
         break;
-      case "ba": s1 = `<span class='skill ba ba-${value.level}' title='business analyst'>🗣</span>`;
+      case "ba": s1 = `<span class='skill ba ba-${value.level}' data-level='${value.level}' title='business analyst'>🗣</span>`;
         break;
     }
 
@@ -548,7 +550,7 @@ function getSkillsDiv(skills: {[id:string]: SkillDetail}):string {
   return "<div class='skills'>" + result + "</div>";
 }
 
-function drawPeople(people: {}):void {
+function drawPeople(people: { [id: string] : Person; }):void {
   for(const key in people) {
      drawPerson(key, people);
   }
@@ -878,16 +880,23 @@ function applyItem(person:Person, item:StoreItem) {
     case ItemCode.dog:
     case ItemCode.cat:
       //dog and cat make you busy....
+      if (item.code == ItemCode.cat) item.icon = randomItem(catIcons);
+      if (item.code == ItemCode.dog) item.icon = randomItem(dogIcons);
+
       person.busy = true;
       person.summary = `Tending to the ${item.name}` ;
       drawMessage(`${person.name} ${person.icon} has the ${item.icon} ${item.name}`);
-      setTimeout(function() { usingFinishedBusyPhase(person, item);}, item.activeDuration*100);
-      // length of time cat/dog spends with someone doubles each time they visit. (Controversial?)
-      item.activeDuration *= 2;
+      setTimeout(function() { usingFinishedBusyPhase(person, item);}, item.activeDuration*50);
+      setTimeout(function() { usingFinished(person, item);}, item.activeDuration*500);
+      
+      // length of time cat/dog spends with someone increase each time they visit. (Controversial?)
+      item.activeDuration *= 1.4;
       person.has['i'+item.id] = item;
       break;
     case ItemCode.banana:
+    case ItemCode.toast:
     case ItemCode.coffee:
+    case ItemCode.coffeemachine:
     case ItemCode.cupcake:
     case ItemCode.donut:
     case ItemCode.pizza:
@@ -920,8 +929,10 @@ function personFree(person:Person) {
     // show this many eyes, that count down each time they check the board...
     person.summary = "👁".repeat(person.selfStartNow);
     drawPerson('p' + person.id, game.People);
-    log(`Will check board in ${person.selfStartDelay}`);
-    setTimeout(function() { selfStart(person);}, person.selfStartDelay);
+    let delay = person.selfStartDelay;
+    if (personHas(person, ItemCode.dog)) delay = delay / 2;
+    log(`Will check board in ${delay}`);
+    setTimeout(function() { selfStart(person);}, delay);
   }
 }
 
@@ -967,8 +978,10 @@ function selfStart(person:Person){
     if (person.selfStartNow > 0) {
       // show this many eyes, that count down each time they check the board...
       person.summary = "👁".repeat(person.selfStartNow);
+      let delay = person.selfStartDelay;
+      if (personHas(person, ItemCode.dog)) delay = delay/2;
       log(`Will check board in ${person.selfStartDelay}`);
-      setTimeout(function() { selfStart(person);}, person.selfStartDelay);
+      setTimeout(function() { selfStart(person);}, delay);
     } else {
       person.summary = "💤";
     }
@@ -983,7 +996,7 @@ function usingFinished(person:Person, item:StoreItem) {
   delete person.has['i'+item.id];
   //jalert(person.has);
   
-  // the office cat and the office dog return to the in-tray when you are sick of them.
+  // the office cat and the office dog return to the in-tray when you are finished with them.
   switch(item.code){
     case ItemCode.dog:
     case ItemCode.cat:
@@ -1020,7 +1033,7 @@ function doIt(doId: string, receiverId: string) {
   person.summary = getSummary(story);
   drawMessage(person.name + " is " + person.summary);
   drawPerson(doId, game.People);
-  drawStory(receiverId, game.Stories, story.customerFoundBug);
+  drawStory(receiverId, game.Stories, story.rework);
   let duration = getDuration(person, story);
   
   log("Duration: of " + story.summary + " " + story.skillneeded + ": " + Math.floor(duration));
@@ -1083,7 +1096,7 @@ function getDuration(person:Person, story:Story):number {
   
   if (personHas(person, ItemCode.dog)) {
     // A person in possession of a dog works twice as fast. No-one understands why.
-    log("Faster work when you have that 🐶!")
+    log("Faster work when you have that 🐶, " + person.name + "!")
     duration = duration / 2;
   }
 
@@ -1192,6 +1205,11 @@ function doneBa(storyId: string) {
     log("Fixed the bug (or spec bug)");
     removeStory(storyId); //remove the story from the Inbox...
     drawStory(storyId, game.Stories, true); //top of the backlog... race it through
+
+    person.busy = false;
+    person.summary = "💤";
+    drawPerson('p' + person.id, game.People);
+  
     return;
   }
 
@@ -1212,7 +1230,7 @@ function doneBa(storyId: string) {
   }
 }
 
-function determineIfHasSkillBug(person: Person, story: Story, skill:string):boolean { 
+function determineIfAddingSkillBug(person: Person, story: Story, skill:string):boolean { 
   
   let skillPointBugLikelihood = 100.0 * getBuginess(person, skill);
   if (story.rework) {
@@ -1259,18 +1277,18 @@ function ElaborateProject(story: Story, person: Person): Story[] {
   remainingPointsToAllocate -= numCards;
 
   //randomly allocate remaining points to card.
-  while(remainingPointsToAllocate > 0) {
+  while (remainingPointsToAllocate > 0) {
     let card = randomItem(newCards); //draw a card from the deck
     card.points += 1;
     remainingPointsToAllocate--;
   }
 
-  for(let cardId of game.Projects['r' + story.id].stories) {
+  for (let cardId of game.Projects['r' + story.id].stories) {
     let hasSpecBug = false;
     //jalert(cardId);
     let card = game.Stories[cardId];
-    //chance of adding a bug relates to effectiveness of ba, and size of story.
-    if (determineIfHasSkillBug(person, card, "ba")) {
+    //chance of adding a bug relates to effectiveness of ba, and size of story. (and whether or not they have... a cat)
+    if (determineIfAddingSkillBug(person, card, "ba")) {
       hasSpecBug = true;
       log("Spec bug 💥 added to '" + card.summary + "'");
     }
@@ -1289,11 +1307,8 @@ function doneDev(storyId: string) {
   
   // no spec bugs can be found until level 3.
   if (game.Level > 2 && story.hasSpecBug) {
-
     let percentChanceOfFindingSpecBug:number = 100.0 * canFindBug(person, "dev");
-
     log("Story " + story.summary + " has a spec bug 💥, there is a " + Math.floor(percentChanceOfFindingSpecBug) + "% chance of the developer finding it.");
-
     let foundSpecBug = (Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug);
     if (foundSpecBug) {
     
@@ -1324,7 +1339,8 @@ function doneDev0(storyId: string) {
   let story = game.Stories[storyId];
   let person = game.People[story.person];
   
-  if (determineIfHasSkillBug(person, story, "dev")) {
+  //chance of adding a bug relates to effectiveness of ba, and size of story. (and whether or not they have... a cat)
+  if (determineIfAddingSkillBug(person, story, "dev")) {
     story.hasBug = true;
     // Note the bug may or may not be found later. If tester doesn't find it, the customer *will* find it.
     log(`A bug 🐛 was added to ${story.summary}`);
@@ -1335,7 +1351,7 @@ function doneDev0(storyId: string) {
   story.person = null;
   story.icon = null;
   log("Story: " + story.summary + " is ready for testing.");
-  drawStory(storyId, game.Stories, false);
+  drawStory(storyId, game.Stories, story.rework);
   person.busy = false;
   person.summary = "💤";
   drawPerson('p' + person.id, game.People);
@@ -1354,7 +1370,7 @@ function doneTest(storyId: string) {
   //no bugs can be found until level 2.
   if (game.Level > 1 && story.hasBug) {
     let percentChanceOfFindingBug:number  = 100.0 * canFindBug(person, "test");
-    log("Story: " + story.summary + " has a bug, there is a " + Math.floor(percentChanceOfFindingBug) + "% chance of finding it while testing.");
+    log("Story " + story.summary + " has a bug, there is a " + Math.floor(percentChanceOfFindingBug) + "% chance of finding it while testing.");
     let foundBug = (Math.floor(Math.random() * 100) < percentChanceOfFindingBug);
     if (foundBug) {
       drawMessage(tester.name + " found a bug 🐛 in story '" + story.summary + "'");
@@ -1371,10 +1387,9 @@ function doneTest(storyId: string) {
 
   // no spec bugs can be found until level 3.
   if (game.Level > 2 && story.hasSpecBug) {
-    
-    let chanceOfFindingSpecBug = 100.0 * canFindBug(tester, "test");
-    log("Story: " + story.summary + " has a spec bug 💥, there is a " + Math.floor(chanceOfFindingSpecBug) + "% chance of finding it while testing.");
-    let foundSpecBug = (Math.floor(Math.random() * 100) < chanceOfFindingSpecBug);
+    let percentChanceOfFindingSpecBug:number = 100.0 * canFindBug(tester, "test");
+    log("Story: " + story.summary + " has a spec bug 💥, there is a " + Math.floor(percentChanceOfFindingSpecBug) + "% chance of finding it while testing.");
+    let foundSpecBug = (Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug);
     if (foundSpecBug) {
       drawMessage(tester.name + " found a spec bug 💥 in story '" + story.summary + "'");
       story.person = null;
@@ -1392,7 +1407,8 @@ function doneTest(storyId: string) {
   log("Story: " + story.summary + " passed testing. Done!");
   story.skillneeded = "done";
   story.icon = "✔";
-  drawStory(storyId, game.Stories, false);
+  drawStory(storyId, game.Stories, story.rework);
+  //the 'done' card dissappears after a while.
   setTimeout(function() { bankStory(storyId);}, avgDuration*5);
 }
 
@@ -1402,9 +1418,9 @@ function canFindBug(person:Person, skill:string){
   // at level 1 -- efficiency is 0.3
   // at level 10 -- efficiency is 0.99
   let efficiency = getEfficiency(person, skill);
-  
+  // that's good enough, we'll just use the efficiency directly.
   log('Efficiency of ' + person.name + ' at ' + skill + ' is ' + efficiency);
-  let chanceOfFindingBug = getEfficiency(person, skill);
+  let chanceOfFindingBug = efficiency;
   return chanceOfFindingBug;
 }
 
@@ -1533,7 +1549,9 @@ function getName() {
   return randomItem(names);
 }
 
-let projectPart0 = ['project', 'operation', 'system', 'the','strategem'];//,'account','group'];
+let catIcons = ['🐈', '😸','😼','😽','😾','😿','🙀','🐱‍👤','🐱‍💻','🐱‍🐉','🐱‍👓','🐱‍🚀','🐱‍🏍','😹','😻'];
+let dogIcons = ['🐕','🐶','🐩'];
+let projectPart0 = ['project', 'operation', 'system', 'the','strategy','industrial','project'];//,'account','group'];
 let projectPart1 = ['robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry'];
 let projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi'];
 
@@ -1549,7 +1567,7 @@ function getLogo() {
   return randomItem(logos);
 }
 // todo: alphabetic ordering
-let taskParts = ['validation','logical','virtual','structural','micro','hyper','accessible','indirect','pointer','truth','business','customer','person','manipulation','pure','seamless','crypto','interactive','SEO','custom','web','auto','digital','cyber','secure','3D','enterprise','pro','developer','augmented','robo','productivity','neural','positronic','computery','deep','immutable','functional','lock-free','meta','native','non-virtual','opinionated','recursive','p2p','yet another','distributed','reticulated','hierarchical','obfuscated','weaponised','graphical','cloud-based','ethical','point-free','chat','social','mobile','embedded','critical','organic','user-generated','self-service','nano','pico','femto','keyword','A/B','optimal','high-res','retina','vector','raster','semantic','structural','self-closing','reverse','responsive','progressive','hybrid','pseudo','shadow','no-sql','big-data','uptime','offline','satellite','nuclear','hydrogen','batch','bulk','excessive'];
+let taskParts = ['validation','logical','virtual','structural','micro','hyper','accessible','indirect','pointer','truth','business','customer','person','manipulation','pure','seamless','crypto','interactive','SEO','custom','web','auto','digital','cyber','secure','3D','enterprise','pro','developer','augmented','robo','productivity','neural','positronic','computery','deep','immutable','functional','lock-free','meta','native','non-virtual','opinionated','recursive','p2p','yet another','distributed','reticulated','hierarchical','obfuscated','weaponised','graphical','cloud-based','ethical','point-free','chat','social','mobile','embedded','critical','organic','user-generated','self-service','nano','pico','femto','keyword','A/B','optimal','high-res','retina','vector','raster','semantic','structural','self-closing','reverse','responsive','progressive','hybrid','pseudo','shadow','no-sql','big-data','uptime','offline','satellite','nuclear','hydrogen','batch','bulk','excessive','third-normal','logarithmic','linguistic'];
 
 // todo: alphabetic ordering
 // note: should be singular.
@@ -1663,7 +1681,7 @@ function drawStore() {
   //for(const item of game.StoreItems){
   for (let key of Object.keys(game.StoreItems)) {
     let item = game.StoreItems[key];
-    let shtml = `<div class='storeItem-catalog ${item.enabled? 'item-enabled' : 'item-disabled'}'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div><span class='storeIcon'>${item.icon}</span> ${item.name} <span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
+    let shtml = `<div class='storeItem-catalog ${item.enabled? 'item-enabled' : 'item-disabled'}'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div><span class='storeIcon'>${item.icon}</span> <span class='item-name'>${item.name}</span><span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
     console.log("item html", shtml);
     let newItem = htmlToElement(shtml);
     itemList.appendChild(newItem);

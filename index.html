@@ -10,13 +10,37 @@
 <title>DevShop</title>
 </head>
 <style>
-.item-enabled {
- xbackground-color:green;
+.skill {
+  max-width:20px;
+  display:inline-block;
+  max-height:20px;
+  position:relative;
+  whitespace:nowrap;
+  padding:0 !important;
+  position:relative;
 }
+.skill:after {
+  content: attr(data-level);
+  font-size:10px;
+  position:relative;
+  top:-9px;
+  right:4px;
+  background-color:white;
+  border-radius:50%;
+  width:11px;
+  height:11px;
+  display:inline-block;
+  margin-right:-11px;
+}
+
+.item-enabled {
+ /* enabled item in store */
+}
+
 .item-disabled {
-xbackground-color:#CCC;
 opacity:0.4;
 }
+
 body {
   font-family: 'lucida console', monospace;
   max-width:calc(100% - 2ch);
@@ -81,8 +105,7 @@ h1,th {
 
 .hint {
   box-shadow:2px 2px 0 #CCC, 1px 1px 2px cyan inset;
-	background-color:#D0F0FF;
-	
+  background-color:#D0F0FF;
 }
 
 .story {
@@ -171,6 +194,11 @@ th {
   width:calc(100vw - 4ch);
   display:block;
   float:none;
+  clear:both;
+}
+.item-name {
+  display:inline-block;
+  whitespace:pre-wrap;
 }
 
 .storeItem-catalog .button {
@@ -184,6 +212,7 @@ th {
 .storeitem-icon {
   font-size:1.6em;
   padding:2px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 .busy {
@@ -239,7 +268,9 @@ th {
 
 .logo, .avatar, .avatar2, .secrets {
   font-family: arial;
-  font-size:14pt;
+  font-size:12pt;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
 }
 .secrets {
   background-color:#AAA;
@@ -264,7 +295,7 @@ th {
   left: 50%;
   transform:translateX(-50%);
   background-color:#FFC;
-	padding:1ch;
+  padding:1ch;
   box-shadow:2px 2px #CCC;
   font-size:10pt;
 }
@@ -316,6 +347,7 @@ th {
 }
 .storeIcon {
   font-size:3em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 #store, #office {
@@ -363,15 +395,15 @@ th {
   #message {
     font-size:8pt;
   }
-	#buttons { font-size:0;}
+  #buttons { font-size:0;}
   .button,.story {
     max-width:50px;
     min-width:50px;
     font-size:8pt;
   }
-	.button {
-	  margin:2px;
-	}
+  .button {
+    margin:2px;
+  }
   .story-detail {
     font-size:6pt;
   }
