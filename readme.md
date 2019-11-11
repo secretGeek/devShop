@@ -51,6 +51,6 @@ Some keystrokes....
 
 ## Contributions
 
-Pull requests welcome!
+Pull requests not actually welcome at this moment. I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that. 
 
 The code is in typescript now.
