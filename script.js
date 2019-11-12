@@ -1,7 +1,14 @@
-// [ ] tending to cat/dog takes too long as you progress.
-// [ ] level of observation training should be shown....
-// [ ] level of self-starter behaviour should be shown...
-// [ ] keyboard icon not rendered correctly when added to person 'has' -- add .icon class
+//Definitely
+// [x] tending to cat/dog takes too long as you progress.
+// [x] keyboard icon not rendered correctly when added to person 'has' -- add .icon class
+// [x] level of observation training should be shown....
+// [x] level of self-starter behaviour should be shown...
+// [ ] Self-starter -- should be infinite but with a big delay. Delay is smaller at higher levels.
+// [ ] chain observations onto each self start 
+// [ ] are observations now chained with self-start? seems too extreme.
+// [ ] 🐛when in the store: only store messages should be shown
+// [ ] indicate # items in a column if more than a minimum
+// [no] Add icons to columns to make required skill clearer (tried it, couldn't make it work neatly on small mobile screens)
 // [ ] Add to store: 
 //  - headphones 🎧 
 //  - Desk plant 🌳
@@ -12,25 +19,11 @@
 //  - cookie 🍪
 // [ ] Personal robot 🤖: 10000+ -- same as infinite self starter  - literally adds infinity symbol to self-starter icon?
 // [ ] for dev/ba/test: If level > 9 -- use infinity symbol not a number
-// [ ] Dark mode
-// [ ] Words wrap in store
-// [ ] Icons and help icon are not vertically centered in store (other content is?)
-// drawMessage "You gave Alan a developer upgrade" 
-// drawMessagw "Founder is enjoying that donut"
-// [ ] keybinding -- letters to people
-// [ ] StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
-//      calls them {original name} A and {original name} B.
-//      can only be given to a person once. (How to do selection/highlighting?)
-// [ ] show (but disabled) buy dev / buy tester button when first starting
+// [ ] 🐛Words wrap in store
+// [ ] 🐛Icons and help icon are not vertically centered in store (other content is?)
 // [ ] more technical names for tasks
-// [ ] Show count of stories at foot of column if > some small number like 5
-// ? limited number of slots for people. cannot hire more than level number... until 
-// ? dual-skill cannot be better than "4/5" at either skill
-// defer: how to show attributes/stats sheet of a person? (see stats button)
-// finesse:
-// - buy dev button is visible but disabled is < (cost of dev)
-// - if no activity detected for long time... show tip
-// - non-prop font for level etc.
+// [ ] show (but disabled) buy dev / buy tester button when first starting
+// [ ] keybinding -- letters to people
 var testMode = false; //true;
 var storeFeatureFlag = true; //testMode;
 var debugOutput = (testMode || getParameterByName('debug') == "true");
@@ -170,6 +163,7 @@ var Game = /** @class */ (function () {
         this.SelectedDoer = null;
         this.SelectedReceiver = null;
         this.DefaultSelfStartDelay = testMode ? 100 : 3000; //3 second pause between polling the board.
+        this.AnimalTendingDelay = 2600;
     }
     return Game;
 }());
@@ -211,7 +205,7 @@ function drawButtons() {
         var _b = _a[_i], key = _b[0], value = _b[1];
         var d = $id("get" + value.skill);
         if (d != undefined) {
-            d.innerHTML = value.icon + " hire " + value.title + " (\uD83D\uDCB2" + value.price + ")";
+            d.innerHTML = "<span class='icon'>" + value.icon + "</span> hire " + value.title + " (\uD83D\uDCB2" + value.price + ")";
             d.setAttribute('onclick', "getNewPerson(\"" + value.skill + "\");");
         }
     }
@@ -309,10 +303,9 @@ function drawPerson(key, people) {
     if (person.busy) {
         busy = " busy";
     }
-    var skills = getSkillsDiv(person.skills);
-    //let items = person.has.map(k => person.has[k.id].icon )
-    var items = Object.keys(person.has).map(function (k) { return person.has[k].icon; }).join(" ");
-    var phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skills + " " + items + "<div class='summary'>" + person.summary + "</div></span>";
+    var skillsDiv = getSkillsDiv(person.skills);
+    var itemsHtml = getItemsHtml(person);
+    var phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
     var newPersonElement = htmlToElement(phtml);
     for (var _i = 0, _a = Object.keys(person.skills); _i < _a.length; _i++) {
         var key_1 = _a[_i];
@@ -324,6 +317,27 @@ function drawPerson(key, people) {
     else {
         p.outerHTML = newPersonElement.outerHTML;
     }
+}
+function getItemsHtml(person) {
+    //was: return = Object.keys(items).map(k => items[k].icon).join(" ");
+    var result = '';
+    for (var _i = 0, _a = Object.keys(person.has); _i < _a.length; _i++) {
+        var itemKey = _a[_i];
+        var item = person.has[itemKey];
+        var levelAttribute = '';
+        if (item.code == ItemCode.seat)
+            levelAttribute = " data-level='" + person.seatLevel + "'";
+        if (item.code == ItemCode.observe)
+            levelAttribute = " data-level='" + person.observantLevel + "'";
+        if (item.code == ItemCode.selfstart)
+            levelAttribute = " data-level='" + person.selfStarterLevel + "'";
+        if (item.code == ItemCode.keyboard)
+            levelAttribute = " data-level='" + person.keyboardLevel + "'";
+        result += "<span class='icon'" + levelAttribute + ">" + item.icon + "</span>";
+    }
+    if (result === '')
+        return result;
+    return "<div class='itemList'>" + result + "</div>";
 }
 function getSkillsDiv(skills) {
     var result = "";
@@ -583,6 +597,7 @@ function applyItem(person, item) {
         case ItemCode.selfstart:
             person.selfStarterLevel++;
             if (person.selfStarterLevel == 1) {
+                person.has['i' + item.id] = item;
                 drawMessage(person.name + " " + person.icon + " is now a self-starter.");
             }
             else {
@@ -639,10 +654,10 @@ function applyItem(person, item) {
             person.busy = true;
             person.summary = "Tending to the " + item.name;
             drawMessage(person.name + " " + person.icon + " has the " + item.icon + " " + item.name);
-            setTimeout(function () { usingFinishedBusyPhase(person, item); }, item.activeDuration * 50);
+            setTimeout(function () { usingFinishedBusyPhase(person, item); }, game.AnimalTendingDelay);
             setTimeout(function () { usingFinished(person, item); }, item.activeDuration * 500);
             // length of time cat/dog spends with someone increase each time they visit. (Controversial?)
-            item.activeDuration *= 1.4;
+            item.activeDuration *= 1.25;
             person.has['i' + item.id] = item;
             break;
         case ItemCode.banana:

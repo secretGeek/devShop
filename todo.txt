@@ -1,8 +1,6 @@
 # TODO
 
 [ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
-[ ] A worker sometimes gets distracted. (Often). 
-		-- the dog/cat might decrease that.
 
 //TODO: Some items can only be purchased if you have the necessary target.
   // e.g. advanced developer training requires a dedicated developer (not just the founder)
@@ -129,6 +127,40 @@ show scores and levels in hexadecimal????
 [ ] achievement when a thing is done for the first time?
 
 
+store game state in local storage
+
+
+## Defer/Maybe
+
+[ ] ability to re-arrange workers
+[ ] How to do determine if a job has become too stale? has taken too long to complete? and if determind, how to show it visually?
+[ ] Self-start... also randomly fire if unallocated for too long.
+[ ] Dark mode
+[ ] drawMessage "You gave Alan a developer upgrade" 
+[ ] drawMessage "Founder is enjoying that donut"
+[ ] StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
+     calls them {original name} A and {original name} B.
+     can only be given to a person once. (How to do selection/highlighting?)
+[ ] Hire a scrum master... once you hire them -- they take over for you, basically... and you can then open a second DevShop...
+[ ] how to show attributes/stats sheet of a person? (see stats button)
+? limited number of slots for people. cannot hire more than level number... until 
+? dual-skill cannot be better than "4/5" at either skill
+finesse:
+- buy dev button is visible but disabled is < (cost of dev)
+- if no activity detected for long time... show tip
+- non-prop font for level etc.
+
+
+
+## Won't do
+
+[ ] add a random timer of sick/vacation unavailability for each resource - resources gain experience/competence with each task they finish
+[ ] A worker sometimes gets distracted. (Often). 
+		-- the dog/cat might decrease that.
+[no] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
+
+
+
 # DONE
 
 
@@ -252,7 +284,3 @@ Answered/resolved (in a different topic)
 //    whenever levelling up... whenever a story is finished? whenever an action occurs
 
 
-Unlikely:
-
-[no] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
- ? Dark mode

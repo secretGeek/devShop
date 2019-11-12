@@ -10,7 +10,7 @@
 <title>DevShop</title>
 </head>
 <style>
-.skill {
+.skill,.icon {
   max-width:20px;
   display:inline-block;
   max-height:20px;
@@ -19,7 +19,7 @@
   padding:0 !important;
   position:relative;
 }
-.skill:after {
+.skill[data-level]:after,.icon[data-level]:after {
   content: attr(data-level);
   font-size:10px;
   position:relative;
@@ -249,24 +249,25 @@ th {
   margin-top:5px;
 }
 
-.person .skills {
+.person .skills, .person .itemList {
   display:block;
 }
-
-.skills {
+.skills,.itemList {
   margin-bottom:3px;
 }
 
-.skills .skill{
-  font-family:arial;
+.skills .skill, .itemList .icon{
   font-size:10pt;
   margin:3px;
   padding:3px;
-  border-radius:4px;
+}
+.skills .skill {
   border:1px solid #CCC;
+  border-radius:4px;
 }
 
-.logo, .avatar, .avatar2, .secrets {
+
+.logo, .avatar, .avatar2, .secrets, .icon, .skill {
   font-family: arial;
   font-size:12pt;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
