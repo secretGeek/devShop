@@ -696,6 +696,7 @@ function personFree(person) {
         log("Will check board in " + delay);
         setTimeout(function () { selfStart(person); }, delay);
     }
+    updatePossible();
 }
 function selfStart(person) {
     //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
