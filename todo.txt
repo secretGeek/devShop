@@ -112,19 +112,48 @@ A few ideas
 
 - Traits for employees, so when choosing employees to hire you have to balance their salary, traits and current level. For example devs can have a Cowboy trait that increases dev speed but also bug chance. No stats like Game Dev Story, an employee just has a level and their traits.
 
+NO: only one dog in the office.
+No: only one cat in the office.
+
+No: cat poops
+No: dog poops
+No: rename to 'tinykanban'
+
+
 
 # DEFER
-// show scores and levels in hexadecimal????
+stats button lower right 📈 : each person's skills and description. point per minute described for every minute of the game (excluded minutes with 0 points)
 
-// ? only one dog in the office.
-// ? only one cat in the office.
-
-// ? cat poops
-// ? dog poops
+show scores and levels in hexadecimal????
 
 [ ] achievement when a thing is done for the first time?
 
+
 # DONE
+
+
+[x] help button doesn't work
+[x] slower increase in cost for store items.
+no: button hover should be light blue
+no: do we have an id issue when selecting storeitem's in store versus inbox? clash of id's?
+[x] ensure chance of CREATING a bug or spec bug is lower for rework
+[x] ensure level of skills is visible
+no: test-management suite -- test level up
+no: powerful IDE -- dev level up
+no: spreadsheet skills -- be a better BA
+no: email etiquette course -- be a better BA
+no: when you buy a self-starter card (or any card) that should not be enough to kick off the self-starting behaviour. (or should it!?) (yes it should)
+[x] icon to indicate has seat after seat upgrade: should show up on the person
+[x] seat upgrade should make you more effective
+[x] chance of finding a bug or specBug -- need to be same mathematical model as creating bug or spec bug
+no: Limit dog/cat numbers
+[x] if > 1, show skill level number top right of skill icon on person card.
+[x] consider: the store should show level n+1 items, disabled.
+[x] show next level items (disabled) before they are available (buttons in office, and in store)
+[x] when new items added to store, show a little icon on the store button
+[x] highlight store button to indicate when there are new things added to it. Unhighlight it when it is pressed.
+[x] highlight button when enabled -- do this for all buttons that are created during level up. (e.g. buy dev)
+
 
 [x] ability to see skill level
 [x] dog/cat never seem to return!

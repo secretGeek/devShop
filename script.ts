@@ -1,48 +1,34 @@
+// [ ] tending to cat/dog takes too long as you progress.
+// [ ] level of observation training should be shown....
+// [ ] level of self-starter behaviour should be shown...
+// [ ] keyboard icon not rendered correctly when added to person 'has' -- add .icon class
+// [ ] Add to store: 
+//  - headphones 🎧 
+//  - Desk plant 🌳
+//  - Desk cactus 🌵
+//  - Games console 🕹
+//  - Deluxe Games console 🎮
+//  - Desk A/C ❄
+//  - cookie 🍪
+// [ ] Personal robot 🤖: 10000+ -- same as infinite self starter  - literally adds infinity symbol to self-starter icon?
+// [ ] for dev/ba/test: If level > 9 -- use infinity symbol not a number
+// [ ] Dark mode
 // [ ] Words wrap in store
 // [ ] Icons and help icon are not vertically centered in store (other content is?)
-// button hover should be light blue
-// do we have an id issue when selecting storeitem's in store versus inbox? clash of id's?
-// ensure chance of CREATING a bug or spec bug is lower for rework
 // drawMessage "You gave Alan a developer upgrade" 
 // drawMessagw "Founder is enjoying that donut"
-// ensure level of skills is visible
-//
-//StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
-//      calls them {original name} 1 and {original name} 2
-// level of observation training should be shown....
-//
-//
-// defer: stats button lower right 📈 : each person's skills and description. point per minute described for every minute of the game (excluded minutes with 0 points)
-//
-//
-// test-management suite -- test level up
-// powerful IDE -- dev level up
-// spreadsheet skills -- be a better BA
-// email etiquette course -- be a better BA
-
-// 
-
-// when you buy a self-starter card (or any card) that should not be enough to kick off the self-starting behaviour. (or should it!?)
-// [x] icon to indicate has seat after seat upgrade: should show up on the person
-// seat upgrade should make you more effective
-// chance of finding a bug or specBug -- need to be same mathematical model as creating bug or spec bug
-// more technical names for tasks
-// Limit dog/cat numbers
-// icon to indicate Observation training 🔍
-// if > 1, show skill level number top right of skill icon on person card.
-// ? Show count of stories in top of column
+// [ ] keybinding -- letters to people
+// [ ] StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
+//      calls them {original name} A and {original name} B.
+//      can only be given to a person once. (How to do selection/highlighting?)
+// [ ] show (but disabled) buy dev / buy tester button when first starting
+// [ ] more technical names for tasks
+// [ ] Show count of stories at foot of column if > some small number like 5
 // ? limited number of slots for people. cannot hire more than level number... until 
-// ? Project Splitter: a talent for ba's that helps them split a large project into two smaller projects.
-// consider: the store should show level n+1 items, disabled.
 // ? dual-skill cannot be better than "4/5" at either skill
-// ? how to show attributes/stats sheet of a person?
-// ? rename to 'tinykanban'
+// defer: how to show attributes/stats sheet of a person? (see stats button)
 // finesse:
 // - buy dev button is visible but disabled is < (cost of dev)
-// - show next level items (disabled) before they are available (buttons in office, and in store)
-// - when new items added to store, show a little icon on the store button
-// - highlight store button to indicate when there are new things added to it. Unhighlight it when it is pressed.
-//    ? do this for all buttons that are created during level up. (e.g. buy dev)
 // - if no activity detected for long time... show tip
 // - non-prop font for level etc.
 
@@ -200,20 +186,16 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
 /*
  defer: some things like a packet of cookies or a packet of donuts -- have a qty... 
 
-  - headphone 🎧
-    🍔🥗🍪
+
+  🍔🥗🍪
   
-    - Desk plant 🌳
-    - Desk cactus 🌵
+
     - Desk bling 💎
     - Stuffed flatbread 🥙
-    - Desk A/C ❄
     - Desk ornament 
 		- Personal Robot 🤖
 	
-		- Games console 🕹
 		- Fax machine 📠
-		- Deluxe Games console 🎮
 		- Printer 🖨
 
 
@@ -240,6 +222,7 @@ class Game {
     this.HighestMoney = startingMoney;
     this.Inflation = testMode? 1.3 : 1.3; // 30 %
     this.SmallInflation = testMode? 1.05 : 1.05; // 5 %
+    this.MediumInflation = testMode? 1.10 : 1.10; // 10 %
     this.HyperInflation = testMode? 3 : 3; //300%
     this.Level = 1;
     this.XP = 0;
@@ -274,6 +257,7 @@ class Game {
   HighestMoney: number;
   Inflation: number;
   SmallInflation: number;
+  MediumInflation: number;
   HyperInflation: number; 
   Level: number;
   XP: number;
@@ -936,6 +920,16 @@ function personFree(person:Person) {
   }
 }
 
+
+function columnName(skill:string):string{
+  switch(skill) {
+    case "ba": return "inbox";
+    case "dev": return "backlog";
+    case "dev0": return "dev";
+    case "test": return "test";
+    case "done": return "done";
+  }
+}
 function selfStart(person:Person){
   //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
   //TODO:
@@ -1172,14 +1166,15 @@ function done(receiveId: string) {
     //check if there's anything in the column where this came from....
     let skillToCheck = skillNeeded;
     if (skillToCheck == "dev0") skillToCheck = "dev";
-    drawMessage(`${person.name} is going to try and do some ${skillToCheck}...`);
+
+    drawMessage(`${person.name} is going to check the ${columnName(skillToCheck)} column...`);
     let columnCards = $(`#${skillToCheck} .inner .story.receiver:not(.busy):not(.selected)`);
     if (columnCards && columnCards.length > 0) {
       drawMessage(`${person.name} will do... ${columnCards[0].innerText}`);
       person.observeNow--;
       doIt('p'+person.id, columnCards[0].id);
     } else {
-      drawMessage(`${person.name} found nothing to do in the ${skillToCheck} column.`);
+      drawMessage(`${person.name} found nothing to do in the ${columnName(skillToCheck)} column.`);
       person.observeNow = 0;
     }
   }
@@ -1645,7 +1640,7 @@ function Inflate(inflation:number, value:number) {
 }
 
 // TODO: add this to game class
-function incrementMoney(amount: number) {
+function incrementMoney(amount: number):void {
   game.Money += amount;
   if (game.Money >= game.HighestMoney) {
     game.HighestMoney = game.Money;
@@ -1697,10 +1692,9 @@ function leaveStore() {
   $('h1')[0].innerText = "DevShop";
 }
 
-function purchase(itemId:number) {
+function purchase(itemId:number):void {
   let item:StoreItem = game.StoreItems[itemId];//.filter(i => i.id == itemId)[0];
-  console.log(item);
-
+  
   if (!item.enabled) {
     drawMessage(`The ${item.name} ${item.icon} is not yet available`);
     return;
@@ -1721,7 +1715,8 @@ function purchase(itemId:number) {
   drawMessage(`You bought ${clone.name} ${clone.icon} for 💲${clone.price}. Nice!`);
   
   // Every time you purchase an item, the price of that time goes up, a lot.
-  item.price = Inflate(game.Inflation, item.price);
+  // consider: some specific items should have a different inflation curve. 
+  item.price = Inflate(game.MediumInflation, item.price);
 
   drawInboxItem("i" + clone.id, clone);
   $id("store-button-" + itemId).innerText = `💲${item.price}`;
