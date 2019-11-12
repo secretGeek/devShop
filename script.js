@@ -700,6 +700,7 @@ function personFree(person) {
         log("Will check board in " + delay);
         setTimeout(function () { selfStart(person); }, delay);
     }
+    updatePossible();
 }
 function columnName(skill) {
     switch (skill) {

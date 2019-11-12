@@ -932,6 +932,7 @@ function personFree(person:Person) {
     log(`Will check board in ${delay}`);
     setTimeout(function() { selfStart(person);}, delay);
   }
+  updatePossible();
 }
 
 
