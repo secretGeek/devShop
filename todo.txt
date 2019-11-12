@@ -154,31 +154,38 @@ finesse:
 
 ## Won't do
 
-[ ] add a random timer of sick/vacation unavailability for each resource - resources gain experience/competence with each task they finish
-[ ] A worker sometimes gets distracted. (Often). 
-		-- the dog/cat might decrease that.
-[no] When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
-
-
-
-# DONE
-
-
-[x] help button doesn't work
-[x] slower increase in cost for store items.
+no: add a random timer of sick/vacation unavailability for each resource -- although "realistic" this is a model not reality, it's okay to avoid most of reality. I feel it would be painful. I also thought about having them spontaneous quit but avoided it. Same with managing their moods/energy levels. Nah, too detailed.
+no: resources gain experience/competence with each task they finish -- too nuanced. not able to be shown visually.
+no: A worker sometimes gets distracted. (Often). -- the dog/cat might decrease that.
+no: When you add something to the board. If it's the only thing on the board, then select that thing automatiucally.
 no: button hover should be light blue
 no: do we have an id issue when selecting storeitem's in store versus inbox? clash of id's?
-[x] ensure chance of CREATING a bug or spec bug is lower for rework
-[x] ensure level of skills is visible
 no: test-management suite -- test level up
 no: powerful IDE -- dev level up
 no: spreadsheet skills -- be a better BA
 no: email etiquette course -- be a better BA
 no: when you buy a self-starter card (or any card) that should not be enough to kick off the self-starting behaviour. (or should it!?) (yes it should)
+no: Add icons to columns to make required skill clearer (tried it, couldn't make it work neatly on small mobile screens)
+no: Limit dog/cat numbers
+no: chain observations onto each self start. REMOVING observation
+no: are observations now chained with self-start? seems too extreme. REMOVING observation
+
+
+
+# DONE
+
+[x] tending to cat/dog takes too long as you progress.
+[x] keyboard icon not rendered correctly when added to person 'has' -- add .icon class
+[x] level of observation training should be shown....
+[x] level of self-starter behaviour should be shown...
+[x] indicate # items in a column if more than a minimum
+[x] help button doesn't work
+[x] slower increase in cost for store items.
+[x] ensure chance of CREATING a bug or spec bug is lower for rework
+[x] ensure level of skills is visible
 [x] icon to indicate has seat after seat upgrade: should show up on the person
 [x] seat upgrade should make you more effective
 [x] chance of finding a bug or specBug -- need to be same mathematical model as creating bug or spec bug
-no: Limit dog/cat numbers
 [x] if > 1, show skill level number top right of skill icon on person card.
 [x] consider: the store should show level n+1 items, disabled.
 [x] show next level items (disabled) before they are available (buttons in office, and in store)

@@ -198,7 +198,6 @@ function drawRoom() {
     drawButtons();
 }
 function drawButtons() {
-    //  <div class='button getLead hidden' onclick='getNewLead();' title='Advertise and find a project to do!'>🎁 find project (💲100)</div>
     var getLead = $id('getLead');
     getLead.innerHTML = "\uD83C\uDF81 find project (\uD83D\uDCB2" + game.LeadPrice + ")";
     for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {
@@ -235,7 +234,9 @@ function drawXP(xp, levelUpXP, level) {
 function removeStory(key) {
     var el = document.getElementById('kanbanboard');
     var s = el.querySelector('#' + key);
+    var column = s.parentNode.parentNode.id;
     s.parentNode.removeChild(s);
+    updateColumnCount(column);
 }
 function drawStory(key, stories, top) {
     var el = document.getElementById('kanbanboard');
@@ -269,6 +270,18 @@ function drawStory(key, stories, top) {
         else {
             column.appendChild(newstory);
         }
+    }
+    updateColumnCount(story.skillneeded);
+}
+function updateColumnCount(column) {
+    var target = $('#' + column + ' .inner .count');
+    if (target && target.length == 1) {
+        var count = $('#' + column + ' .inner .receiver').length;
+        target[0].innerText = '' + count;
+        target[0].setAttribute('data-count', '' + count);
+        // consider: check the number of people who have this skill. 
+        //If the count > (#people) make the color yellowish;
+        //if the count > (#people * 2 + 2) make the color redish;
     }
 }
 function drawStories(stories) {
