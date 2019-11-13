@@ -208,11 +208,12 @@ th {
   position:relative;
   display:block;
   margin:4px 0;
-  width:calc(100vw - 4ch);
+  width:calc(100vw - 6ch);
   display:block;
   float:none;
   clear:both;
 }
+
 .item-name {
   display:inline-block;
   whitespace:pre-wrap;
@@ -306,7 +307,7 @@ th {
   text-align:center;
 }
 
-#message {
+#message,#storeMessage {
   position:absolute;
   bottom:2ch;
   border:1px solid #CCC;
@@ -386,7 +387,7 @@ th {
     font-size:7pt;
     text-shadow:1px 1px #CCC;
   }
-  #message {
+  #message,#storeMessage {
     font-size:10pt;
   }
 }
@@ -410,7 +411,7 @@ th {
     font-size:6pt;
     text-shadow:1px 1px #CCC;
   }
-  #message {
+  #message,#storeMessage {
     font-size:8pt;
   }
   #buttons { font-size:0;}
@@ -497,6 +498,7 @@ th {
   </div>
 </div>
 <span id='message'>Press '🌟 start' to begin.</span>
+<span id='storeMessage' class='hidden'>⭐ Welcome to the DevStore ⭐</span>
 <a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
 <div id='debug' class='hidden' style='clear:both'></div>
 </body>
