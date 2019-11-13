@@ -1,14 +1,8 @@
 //Definitely
-// [x] tending to cat/dog takes too long as you progress.
-// [x] keyboard icon not rendered correctly when added to person 'has' -- add .icon class
-// [x] level of observation training should be shown....
-// [x] level of self-starter behaviour should be shown...
+// [ ] remove observation skill
+// [ ] rename self-start to initiative
 // [ ] Self-starter -- should be infinite but with a big delay. Delay is smaller at higher levels.
-// [ ] chain observations onto each self start 
-// [ ] are observations now chained with self-start? seems too extreme.
 // [ ] 🐛when in the store: only store messages should be shown
-// [ ] indicate # items in a column if more than a minimum
-// [no] Add icons to columns to make required skill clearer (tried it, couldn't make it work neatly on small mobile screens)
 // [ ] Add to store: 
 //  - headphones 🎧 
 //  - Desk plant 🌳
@@ -100,7 +94,7 @@ function getAllLevelItems() {
         ],
         "l9": [],
         "l10": [
-            { id: 180, name: 'Coffee machine', price: 4000, icon: "⛽", skillneeded: "any", busy: false, code: ItemCode.coffeemachine, activeDuration: 30, description: 'A coffee machine at your desk, your performance will be irreparably improved.', enabled: false },
+            { id: 180, name: 'Coffee machine', price: 4000, icon: "⛽", skillneeded: "any", busy: false, code: ItemCode.coffeemachine, activeDuration: 0, description: 'A coffee machine at your desk, your performance will be irreparably improved.', enabled: false },
         ],
         "l11": [
             { id: 200, name: 'Inspirational poster', price: 30000, icon: "🌄", skillneeded: "any", busy: false, code: ItemCode.poster, activeDuration: 0, description: 'Enhance your cubicle and improve your concentration.', enabled: false },
