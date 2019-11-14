@@ -1,8 +1,10 @@
 //Definitely
-// [x] remove observation skill
-// [x] rename self-start to initiative
-// [x] Self-starter -- should be infinite but with a big delay. Delay is smaller at higher levels.
-// [x] 🐛when in the store: only store messages should be shown
+// [ ] ? idea: Cannot give initiative to founder
+// [ ] if person is the selected doer then they cannot self-start at that moment.
+// [ ] size on ipad: too wide. why?
+// [ ] cat nerd doesn't render correctly (on iOS at least)
+// [ ] Dogs, cats and store items shouldn't could towards number of items in column
+// [ ] When person returns from completing a self-started task, they should highlight themselves if there is a selected object of consequence
 // [ ] dog: consistent icon (random choice at first)
 // [ ] dog to have a name
 // [ ] cat: consistent icon (random choice at first)
@@ -14,14 +16,17 @@
 //  - Games console 🕹
 //  - Deluxe Games console 🎮
 //  - Desk A/C ❄
-//  - cookie 🍪
-// [ ] Personal robot 🤖: 10000+ -- same as infinite self starter  - literally adds infinity symbol to self-starter icon?
-// [ ] for dev/ba/test: If level > 9 -- use infinity symbol not a number
+//  - cookie 🍪 ($1, not unlocked until level 100)
+// [ ] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
+// [ ] Column limits could be based on: total number of points in a column divided by number of people with that skill
+// [ ] Multi-skilled person choosing task to do could be based on: total number of points in a column divided by number of people with that skill. Worst ratio? Do that next. In case of tie-break, go with right most column.
+// [x] for dev/ba/test: If level > 9 -- use infinity symbol not a number
 // [ ] 🐛Words wrap in store
 // [ ] 🐛Icons and help icon are not vertically centered in store (other content is?)
 // [ ] more technical names for tasks
 // [ ] show (but disabled) buy dev / buy tester button when first starting
 // [ ] keybinding -- letters to people
+
 
 let testMode = false;//true;
 let storeFeatureFlag = true;//testMode;
@@ -108,7 +113,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l9":
        [
-        {id:110,name:'Initiative Training', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
+        {id:175,name:'Initiative Training', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
        ],
        "l10":
        [
@@ -1663,10 +1668,11 @@ function visitStore() {
 function describe(itemId:number){
   let item:StoreItem = game.StoreItems[itemId];
   if (!item.enabled){
-    drawMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
+    // TODO: Until level X
+    drawStoreMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
     return;
   }
-  drawMessage(`"${item.name} ${item.icon}" ${item.description}`);
+  drawStoreMessage(`"${item.name} ${item.icon}" ${item.description}`);
 }
 function drawStore() {
   let itemList = $id('items');
