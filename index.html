@@ -15,9 +15,10 @@
   bottom:0;
   right:0;
   background-color:#DDD;
-  border-radius:10px;
-  padding:2px 6px;
-  margin:2px;
+  xborder-radius:10px 0 0 0;
+  xbox-shadow:1px 1px 0 inset #888;
+  padding:2px 6px 1px 6px;
+  margin:2px 0 0 2px;
   opacity:0.7;
   z-index:2;
 }
@@ -60,7 +61,7 @@ opacity:0.4;
 
 body {
   font-family: 'lucida console', monospace;
-  max-width:calc(100% - 2ch);
+  max-width:xcalc(100vw - 4ch);
   padding:2ch;
   margin:auto;
   color:#333;
@@ -145,16 +146,21 @@ th {
   margin-top:5px;
   border:1px solid #666;
   border-collapse: collapse;
-  width:calc(100% - 2ch);
+  width:calc(100vw - 6ch);
   table-layout: fixed;
   height:30vh;
   min-height:30vh;
   max-height:30vh;
+  box-shadow:2px 2px 0 #CCC;
 }
 
 #kanbanboard th, #kanbanboard td {
   border:1px solid #666;
   position:relative;
+
+}
+#kanbanboard tr {
+  box-shadow:2px 2px 2px inset #EEE;
 }
 
 #kanbanboard td {
@@ -233,7 +239,7 @@ th {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-.busy {
+.busy, #done .inner .story {
   opacity:0.5;
   border:1px solid #CCC;
 }
@@ -371,11 +377,11 @@ th {
 
 #store, #office {
   position:absolute;
-  max-height:calc(100vh - 100px);
-  height:calc(100vh - 100px);
+  max-height:calc(100vh - 60px);
+  height:calc(100vh - 60px);
   overflow-y:auto;
-  max-width:calc(100vw - 2ch);
-  width:calc(100vw - 2ch);
+  max-width:calc(100vw - 4ch);
+  width:calc(100vw - 4ch);
 }
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
@@ -502,5 +508,5 @@ th {
 <a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
 <div id='debug' class='hidden' style='clear:both'></div>
 </body>
-<script src='script.js?2' type="text/javascript"></script>
+<script src='script.js?3' type="text/javascript"></script>
 </html>

@@ -1,31 +1,29 @@
 //Definitely
-// [ ] ? idea: Cannot give initiative to founder
-// [ ] if person is the selected doer then they cannot self-start at that moment.
 // [ ] size on ipad: too wide. why?
-// [ ] cat nerd doesn't render correctly (on iOS at least)
-// [ ] Dogs, cats and store items shouldn't could towards number of items in column
-// [ ] When person returns from completing a self-started task, they should highlight themselves if there is a selected object of consequence
-// [ ] dog: consistent icon (random choice at first)
-// [ ] dog to have a name
-// [ ] cat: consistent icon (random choice at first)
-// [ ] cat to have a name
-// [ ] Add to store: 
-//  - headphones 🎧 
-//  - Desk plant 🌳
-//  - Desk cactus 🌵
+// [ ] add to store:
 //  - Games console 🕹
 //  - Deluxe Games console 🎮
 //  - Desk A/C ❄
-//  - cookie 🍪 ($1, not unlocked until level 100)
 // [ ] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
-// [ ] Column limits could be based on: total number of points in a column divided by number of people with that skill
 // [ ] Multi-skilled person choosing task to do could be based on: total number of points in a column divided by number of people with that skill. Worst ratio? Do that next. In case of tie-break, go with right most column.
-// [x] for dev/ba/test: If level > 9 -- use infinity symbol not a number
 // [ ] 🐛Words wrap in store
-// [ ] 🐛Icons and help icon are not vertically centered in store (other content is?)
+// [ ] 🐛Icons and help icon are not vertically centered in store (other content is not either)
 // [ ] more technical names for tasks
 // [ ] show (but disabled) buy dev / buy tester button when first starting
 // [ ] keybinding -- letters to people
+// [ ] keybinding -- multiple presses of a number will cycle through the cards in that column
+// [ ] Consider: have a slow loop that checks if any one with selfStart who is not selected or busy has a triggerTime that's stale by > 2* maxtriggertime and if so call 'trySelfStart'
+// [ ] Store: column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
+
+// [ ] front page:
+// -> Start
+// -> (later: Resume  -- saved games)
+// -> About -> link to wiki that describes each item in the store.
+// -> Mailing List [________: Join ] __privacy policy__
+// -> game itself needs a way to exit then.
+// fire people?
+// limited people?
+// 
 
 
 let testMode = false;//true;
@@ -64,7 +62,11 @@ enum ItemCode {
   poster,
   crystalball,
   statue,
-  statue2
+  statue2,
+  cookie,
+  headphones,
+  deskplant,
+  cactus
 }
 
 function getAllLevelItems(): { [id: string]: StoreItem[]; } {
@@ -74,17 +76,17 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
   //The 'code' property is used in `function useIt` to decide how the card affects the player.
   let allItems: { [id: string]: StoreItem[]; } = 
       { "l2": //Level 2 Items
-       [{id:10,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:20, description: 'A sugary fix will speed you up... but not for long.', enabled:false},
-       {id:12,name:'Mechanical keyboard upgrade', price:400, icon:"⌨", skillneeded:"any", busy:false, code:ItemCode.keyboard, activeDuration:0, description: 'This mechanical keyboard upgrade will boost your speed at every task.', enabled:false},
+       [{id:5,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:20, description: 'A sugary fix will speed you up... but not for long.', enabled:false},
+       {id:10,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:40, description: 'A cup of joe will speed up any worker …if only for a little while.', enabled:false},      
        //{id:14,name:'Initiative Training', price:5, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
        ],
         "l3": //Level 3 Items
        [{id:20,name:'Upskill Developer: Efficiency Development Series', price:120, icon:"📗", skillneeded:"dev", busy:false, code:ItemCode.upskillDev, activeDuration:0, description:'Already a developer? This advanced training course will reduce the number of bugs you create.', enabled:false},
-        {id:40,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:40, description: 'A cup of joe will speed up any worker …if only for a little while.', enabled:false},      
+       {id:30,name:'Mechanical keyboard upgrade', price:400, icon:"⌨", skillneeded:"any", busy:false, code:ItemCode.keyboard, activeDuration:0, description: 'This mechanical keyboard upgrade will boost your speed at every task.', enabled:false},
        ],
         "l4":
        [
-        {id:50,name:'Upskill Tester: Fast and Thorough Book Series', price:70, icon:"📘", skillneeded:"test", busy:false, code:ItemCode.upskillTest, activeDuration:0, description:'Already a tester? Be a better tester!', enabled:false},
+        {id:50,name:'Upskill Tester: Fast and Thorough Book Series', price:80, icon:"📘", skillneeded:"test", busy:false, code:ItemCode.upskillTest, activeDuration:0, description:'Already a tester? Be a better tester!', enabled:false},
         {id:90,name:'Pizza', price:50, icon:"🍕", skillneeded:"any", busy:false, code:ItemCode.pizza, activeDuration:90, description: 'Food can trap your workers in the office by giving them no reason to leave.', enabled:false},
         {id:100,name:'Banana', price:25, icon:"🍌", skillneeded:"any", busy:false, code:ItemCode.banana, activeDuration:40, description: 'This healthy snack gives a short-lived energy boost', enabled:false},
         {id:105,name:'Cupcake', price:100, icon:"🧁", skillneeded:"any", busy:false, code:ItemCode.cupcake, activeDuration:25, description: 'A cupcake to enjoy. Increase motivation, but not for long.', enabled:false},
@@ -93,17 +95,18 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        [
         {id:107,name:'Upskill BA: Powerful communication book series', price:70, icon:"📕", skillneeded:"ba", busy:false, code:ItemCode.upskillBA, activeDuration:0, description:'Improves your Business Analysis Skills, for faster better work!', enabled:false},
         
-        {id:120,name:'Office Cat', price:5000, icon:"🐱", skillneeded:"any", busy:false, code:ItemCode.cat, activeDuration:200, description:'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled:false},
+        {id:120,name:'Office cat', price:5000, icon:"🐱", skillneeded:"any", busy:false, code:ItemCode.cat, activeDuration:200, description:'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled:false},
         
        ],
         "l6":
        [
         {id:150,name:'Seat upgrade', price:400, icon:"💺", skillneeded:"any", busy:false, code:ItemCode.seat, activeDuration:0, description: 'A comfortable seat upgrade makes any worker more efficient.', enabled:false},
-
+        {id:155,name:'Headphone upgrade', price:700, icon:"🎧", skillneeded:"any", busy:false, code:ItemCode.headphones, activeDuration:0, description: 'With better headphones a person\'s focus is greatly improved!', enabled:false},
+ 
        ],
        "l7":
        [
-        {id:160,name:'Office Dog', price:6000, icon:"🐶", skillneeded:"any", busy:false, code:ItemCode.dog, activeDuration:200, description:'Bring joy and efficiency to the workplace. Care for a dog and double your speed', enabled:false},
+        {id:160,name:'Office dog', price:6000, icon:"🐶", skillneeded:"any", busy:false, code:ItemCode.dog, activeDuration:200, description:'Bring joy and efficiency to the workplace. Care for a dog and double your speed', enabled:false},
  
        ],
        "l8":
@@ -113,6 +116,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l9":
        [
+
         {id:175,name:'Initiative Training', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
        ],
        "l10":
@@ -127,6 +131,8 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l12":
        [
+        {id:210,name:'Desk cactus', price:1000, icon:"🌵", skillneeded:"any", busy:false, code:ItemCode.cactus, activeDuration:0, description: 'A desk cactus has been scientifically proven to have no impact on your productivity at all. But it\'s cool.', enabled:false},
+        {id:220,name:'Desk plant', price:500, icon:"🌳", skillneeded:"any", busy:false, code:ItemCode.deskplant, activeDuration:0, description: 'Beautiful desk plant improves the workplace and decreases your error rate.', enabled:false},
 
        ],
        "l13":
@@ -139,7 +145,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l15":
        [
-        {id:220,name:'Mystical Statue', price:40000, icon:"🗿", skillneeded:"any", busy:false, code:ItemCode.statue2, activeDuration:0, description: 'Mystical statue improves your workplace.', enabled:false},
+        {id:250,name:'Mystical Statue', price:40000, icon:"🗿", skillneeded:"any", busy:false, code:ItemCode.statue2, activeDuration:0, description: 'Mystical statue improves your workplace.', enabled:false},
        ],
        "l16":
        [
@@ -163,9 +169,14 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l21":
        [
-        {id:350,name:'Crystal ball', price:100000, icon:"🔮", skillneeded:"any", busy:false, code:ItemCode.crystalball, activeDuration:0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.', enabled:false},
+        {id:350,name:'Crystal ball', price:1000000, icon:"🔮", skillneeded:"any", busy:false, code:ItemCode.crystalball, activeDuration:0, description: 'This crystal ball does not tell the future, but it\'s a nice desk ornament.', enabled:false},
 
        ],
+       "l100":
+       [
+        {id:900,name:'A cookie', price:1, icon:"🍪", skillneeded:"any", busy:false, code:ItemCode.cookie, activeDuration:20, description: 'It\'s a cookie', enabled:false},
+
+       ]
       };
 
   return allItems;
@@ -239,7 +250,7 @@ class Game {
     this.SelectedDoer = null;
     this.SelectedReceiver = null;
     this.DefaultSelfStartDelay = testMode? 12000 : 12000; //12 second pause between self-starters polling the board.
-    this.AnimalTendingDelay = 2600;
+    this.AnimalTendingDelay = 3900;
   }
   Money: number;
   HighestMoney: number;
@@ -289,6 +300,7 @@ interface Person {
   triggerTime:Date;
   seatLevel: number; //how good is your seat?
   keyboardLevel: number; //how good is your keyboard?
+  headphoneLevel: number; //how good are your headphones?
   has: { [id:string] : StoreItem; } // coffee, donuts and puppies go here.
 }
 
@@ -324,9 +336,7 @@ interface StoreItem {
   icon: string;
   skillneeded: string;
   busy: boolean;
-  code: ItemCode; //'code' is a short, readable, ID, such as 'dog' that is used in a switch statement somewhere for all the deep logic/capabilities of StoreItems... as they can ultimately do anything. TODO: consider an enum for this.
-  //skillBoost: string; 
-  //category: training/equipment
+  code: ItemCode; //'code' is a short, readable, ID, such as 'dog' used in switch statement somewhere for all the deep logic/capabilities of StoreItems... as they can ultimately do anything. 
   description: string;
   activeDuration: number; //how long does the item act on the person? (0 for indefinitely)
   enabled:boolean;
@@ -351,7 +361,21 @@ function initGameState():void
       "ba": {level: 1}
     };
   
-  let player: Person = { id: nextId(), skills: allSkills, name: "Founder", summary: "💤", icon:"🤔", XP: 0, busy: false, selfStarterLevel: 0, has: {}, seatLevel: 0, keyboardLevel:0, selfStartDelay: game.DefaultSelfStartDelay, triggerTime:null};
+  let player: Person = { 
+      id: nextId(), 
+      skills: allSkills, 
+      name: "Founder", 
+      summary: "💤", 
+      icon:"🤔", 
+      XP: 0, 
+      busy: false, 
+      selfStarterLevel: 0, 
+      has: {}, 
+      seatLevel: 0, 
+      keyboardLevel:0, 
+      headphoneLevel:0, 
+      selfStartDelay: game.DefaultSelfStartDelay, 
+      triggerTime:null};
   game.People['p' + player.id] = player;
   incrementXP(0);
   incrementMoney(0);
@@ -379,8 +403,7 @@ function drawButtons():void {
       d.innerHTML = `<span class='icon'>${value.icon}</span> hire ${value.title} (💲${value.price})`;
       d.setAttribute('onclick', `getNewPerson("${value.skill}");`);    
     }
-  }
-  
+  }  
 }
 
 function drawMoney(money: number):void {
@@ -435,7 +458,7 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean):
 
   let points = "<span class='points'>" + story.points + "</span>";
 
-  //if the story is done, don't add a click handler.
+  // if the story is done, don't add a click handler.
   let handler = story.skillneeded == "done" ? "" : `onclick='clickReceiver(\"${key}\");'`;
 
   let shtml = `<span class='story receiver ${story.skillneeded}${busy}' id='${key}' ${handler}><span class='story-detail'>${logo} ${story.summary}</span>${avatar}${points}</span>`;
@@ -458,7 +481,7 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean):
 function updateColumnCount(column:string):void {
   let target = $('#' + column + ' .inner .count');
   if (target && target.length == 1) {
-    const count = $('#' + column + ' .inner .receiver').length;
+    const count = $('#' + column + ' .inner .story').length;
     target[0].innerText = '' + count;
     target[0].setAttribute('data-count', '' + count); 
     // consider: check the number of people who have this skill. 
@@ -502,8 +525,8 @@ function drawPerson(key: string, people: { [x: string]: Person; }):void {
   }
   let skillsDiv = getSkillsDiv(person.skills);
   let itemsHtml = getItemsHtml(person);
-  
-  let phtml = "<span class='person doer" + busy + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
+  let selected = game.SelectedDoer == ('p' + person.id) ? " selected" : "";
+  let phtml = "<span class='person doer" + busy + selected + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
   let newPersonElement = htmlToElement(phtml);
 
   for (let key of Object.keys(person.skills)) {
@@ -628,7 +651,21 @@ function getNewPerson(skill: string):void {
   let id = nextId();
   let skillo = {};
   skillo[skill] = { level: 1};
-  let newEmployee: Person = { id: id, skills: skillo, summary: "💤", icon: getIcon(), name: getName(), XP: 0, busy: false, selfStarterLevel: 0, has: {}, seatLevel: 0, keyboardLevel:0, selfStartDelay: game.DefaultSelfStartDelay, triggerTime:null};
+  let newEmployee: Person = 
+    { id: id, 
+      skills: skillo, 
+      summary: "💤", 
+      icon: getIcon(), 
+      name: getName(), 
+      XP: 0, 
+      busy: false, 
+      selfStarterLevel: 0,
+      has: {},
+      seatLevel: 0,
+      keyboardLevel:0,
+      headphoneLevel:0,
+      selfStartDelay: game.DefaultSelfStartDelay,
+      triggerTime:null};
   game.People['p' + id] = newEmployee;
   drawPerson('p' + id, game.People);
   // Every time you hire a person the price for that type inflates by a LOT.
@@ -844,6 +881,12 @@ function applyItem(person:Person, item:StoreItem) {
         person.has['i'+item.id] = item;
       }
       break;
+    case ItemCode.headphones:  
+      person.headphoneLevel++;
+      if (person.headphoneLevel == 1) {
+        person.has['i'+item.id] = item;
+      }
+      break;
     case ItemCode.keyboard:
       person.keyboardLevel++;
       if (person.keyboardLevel == 1) {
@@ -874,11 +917,12 @@ function applyItem(person:Person, item:StoreItem) {
     case ItemCode.dog:
     case ItemCode.cat:
       //dog and cat make you busy for a little while
-      if (item.code == ItemCode.cat) item.icon = randomItem(catIcons);
-      if (item.code == ItemCode.dog) item.icon = randomItem(dogIcons);
+      //if (item.code == ItemCode.cat) item.icon = randomItem(catIcons);
+      //if (item.code == ItemCode.dog) item.icon = randomItem(dogIcons);
 
       person.busy = true;
-      person.summary = `Tending to the ${item.name}` ;
+      let animal = item.code == ItemCode.dog? "dog" : "cat";
+      person.summary = `Tending to ${item.name} ${item.icon} (the ${animal})` ;
       drawMessage(`${person.name} ${person.icon} has the ${item.icon} ${item.name}`);
       setTimeout(function() { usingFinishedBusyPhase(person, item);}, game.AnimalTendingDelay); 
       setTimeout(function() { usingFinished(person, item);}, item.activeDuration*500);
@@ -898,6 +942,9 @@ function applyItem(person:Person, item:StoreItem) {
     case ItemCode.poster:
     case ItemCode.statue:
     case ItemCode.statue2:
+    case ItemCode.cookie:
+    case ItemCode.cactus:
+    case ItemCode.deskplant:
       person.has['i'+item.id] = item;
       if (item.activeDuration > 0) {
         setTimeout(function() { usingFinished(person, item);}, item.activeDuration*1000);
@@ -932,10 +979,16 @@ function trySelfStart(person:Person):void {
     log(`Will check board in ${delay}`);
     let triggerTime = new Date();
     person.triggerTime = triggerTime;
-    setTimeout(function() { selfStart(person, triggerTime);}, delay);
+    if (game.SelectedDoer == ('p' + person.id)) {
+      //can't self start while selected... try again in a little bit...
+      setTimeout(function() { trySelfStart(person);}, delay);
+    } else {
+      setTimeout(function() { selfStart(person, triggerTime);}, delay);
+    }
   } else {
     person.summary = "💤";
   }
+
   drawPerson('p' + person.id, game.People);
 }
 
@@ -950,6 +1003,8 @@ function columnName(skill:string):string{
   }
 }
 
+
+
 function selfStart(person:Person, triggerTime:Date){
   //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
   //TODO:
@@ -957,6 +1012,13 @@ function selfStart(person:Person, triggerTime:Date){
     log("Stale self-start event.");
     return;
   }
+
+  if (game.SelectedDoer == ('p' + person.id)) {
+    //can't self start while selected... try again in a little bit...
+    setTimeout(function() { trySelfStart(person);}, 1000);
+    return;
+  }
+
   log("Self starter is awake...");
   log(person.name + " " + person.icon + " is busy? " + person.busy);
   if (!person.busy) {
@@ -1071,13 +1133,17 @@ function getEfficiency(person:Person, skill:string):number {
 
   level += person.seatLevel;
   level += person.keyboardLevel;
+  level += person.headphoneLevel;
   if (personHas(person, ItemCode.cupcake)) level++;
   if (personHas(person, ItemCode.donut)) level++;
   if (personHas(person, ItemCode.pizza)) level++;
   if (personHas(person, ItemCode.banana)) level++;
   if (personHas(person, ItemCode.keyboard)) level++;
-  //twice the power!!
+  if (personHas(person, ItemCode.deskplant)) level++;
+  if (personHas(person, ItemCode.cookie)) level++;
+  //coffee givestwice the power!!
   if (personHas(person, ItemCode.coffee) || personHas(person, ItemCode.coffeemachine)) level = level + 2;
+  
   
   switch (level) {
     case 0: return 0;
@@ -1085,11 +1151,15 @@ function getEfficiency(person:Person, skill:string):number {
     case 2 : return 0.4;
     case 3 : return 0.5;
     case 4 : return 0.6;
-    case 5 : return 0.77;
-    case 6 : return 0.83;
-    case 7 : return 0.90;
-    case 8 : return 0.95;
-    case 9 : return 0.99;
+    case 5 : return 0.7;
+    case 6 : return 0.77;
+    case 7 : return 0.83;
+    case 8 : return 0.90;
+    case 9 : return 0.95;
+    case 10 : return 0.96;
+    case 11 : return 0.97;
+    case 12 : return 0.98;
+    case 13 : return 0.98;
     default: return 0.999;
   }
 }
@@ -1547,8 +1617,10 @@ function getName() {
   return randomItem(names);
 }
 
-let catIcons = ['🐈', '😸','😼','😽','😾','😿','🙀','🐱‍👤','🐱‍💻','🐱‍🐉','🐱‍👓','🐱‍🚀','🐱‍🏍','😹','😻'];
+let catIcons = ['🐈', '😸','😼','😽','😾','😿','🙀','🐱‍👤','🐱‍🐉','🐱‍👓','🐱‍🚀','🐱‍🏍','😹','😻'];
 let dogIcons = ['🐕','🐶','🐩'];
+let catNames = ['Ace','Alfie','Alonzo','Amberjack','Angel','Angus','Ashes','Astro','Baby','Bagel','Baguette','Barb','Barley','Basil','Batfish','Bella','Bill','Birdie','Bitty','Blackie','Bobo','Bombalurina','Buddy','Buffy','Bugsy','Bustopher Jones','Butter','Buttercup','Butterscotch','Buzz','Cabbage','Captain','Carbucketty','Carrot','Cashew','Casper','Catalufa','Chai','Chairman Meow','Charlie','Cheddar','Cheerio','Cherubfish','Chesnut','Chickpea','Chloe','Churro','Cinnamon','Clementine','Cleo','Coco','Coffee','Comet','Cranberry','Croaker','Croissant','Crouton','Crumbs','Crêpe','Cubby','Curry','Cutthroat','Daggertooth','Daisy','Demeter','Dewey','Diesel','Doodle','Dory','Dottie','Dragonfish','Ducky','Dude','Dumpling','Dwight','Edward','Etcetera','Fangtooth','Felix','Fergus','Fig','Flapjack','Fluffy','Fondue','Fraidy','Fritter','Frodo','Fudge','Gibberfish','Ginger','Granola','Gravy','Grits','Grizabella','Guacamole','Gumbo','Gyro','Hades','Hamlet','Hash Brown','Hector','Hoagie','Jack','Jalapeño','Jambalaya','Jasper','Jellicle','Jellylorum','Jemima','Jennyanydots','Jet','Jimmy','Jules','Kabob','Kimchi','Kingfish','Kitty','Knifejaw','Kumquat','Lackets','Lala','Latke','Lemonshark','Lentil','Licorice','Linguini','Lucky','Lucy','Macaron','Macavity','Maggie','Manny','Marshmallow','Max','Meatball','Milkshake','Millie','Milo','Missy','Misty','Molly','Mooneye','Morty','Mousse','Mr. Mistoffelees','Muffin','Mungojerrie','Munkustrap','Mushroom','Mushu','Mustard','Nimbus','Noodlefish','Nugget','Nutella','Old Deuteronomy','Oliver','Opah','Oreo','Oscar','Otto','Parsnip','Patch','Patches','Peaches','Peanut','Pecan','Perogi','Phil','Pickles','Pistachio','Ponyfish','Popcorn','Poppy','Porkchop','Porky','Pouncival','Princess','Pudding','Puss','Radish','Raisin','Rambo','Ramen','Reuben','Rooster','Rum Tum','Rumpleteazer','Rumpus Cat','Sacha','Sam','Samantha','Sammy','Sausage','Scampi','Scaredy','Sea raven','Shadow','Shortcake','Simba','Simon','Skimbleshanks','Smokey','Smudge','Sneaky','Snook','Snooty','Snots','Sooty','Sophie','Sorbet','Spaghetti','Sparkles','Sparky','Splashes','Sploosh','Squash','Sriracha','Stan','Stickers','String Bean','Sweet Pea','Sylvester','Synonym','Taffy','Tallulah','Tapetail','Tesla','Thumper','Thunder','Thyme','Tiger','Tigger','Timmy','Tink','Tinks','Tinky','Tippy','Toast','Tofu','Tom','Toothless','Tootsie','Treefish','Truffle','Turbo','Turkeyfish','Turnip','Turtle','Twinkie','Velvetfish','Victoria the White Cat','Vimba','Wahoo','Walleye','Warmouth','Weasel shark','Whiskers','Whiskey','Wolf-eel','Wonton','Wrymouth','Yam','Yellow-eye mullet','Yogi','Zingle','Ziti','Ziggy'];
+let dogNames = ['Abbie', 'Abby', 'Abigail', 'Ace', 'Achilles', 'Addie', 'Ajax', 'Ali', 'Alice', 'Allie', 'Amber', 'Angel', 'Angus', 'Annie', 'Apollo', 'Archie', 'Arlo', 'Aspen', 'Athena', 'Atlas', 'Aurora', 'Axel', 'Babe', 'Baby', 'Baby Girl', 'Bailey', 'Bandit', 'Banjo', 'Barley', 'Baxter', 'Bear', 'Beau', 'Bella', 'Belle', 'Ben', 'Benny', 'Bentley', 'Bernie', 'Blaze', 'Blue', 'Bo', 'Bob', 'Bobby', 'Bodhi', 'Bolt', 'Boo', 'Boomer', 'Boots', 'Bowser', 'Brandy', 'Bristol', 'Brodie', 'Brody', 'Bruce', 'Bruno', 'Brutus', 'Bubba', 'Buddy', 'Buster', 'Caesar', 'Cali', 'Callie', 'Casey', 'Cash', 'Cassie', 'Chai', 'Chance', 'Charley', 'Charlie', 'Charlotte', 'Chase', 'Chena', 'Chevy', 'Chewy', 'Chica', 'Chico', 'Chief', 'Chinook', 'Chip', 'Chloe', 'Cinder', 'Cinnamon', 'Coal', 'Coco', 'Cocoa', 'Cody', 'Comet', 'Cookie', 'Cooper', 'Copper', 'Cosmo', 'Cricket', 'Daisy', 'Daisy Mae', 'Dakota', 'Dallas', 'Daphne', 'Dash', 'Dawson', 'Dax', 'Delilah', 'Denali', 'Deshka', 'Dexter', 'Diamond', 'Diego', 'Diesel', 'Dixie', 'Dobby', 'Doc', 'Dozer', 'Drake', 'Dude', 'Duke', 'Dusty', 'Dutch', 'Eddie', 'Ella', 'Ellie', 'Elsa', 'Elvis', 'Ember', 'Emma', 'Eva', 'Fancy', 'Finley', 'Finn', 'Fiona', 'Foxy', 'Frank', 'Frankie', 'Freya', 'Fritz', 'Frodo', 'George', 'Gertie', 'Gigi', 'Ginger', 'Gizmo', 'Goldie', 'Goose', 'Grace', 'Gracie', 'Grizzly', 'Gunner', 'Gus', 'Gypsy', 'Hank', 'Hannah', 'Harley', 'Hatcher', 'Hazel', 'Heidi', 'Henry', 'Hercules', 'Holly', 'Homer', 'Honey', 'Hope', 'Hunter', 'Indy', 'Isabella', 'Isis', 'Ivy', 'Izzy', 'Jack', 'Jackson', 'Jade', 'Jager', 'Jake', 'Jasmine', 'Jasper', 'Jax', 'Jaxx', 'Jazz', 'Jenny', 'Jesse', 'Jethro', 'Joe', 'Joey', 'Josie', 'Joy', 'Juno', 'Kai', 'Kaiser', 'Kane', 'Karma', 'Katie', 'Kaya', 'Kenai', 'Keta', 'Kiki', 'Kimber', 'King', 'Kinley', 'Kira', 'Kiska', 'Kita', 'Koa', 'Kobe', 'Kobuk', 'Koda', 'Kodiak', 'Koko', 'Kona', 'Lady', 'Layla', 'Leia', 'Lenny', 'Leo', 'Lexi', 'Lila', 'Lilly', 'Lily', 'Lincoln', 'Logan', 'Loki', 'Lola', 'Louie', 'Lucky', 'Lucy', 'Luka', 'Luke', 'Lulu', 'Luna', 'Mabel', 'Macy', 'Maddie', 'Maddy', 'Madison', 'Maggie', 'Major', 'Marley', 'Mason', 'Matilda', 'Mattie', 'Maui', 'Maverick', 'Max', 'Maximus', 'Maya', 'Mckinley', 'Mia', 'Mickey', 'Midnight', 'Mila', 'Miley', 'Millie', 'Milo', 'Mimi', 'Minnie', 'Mishka', 'Miska', 'Missy', 'Misty', 'Mocha', 'Mojo', 'Moki', 'Molly', 'Moose', 'Morgan', 'Murphy', 'Nala', 'Nanook', 'Nellie', 'Nikki', 'Nina', 'Nova', 'Nugget', 'Nukka', 'Oakley', 'Obi', 'Odie', 'Odin', 'Olive', 'Oliver', 'Ollie', 'Onyx', 'Oreo', 'Oscar', 'Otis', 'Otto', 'Ozzy', 'Panda', 'Papi', 'Parker', 'Patch', 'Peaches', 'Peanut', 'Pearl', 'Penelope', 'Penny', 'Pepper', 'Percy', 'Phoebe', 'Piper', 'Pixie', 'Poppy', 'Porter', 'Prince', 'Princess', 'Quinn', 'Radar', 'Raider', 'Ranger', 'Rascal', 'Raven', 'Rebel', 'Red', 'Reggie', 'Remi', 'Remington', 'Remy', 'Rex', 'Rico', 'Riley', 'Rio', 'Ripley', 'River', 'Rocco', 'Rocket', 'Rocky', 'Roger', 'Romeo', 'Roo', 'Roscoe', 'Rose', 'Rosie', 'Rowdy', 'Roxie', 'Roxy', 'Ruby', 'Rudy', 'Rufus', 'Ruger', 'Rusty', 'Ryder', 'Sadie', 'Sally', 'Sam', 'Samantha', 'Sammy', 'Sampson', 'Sandy', 'Sara', 'Sarge', 'Sasha', 'Sassy', 'Scooby', 'Scooter', 'Scout', 'Scrappy', 'Shadow', 'Sheba', 'Shelby', 'Sherman', 'Shiloh', 'Sierra', 'Simba', 'Simon', 'Sitka', 'Skippy', 'Skye', 'Smokey', 'Snickers', 'Sophia', 'Sophie', 'Sparky', 'Spike', 'Stanley', 'Star', 'Stella', 'Stormy', 'Sugar', 'Summer', 'Sunny', 'Sweet Pea', 'Sweetie', 'Sydney', 'Tallulah', 'Tank', 'Taz', 'Teddy', 'Thor', 'Thunder', 'Tiger', 'Tilly', 'Timber', 'Tinkerbell', 'Titan', 'Titus', 'Toby', 'Tonka', 'Tori', 'Trapper', 'Trigger', 'Trinity', 'Trixie', 'Trooper', 'Tucker', 'Tuffy', 'Tundra', 'Turbo', 'Tyson', 'Violet', 'Watson', 'Whiskey', 'Willow', 'Winnie', 'Winston', 'Wrigley', 'Xena', 'Yoda', 'Yuki', 'Yukon', 'Zeke', 'Zelda', 'Zeus', 'Ziggy', 'Ziva', 'Zoe', 'Zoey'];
 let projectPart0 = ['project', 'operation', 'system', 'the','strategy','industrial','project'];//,'account','group'];
 let projectPart1 = ['robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry'];
 let projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi'];
@@ -1586,9 +1658,16 @@ function LevelUp() {
   let items = game.AllLevelItems["l" + game.Level];
   if (items != undefined) {
     for(const item of items) {
-      game.StoreItems[item.id].enabled = true;//.push(item);
+      game.StoreItems[item.id].enabled = true;
     }
     addClass(".visitStore", 'hint');
+  }
+
+  if (testMode) {
+    for (let key of Object.keys(game.StoreItems)) {
+      game.StoreItems[key].enabled = true;
+      game.StoreItems[key].price = 5;
+    }
   }
 
   switch(game.Level) {
@@ -1715,6 +1794,15 @@ function purchase(itemId:number):void {
   // Add a shallow clone of the item (not the item itself)
   let clone = Object.assign({}, item);
   clone.id = nextId();
+  if (clone.code == ItemCode.dog) {
+    clone.icon = randomItem(dogIcons);
+    clone.name = randomItem(dogNames);
+  }
+  if (clone.code == ItemCode.cat) {
+    clone.icon = randomItem(catIcons);
+    clone.name = randomItem(catNames);
+  }
+
   game.Items["i" + clone.id] = clone;
   
   drawStoreMessage(`You bought ${clone.name} ${clone.icon} for 💲${clone.price}. Nice!`);

@@ -175,6 +175,21 @@ no: are observations now chained with self-start? seems too extreme. REMOVING ob
 
 # DONE
 
+[x] things in the done column should always appear faded out like their busy, but basically unselectable
+[x] When person returns from completing a self-started task, they should highlight themselves if there is a selected object of consequence
+[x] dog: consistent icon (random choice at first)
+[x] dog to have a name
+[x] cat: consistent icon (random choice at first)
+[x] cat to have a name 
+[x] Add to store: 
+[x] headphones 🎧 
+[x] Desk plant 🌳
+[x] Desk cactus 🌵
+[x] cookie 🍪 ($1, not unlocked until level 100)
+[x] for dev/ba/test: If level > 9 -- use infinity symbol not a number
+[x] if person is the selected doer then they cannot self-start at that moment.
+[x] Dogs, cats and store items shouldn't count towards number of items in column, only stories.
+[x] cat nerd doesn't render correctly (on iOS at least)
 
 [x] remove observation skill
 [x] rename self-start to initiative
