@@ -10,6 +10,29 @@
 <title>DevShop</title>
 </head>
 <style>
+
+.elapsed {
+  position:absolute;
+  background-color:red;
+  display:inline-block;
+  width:2px;
+  min-width:2px;
+  max-width:2px;
+  padding:0;
+  margin:0;
+  bottom:0;
+  right:0;
+}
+.time-bars {
+ position:absolute;
+ right:0;
+ height:100%;
+ width:2px;
+ top:0;
+ min-width:2px;
+ max-width:2px;
+}
+
 .count {
   position:absolute;
   bottom:0;
@@ -57,6 +80,7 @@
 
 .item-disabled {
 opacity:0.4;
+filter: grayscale(100%);
 }
 
 body {
@@ -209,10 +233,8 @@ th {
 .storeItem-catalog {
   font-family: 'lucida console', monospace;
   font-size: 8pt;
-  float:left;
   border:1px solid #333;
   position:relative;
-  display:block;
   margin:4px 0;
   width:calc(100vw - 6ch);
   display:block;
@@ -254,7 +276,7 @@ th {
   margin:0 0;
 }
 
-#xp, #level {
+#xp, #level, #rate {
   text-shadow:0 2px 2px #CCC;
   float:right;
   margin:0 20px 0 0;
@@ -347,7 +369,7 @@ th {
 }
 .points {
   position:absolute;
-  bottom:0;
+  bottom:1px;
   left:3px;
 }
 
@@ -440,8 +462,10 @@ th {
 </style>
 <body>
 <span id='money' title='cash on hand'>💲100</span>
+<span id='rate' title='revenue rate' class='hidden'>~💲0/min</span>
 <span id='xp' title='eXperience Points'>0/50🥓</span>
 <span id='level' title='Level'>1🥑</span>
+
 <h1>DevShop</h1>
 
 <div class='button' id='start' onclick='go();'>🌟 start</div>

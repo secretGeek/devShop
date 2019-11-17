@@ -1,19 +1,27 @@
 //Definitely
 // [ ] size on ipad: too wide. why?
-// [ ] add to store:
-//  - Games console 🕹
-//  - Deluxe Games console 🎮
-//  - Desk A/C ❄
+// [ ] Store: column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
 // [ ] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
-// [ ] Multi-skilled person choosing task to do could be based on: total number of points in a column divided by number of people with that skill. Worst ratio? Do that next. In case of tie-break, go with right most column.
 // [ ] 🐛Words wrap in store
 // [ ] 🐛Icons and help icon are not vertically centered in store (other content is not either)
-// [ ] more technical names for tasks
+// [ ] Training should have a time cost (? increases at higher levels of training)
+// [ ] Multi-skilled person choosing task to do could be based on: 
+//        total number of points in a column divided by number of people with that skill. 
+//        Worst ratio? Do that next. In case of tie-break, go with right most column.
+//        No -- if any are worse than the threshold -- do the worst.
+//        if all are better than the threshold, choose from the right.
 // [ ] show (but disabled) buy dev / buy tester button when first starting
 // [ ] keybinding -- letters to people
 // [ ] keybinding -- multiple presses of a number will cycle through the cards in that column
 // [ ] Consider: have a slow loop that checks if any one with selfStart who is not selected or busy has a triggerTime that's stale by > 2* maxtriggertime and if so call 'trySelfStart'
-// [ ] Store: column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
+// [ ] more technical names for tasks
+// [ ] add to store:
+//  - Games console 🕹
+//  - Deluxe Games console 🎮
+//  - Desk A/C ❄
+//  - pingpong table 🏓
+//  - donut machine 🏭
+//  - cityscape at dusk 🌆
 // [ ] front page:
 // -> Start
 // -> (later: Resume  -- saved games)
@@ -25,13 +33,23 @@
 // 
 var testMode = false; //true;
 var storeFeatureFlag = true; //testMode;
-var debugOutput = (testMode || getParameterByName('debug') == "true");
+var timeBarFeatureFlag = false;
+var debugOutput = false;
 var avgDuration = testMode ? 4 : 600;
 var startingMoney = testMode ? 100 : 100;
 var game;
+// basic test modes
+testMode = (testMode || getParameterByName('testmode') == "true");
+debugOutput = (debugOutput || testMode || getParameterByName('debug') == "true");
+// basic feature flags  
+timeBarFeatureFlag = (timeBarFeatureFlag || getParameterByName('timebarflag') == "true"); //?timebarflag=true
+storeFeatureFlag = (storeFeatureFlag || getParameterByName('storeflag') == "true"); //?storeflag=true
 if (debugOutput) {
     $id('debug').classList.remove('hidden');
     log('debug mode detected');
+}
+if (timeBarFeatureFlag) {
+    $id('rate').classList.remove('hidden');
 }
 var ItemCode;
 (function (ItemCode) {
@@ -44,26 +62,27 @@ var ItemCode;
     ItemCode[ItemCode["seat"] = 7] = "seat";
     ItemCode[ItemCode["coffee"] = 8] = "coffee";
     ItemCode[ItemCode["coffeemachine"] = 9] = "coffeemachine";
-    ItemCode[ItemCode["cupcake"] = 10] = "cupcake";
-    ItemCode[ItemCode["donut"] = 11] = "donut";
-    ItemCode[ItemCode["pizza"] = 12] = "pizza";
-    ItemCode[ItemCode["banana"] = 13] = "banana";
-    ItemCode[ItemCode["toast"] = 14] = "toast";
-    ItemCode[ItemCode["keyboard"] = 15] = "keyboard";
-    ItemCode[ItemCode["x_bafortest"] = 16] = "x_bafortest";
-    ItemCode[ItemCode["x_bafordev"] = 17] = "x_bafordev";
-    ItemCode[ItemCode["x_testforba"] = 18] = "x_testforba";
-    ItemCode[ItemCode["x_testfordev"] = 19] = "x_testfordev";
-    ItemCode[ItemCode["x_devforba"] = 20] = "x_devforba";
-    ItemCode[ItemCode["x_devfortest"] = 21] = "x_devfortest";
-    ItemCode[ItemCode["poster"] = 22] = "poster";
-    ItemCode[ItemCode["crystalball"] = 23] = "crystalball";
-    ItemCode[ItemCode["statue"] = 24] = "statue";
-    ItemCode[ItemCode["statue2"] = 25] = "statue2";
-    ItemCode[ItemCode["cookie"] = 26] = "cookie";
-    ItemCode[ItemCode["headphones"] = 27] = "headphones";
-    ItemCode[ItemCode["deskplant"] = 28] = "deskplant";
-    ItemCode[ItemCode["cactus"] = 29] = "cactus";
+    ItemCode[ItemCode["donutmachine"] = 10] = "donutmachine";
+    ItemCode[ItemCode["cupcake"] = 11] = "cupcake";
+    ItemCode[ItemCode["donut"] = 12] = "donut";
+    ItemCode[ItemCode["pizza"] = 13] = "pizza";
+    ItemCode[ItemCode["banana"] = 14] = "banana";
+    ItemCode[ItemCode["toast"] = 15] = "toast";
+    ItemCode[ItemCode["keyboard"] = 16] = "keyboard";
+    ItemCode[ItemCode["x_bafortest"] = 17] = "x_bafortest";
+    ItemCode[ItemCode["x_bafordev"] = 18] = "x_bafordev";
+    ItemCode[ItemCode["x_testforba"] = 19] = "x_testforba";
+    ItemCode[ItemCode["x_testfordev"] = 20] = "x_testfordev";
+    ItemCode[ItemCode["x_devforba"] = 21] = "x_devforba";
+    ItemCode[ItemCode["x_devfortest"] = 22] = "x_devfortest";
+    ItemCode[ItemCode["poster"] = 23] = "poster";
+    ItemCode[ItemCode["crystalball"] = 24] = "crystalball";
+    ItemCode[ItemCode["statue"] = 25] = "statue";
+    ItemCode[ItemCode["statue2"] = 26] = "statue2";
+    ItemCode[ItemCode["cookie"] = 27] = "cookie";
+    ItemCode[ItemCode["headphones"] = 28] = "headphones";
+    ItemCode[ItemCode["deskplant"] = 29] = "deskplant";
+    ItemCode[ItemCode["cactus"] = 30] = "cactus";
 })(ItemCode || (ItemCode = {}));
 function getAllLevelItems() {
     //These are the items that become available in the store at each level.
@@ -99,7 +118,7 @@ function getAllLevelItems() {
             { id: 170, name: 'Piece of Toast', price: 10, icon: "🍞", skillneeded: "any", busy: false, code: ItemCode.toast, activeDuration: 15, description: 'It\'s a piece of toast. How much could it be?', enabled: false },
         ],
         "l9": [
-            { id: 175, name: 'Initiative Training', price: 500, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled: false },
+            { id: 175, name: '⭐ Initiative Training ⭐', price: 500, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled: false },
         ],
         "l10": [
             { id: 180, name: 'Coffee Machine', price: 4000, icon: "⛽", skillneeded: "any", busy: false, code: ItemCode.coffeemachine, activeDuration: 0, description: 'A coffee machine at your desk, your performance will be irreparably improved.', enabled: false },
@@ -108,10 +127,12 @@ function getAllLevelItems() {
             { id: 200, name: 'Inspirational poster', price: 30000, icon: "🌄", skillneeded: "any", busy: false, code: ItemCode.poster, activeDuration: 0, description: 'Enhance your cubicle and improve your concentration.', enabled: false },
         ],
         "l12": [
-            { id: 210, name: 'Desk cactus', price: 1000, icon: "🌵", skillneeded: "any", busy: false, code: ItemCode.cactus, activeDuration: 0, description: 'A desk cactus has been scientifically proven to have no impact on your productivity at all. But it\'s cool.', enabled: false },
-            { id: 220, name: 'Desk plant', price: 500, icon: "🌳", skillneeded: "any", busy: false, code: ItemCode.deskplant, activeDuration: 0, description: 'Beautiful desk plant improves the workplace and decreases your error rate.', enabled: false },
+            { id: 210, name: 'Desk cactus', price: 1100, icon: "🌵", skillneeded: "any", busy: false, code: ItemCode.cactus, activeDuration: 0, description: 'A desk cactus has been scientifically proven to have no impact on your productivity at all. But it\'s cool.', enabled: false },
+            { id: 220, name: 'Desk plant', price: 502, icon: "🌳", skillneeded: "any", busy: false, code: ItemCode.deskplant, activeDuration: 0, description: 'Beautiful desk plant improves the workplace and decreases your error rate.', enabled: false },
         ],
-        "l13": [],
+        "l13": [
+            { id: 225, name: 'Donut Machine', price: 31000, icon: "🏭", skillneeded: "any", busy: false, code: ItemCode.donutmachine, activeDuration: 0, description: 'It is possibly unwise to have a donut machine at your desk. Sugar is a hell of a drug.', enabled: false },
+        ],
         "l14": [],
         "l15": [
             { id: 250, name: 'Mystical Statue', price: 40000, icon: "🗿", skillneeded: "any", busy: false, code: ItemCode.statue2, activeDuration: 0, description: 'Mystical statue improves your workplace.', enabled: false },
@@ -172,6 +193,11 @@ var Game = /** @class */ (function () {
         this.SelectedReceiver = null;
         this.DefaultSelfStartDelay = testMode ? 12000 : 12000; //12 second pause between self-starters polling the board.
         this.AnimalTendingDelay = 3900;
+        this.MaxAge = 120; // give them 2 minuts to complete *every* project; (increases slightly each level)
+        this.StartTime = new Date();
+        this.LifeTimeRevenue = 0;
+        this.LifeTimeRevenueMinus1Minute = 0;
+        this.PositiveCashFlows = [];
     }
     return Game;
 }());
@@ -261,6 +287,27 @@ function removeStory(key) {
     s.parentNode.removeChild(s);
     updateColumnCount(column);
 }
+function drawTimebar(target, key, story) {
+    //const el = document.getElementById('kanbanboard');
+    //let s = el.querySelector('#' + key + " .time-bars .elapsed") as HTMLDivElement;
+    if (target != null) {
+        log("HEY");
+        //let story = stories[key];
+        var percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
+        target.style.height = "" + percent + "%";
+        target.style.minHeight = "" + percent + "%";
+        target.style.maxHeight = "" + percent + "%";
+        var bg = "red";
+        if (percent >= 40) {
+            bg = "green";
+        }
+        else if (percent > 10) {
+            bg = "orange";
+        }
+        log("percent " + percent);
+        target.style.backgroundColor = bg;
+    }
+}
 function drawStory(key, stories, top) {
     var el = document.getElementById('kanbanboard');
     var s = el.querySelector('#' + key);
@@ -277,10 +324,18 @@ function drawStory(key, stories, top) {
     if (story.busy) {
         busy = " busy";
     }
+    var selected = "";
+    if (game.SelectedReceiver == key) {
+        selected = " selected";
+    }
+    if (isPossible(story)) {
+        selected = " possible";
+    }
     var points = "<span class='points'>" + story.points + "</span>";
     // if the story is done, don't add a click handler.
     var handler = story.skillneeded == "done" ? "" : "onclick='clickReceiver(\"" + key + "\");'";
-    var shtml = "<span class='story receiver " + story.skillneeded + busy + "' id='" + key + "' " + handler + "><span class='story-detail'>" + logo + " " + story.summary + "</span>" + avatar + points + "</span>";
+    var timebar = timeBarFeatureFlag ? generateTimebarHtml(story) : "";
+    var shtml = "<span class='story receiver " + story.skillneeded + busy + selected + "' id='" + key + "' " + handler + "><span class='story-detail'>" + logo + " " + story.summary + "</span>" + avatar + points + timebar + "</span>";
     if (s != null) {
         s.outerHTML = shtml;
     }
@@ -294,7 +349,29 @@ function drawStory(key, stories, top) {
             column.appendChild(newstory);
         }
     }
+    if (timeBarFeatureFlag) {
+        var target = el.querySelector('#' + key + " .time-bars .elapsed");
+        drawTimebar(target, key, story);
+    }
     updateColumnCount(story.skillneeded);
+}
+// absolute date diff in whole seconds
+function dateDiff_s(date1, date2) {
+    var diff = (date1.getTime() - date2.getTime()) / 1000;
+    return Math.abs(Math.round(diff));
+}
+//consider: make this a method on story
+function projectAge_s(story) {
+    return dateDiff_s(story.startingTime, new Date());
+}
+function getTenthsOfTimeElapsed(story) {
+    var age_s = projectAge_s(story);
+    //we will draw a total of 5 bars, so tenths are what matters.
+    var maxAge_seconds = story.maxAge;
+    return Math.floor(age_s / (maxAge_seconds / 10));
+}
+function generateTimebarHtml(story) {
+    return "<div class='time-bars'><span class='elapsed'></span></div>";
 }
 function updateColumnCount(column) {
     var target = $('#' + column + ' .inner .count');
@@ -310,6 +387,14 @@ function updateColumnCount(column) {
 function drawStories(stories) {
     for (var key in stories) {
         drawStory(key, stories, stories[key].rework);
+    }
+}
+function drawTimebars(stories) {
+    var el = document.getElementById('kanbanboard');
+    for (var key in stories) {
+        var target = el.querySelector('#' + key + " .time-bars .elapsed");
+        drawTimebar(target, key, stories[key]);
+        ;
     }
 }
 function drawInboxItem(key, item) {
@@ -406,6 +491,7 @@ function go() {
     removeClass('#getLead', 'hidden'); //show 'purchase sales lead' button
     addClass(".getPerson", 'hidden'); //hide 'buy dev/test/ba' buttons. (They are re-enabled when total >= 300)
     drawMessage("STEP 1: press '🎁 find project'");
+    startMainLoop();
 }
 function getNewLead() {
     DeSelectDoerAndReceiver();
@@ -420,7 +506,25 @@ function getNewLead() {
     incrementXP(5);
     // TODO: instead of 10 points and value 1000....
     // should be based on current level... some randomness.
-    var newLead = { id: nextId(), points: game.ProjectSize, pointPrice: game.PointPrice, value: 1000, status: "lead", skillneeded: "ba", summary: projectName(), logo: getLogo(), person: null, busy: false, icon: null, hasBug: false, hasSpecBug: false, customerFoundBug: null, projectId: null, rework: false };
+    var newLead = {
+        id: nextId(),
+        points: game.ProjectSize,
+        pointPrice: game.PointPrice,
+        status: "lead",
+        skillneeded: "ba",
+        summary: projectName(),
+        logo: getLogo(),
+        person: null,
+        busy: false,
+        icon: null,
+        hasBug: false,
+        hasSpecBug: false,
+        customerFoundBug: null,
+        projectId: null,
+        rework: false,
+        startingTime: new Date(),
+        maxAge: game.MaxAge
+    };
     if (isEmpty(game.Stories)) {
         // this was the first lead ever! give them a tip...
         drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the Founder " + game.People["p1"].icon + " (or vice-versa)");
@@ -468,7 +572,8 @@ function getNewPerson(skill) {
         keyboardLevel: 0,
         headphoneLevel: 0,
         selfStartDelay: game.DefaultSelfStartDelay,
-        triggerTime: null };
+        triggerTime: null
+    };
     game.People['p' + id] = newEmployee;
     drawPerson('p' + id, game.People);
     // Every time you hire a person the price for that type inflates by a LOT.
@@ -498,6 +603,19 @@ document.onkeypress = function (e) {
             break;
     }
 };
+function isPossible(story) {
+    if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
+        if (story.skillneeded == "any")
+            return true;
+        console.log("skillneeded", story.skillneeded);
+        var skills = game.People[game.SelectedDoer].skills;
+        console.log(skills);
+        if (Object.keys(skills).includes(story.skillneeded)) {
+            return true;
+        }
+    }
+    return false;
+}
 function updatePossible() {
     if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
         //As a 'doer' -- highlight everything I can do.  (where not busy)
@@ -505,7 +623,6 @@ function updatePossible() {
         //for(const skill of game.People[game.SelectedDoer].skills) {
         for (var _i = 0, _a = Object.keys(skills); _i < _a.length; _i++) {
             var key = _a[_i];
-            log(key);
             addClass("." + key + ".receiver:not(.busy)", 'possible');
         }
         addClass(".any.receiver:not(.busy)", 'possible');
@@ -617,14 +734,10 @@ function tryDo(doId, receiverId, viaDoer) {
     removeAllClass("possible");
     game.SelectedReceiver = null;
     game.SelectedDoer = null;
-    //doer.selfStartNow = doer.selfStarterLevel;
     doIt(doId, receiverId);
 }
 function useIt(doId, item) {
     var person = game.People[doId];
-    //drawMessage(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
-    //log(`${person.name} ${person.icon} is gonna use ${item.name} ${item.icon}`);
-    //alert('person ' + doId + ' is gonna use the ' + JSON.stringify(item));
     applyItem(person, item);
     drawPerson('p' + person.id, game.People);
     removeStory('i' + item.id);
@@ -707,6 +820,7 @@ function applyItem(person, item) {
         case ItemCode.coffeemachine:
         case ItemCode.cupcake:
         case ItemCode.donut:
+        case ItemCode.donutmachine:
         case ItemCode.pizza:
         case ItemCode.crystalball:
         case ItemCode.poster:
@@ -880,6 +994,8 @@ function getEfficiency(person, skill) {
         level++;
     if (personHas(person, ItemCode.donut))
         level++;
+    if (personHas(person, ItemCode.donutmachine))
+        level++;
     if (personHas(person, ItemCode.pizza))
         level++;
     if (personHas(person, ItemCode.banana))
@@ -1038,19 +1154,37 @@ function determineIfAddingSkillBug(person, story, skill) {
     }
     return false;
 }
-function ElaborateProject(story, person) {
-    var numCards = Math.floor(story.points / 3) + 1;
-    log("Lead: " + story.summary + " " + story.logo + " has been analyzed. " + numCards + " stories are being created.");
-    var remainingPointsToAllocate = story.points;
+function ElaborateProject(project, person) {
+    var numCards = Math.floor(project.points / 3) + 1;
+    log("Lead: " + project.summary + " " + project.logo + " has been analyzed. " + numCards + " stories are being created.");
+    var remainingPointsToAllocate = project.points;
     var newCards = [];
     // Deal out starting cards worth 1 point each.
     for (var i = 0; i < numCards; i++) {
         var summary = getTask();
-        var newCard = { id: nextId(), pointPrice: story.pointPrice, points: 1, value: 200, status: "story", skillneeded: "dev", summary: summary, logo: story.logo, projectId: 'r' + story.id, person: null, icon: null, busy: false, hasBug: false, hasSpecBug: false, customerFoundBug: null, rework: false };
+        var newCard = {
+            id: nextId(),
+            pointPrice: project.pointPrice,
+            points: 1,
+            status: "story",
+            skillneeded: "dev",
+            summary: summary,
+            logo: project.logo,
+            projectId: 'r' + project.id,
+            person: null,
+            icon: null,
+            busy: false,
+            hasBug: false,
+            hasSpecBug: false,
+            customerFoundBug: null,
+            rework: false,
+            startingTime: project.startingTime,
+            maxAge: project.maxAge
+        };
         game.Stories['r' + newCard.id] = newCard;
         newCards.push(newCard);
         //Add this new card to the list of stories for that project.
-        game.Projects['r' + story.id].stories.push('r' + newCard.id);
+        game.Projects['r' + project.id].stories.push('r' + newCard.id);
     }
     //okay we've given a point to each card.
     remainingPointsToAllocate -= numCards;
@@ -1060,7 +1194,7 @@ function ElaborateProject(story, person) {
         card.points += 1;
         remainingPointsToAllocate--;
     }
-    for (var _i = 0, _a = game.Projects['r' + story.id].stories; _i < _a.length; _i++) {
+    for (var _i = 0, _a = game.Projects['r' + project.id].stories; _i < _a.length; _i++) {
         var cardId = _a[_i];
         var hasSpecBug = false;
         //jalert(cardId);
@@ -1210,10 +1344,23 @@ function bankStory(storyId) {
     var price = Math.floor(story.points * story.pointPrice);
     var message2 = " for '" + story.summary + "'";
     incrementXP(5);
+    //we need to work out if there is a quick time bonus... or a slow time penalty.
     if (story.customerFoundBug) {
         //price = Math.floor(price/2);
         message2 += " (reduced as customer found that bug)";
         //price is reduced because customer previously found a bug in this!.
+    }
+    var timeBonus = 0;
+    if (timeBarFeatureFlag) {
+        var tenths = getTenthsOfTimeElapsed(story);
+        if (tenths < 7) {
+            timeBonus = Math.ceil(0.1 * story.points * story.pointPrice);
+            message2 += " and time-bonus of 💲" + timeBonus + "❕";
+        }
+        else if (tenths >= 10) {
+            timeBonus = Math.ceil(-0.5 * story.points * story.pointPrice);
+            message2 += " MINUS time-penalty 😭 of 💲" + Math.abs(timeBonus) + "❗";
+        }
     }
     var projectId = game.Stories[storyId].projectId;
     //remove the story from the project it belongs to.
@@ -1224,15 +1371,26 @@ function bankStory(storyId) {
         //if there are no stories remaining then a project completion bonus is paid.
         if (project.stories.length == 0) {
             bonus = Math.ceil(project.lead.points * project.lead.pointPrice / 2);
-            message2 += " plus \uD83D\uDCB2" + bonus + " for completing '" + project.lead.summary + " " + project.lead.logo + "'!";
+            message2 += " plus \uD83D\uDCB2" + bonus + " for completing " + project.lead.summary + " " + project.lead.logo;
             for (var s in project.stories) {
                 delete game.Stories[s];
             }
             delete game.Projects[projectId];
             incrementXP(10);
+            if (timeBarFeatureFlag) {
+                var tenths = getTenthsOfTimeElapsed(story);
+                if (tenths < 7) {
+                    timeBonus = Math.ceil(project.lead.points * project.lead.pointPrice * 0.1);
+                    message2 += " ...and project time-bonus of 💲" + timeBonus + "❕";
+                }
+                else if (tenths >= 10) {
+                    timeBonus = Math.ceil(-1.9 * project.lead.points * project.lead.pointPrice);
+                    message2 += " ...MINUS time-penalty 😭 of 💲" + Math.abs(timeBonus) + "❗";
+                }
+            }
         }
     }
-    incrementMoney(price + bonus);
+    incrementMoney(price + bonus + timeBonus);
     drawMoney(game.Money);
     drawMessage("Earned \uD83D\uDCB2" + price + message2);
     removeStory(storyId);
@@ -1333,6 +1491,7 @@ function LevelUp() {
     game.LevelUpXP = Inflate(game.Inflation, game.LevelUpXP);
     game.PointPrice = Inflate(game.Inflation, game.PointPrice);
     game.ProjectSize = Inflate(game.SmallInflation, game.ProjectSize);
+    game.MaxAge += 5; //an extra 5 seconds is allowed for completing projects on each level;
     var items = game.AllLevelItems["l" + game.Level];
     if (items != undefined) {
         for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
@@ -1393,6 +1552,11 @@ function Inflate(inflation, value) {
 // TODO: add this to game class
 function incrementMoney(amount) {
     game.Money += amount;
+    if (amount > 0) {
+        game.LifeTimeRevenue += amount;
+        var payment = { amount: amount, when: new Date() };
+        game.PositiveCashFlows.push(payment);
+    }
     if (game.Money >= game.HighestMoney) {
         game.HighestMoney = game.Money;
     }
@@ -1481,4 +1645,40 @@ function log(message) {
         $id('debug').appendChild(m);
     }
     console.log(message);
+}
+var mainIntervalId;
+function startMainLoop() {
+    mainIntervalId = setInterval(mainLoop, 1000);
+}
+function stopMainLoop() {
+    clearInterval(mainIntervalId);
+}
+function mainLoop() {
+    //detect age of cards.
+    //nah -- just update the timebars.
+    if (timeBarFeatureFlag) {
+        drawTimebars(game.Stories);
+        trackIncome();
+    }
+}
+function trackIncome() {
+    var now = new Date();
+    //how long has the game been going?
+    var gameAge_s = Math.floor(Math.abs(game.StartTime.getTime() - now.getTime()) / 1000);
+    if (gameAge_s > 60) {
+        var OneMinuteAgo = new Date(now.getTime() - 60000);
+        var toRemove_1 = [];
+        //remove any incomes from start of 
+        for (var _i = 0, _a = game.PositiveCashFlows; _i < _a.length; _i++) {
+            var x = _a[_i];
+            if (x.when > OneMinuteAgo)
+                break;
+            game.LifeTimeRevenueMinus1Minute += x.amount;
+            toRemove_1.push(x);
+        }
+        game.PositiveCashFlows = game.PositiveCashFlows.filter(function (item) { return !toRemove_1.includes(item); });
+    }
+    var sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
+    //<span id='rate' title='revenue rate'>💲0/min</span>
+    $id('rate').innerText = '~💲' + sixtySecondIncome + "/min";
 }

@@ -175,6 +175,9 @@ no: are observations now chained with self-start? seems too extreme. REMOVING ob
 
 # DONE
 
+[x] donut machine 🏭 - similar effects to coffee machine. Doesn't seem advisable though.
+[x] cards and projects age. After X minutes, they are worth 0. progress bar along the side.
+[x] show 💲/min
 [x] things in the done column should always appear faded out like their busy, but basically unselectable
 [x] When person returns from completing a self-started task, they should highlight themselves if there is a selected object of consequence
 [x] dog: consistent icon (random choice at first)
