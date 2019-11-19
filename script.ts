@@ -1,4 +1,22 @@
 //Definitely
+
+// (Or replace 'load' with 'resume' and have it say "12 🥑 153 🥓" .. and perhaps a time??)
+
+// [x] start button
+// [x] load button
+// [ ] populate load screen
+// [x] exit load screen
+// [x] about button
+// [ ] about screen (content)
+// [x] exit about
+// [x] mailing list controls
+// [ ] join mailing list functionality joinemail
+// [ ] privacy policy content -- mailing list, google analytics
+// [ ] How to exit the game, and when/how to save.
+//  ?  Your high scores?
+//  ?  Time Challenge
+
+// [ ] add google analytics
 // [ ] size on ipad: too wide. why?
 // [ ] Store: column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
 // [ ] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
@@ -20,7 +38,6 @@
 //  - Deluxe Games console 🎮
 //  - Desk A/C ❄
 //  - pingpong table 🏓
-//  - donut machine 🏭
 //  - cityscape at dusk 🌆
 
 // [ ] front page:
@@ -37,9 +54,11 @@
 let testMode = false;//true;
 let storeFeatureFlag = true;//testMode;
 let timeBarFeatureFlag = false;
+let timePenaltyFeatureFlag = false;
 let debugOutput = false; 
-let avgDuration = testMode ? 4 : 600; 
+let avgDuration = testMode ? 4 : 600;  // factor that all work durations are based on, in milliseconds
 let startingMoney = testMode ? 100 : 100;
+let defaultCompletionTime = testMode? 10 : 100; //how long have you got to complete a project, in seconds?
 let game: Game;
 
 // basic test modes
@@ -99,8 +118,8 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
   //The 'code' property is used in `function useIt` to decide how the card affects the player.
   let allItems: { [id: string]: StoreItem[]; } = 
       { "l2": //Level 2 Items
-       [{id:5,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:20, description: 'A sugary fix will speed you up... but not for long.', enabled:false},
-       {id:10,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:40, description: 'A cup of joe will speed up any worker …if only for a little while.', enabled:false},      
+       [{id:5,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:30, description: 'A sugary fix will speed you up... but not for long.', enabled:false},
+       {id:10,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:60, description: 'A cup of joe will speed up any worker …if only for a little while.', enabled:false},      
        //{id:14,name:'Initiative Training', price:5, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
        ],
         "l3": //Level 3 Items
@@ -110,8 +129,8 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
         "l4":
        [
         {id:50,name:'Upskill Tester: Fast and Thorough Book Series', price:80, icon:"📘", skillneeded:"test", busy:false, code:ItemCode.upskillTest, activeDuration:0, description:'Already a tester? Be a better tester!', enabled:false},
-        {id:90,name:'Pizza', price:50, icon:"🍕", skillneeded:"any", busy:false, code:ItemCode.pizza, activeDuration:90, description: 'Food can trap your workers in the office by giving them no reason to leave.', enabled:false},
-        {id:100,name:'Banana', price:25, icon:"🍌", skillneeded:"any", busy:false, code:ItemCode.banana, activeDuration:40, description: 'This healthy snack gives a short-lived energy boost', enabled:false},
+        {id:90,name:'Pizza', price:50, icon:"🍕", skillneeded:"any", busy:false, code:ItemCode.pizza, activeDuration:180, description: 'Food can trap your workers in the office by giving them no reason to leave.', enabled:false},
+        {id:100,name:'Banana', price:25, icon:"🍌", skillneeded:"any", busy:false, code:ItemCode.banana, activeDuration:50, description: 'This healthy snack gives a short-lived energy boost', enabled:false},
         {id:105,name:'Cupcake', price:100, icon:"🧁", skillneeded:"any", busy:false, code:ItemCode.cupcake, activeDuration:25, description: 'A cupcake to enjoy. Increase motivation, but not for long.', enabled:false},
       ],
         "l5":
@@ -134,7 +153,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        ],
        "l8":
        [
-        {id:170,name:'Piece of Toast', price:10, icon:"🍞", skillneeded:"any", busy:false, code:ItemCode.toast, activeDuration:15, description: 'It\'s a piece of toast. How much could it be?', enabled:false},
+        {id:170,name:'Piece of Toast', price:10, icon:"🍞", skillneeded:"any", busy:false, code:ItemCode.toast, activeDuration:35, description: 'It\'s a piece of toast. How much could it be?', enabled:false},
 
        ],
        "l9":
@@ -234,8 +253,8 @@ interface PersonType {
 
 function getAllPeopleTypes() : { [id:string]: PersonType; } {
   return { 
-      "dev":  { skill: "dev", price: 150, icon:"💻", title: "dev"},
-      "test": {skill: "test", price: 200, icon:"🔬", title: "tester"},
+      "dev":  { skill: "dev", price: 120, icon:"💻", title: "dev"},
+      "test": {skill: "test", price: 150, icon:"🔬", title: "tester"},
       "ba":   {skill: "ba", price:250, icon:"🗣", title: "business analyst"}
     };
 }
@@ -275,16 +294,22 @@ class Game {
     this.SelectedReceiver = null;
     this.DefaultSelfStartDelay = testMode? 12000 : 12000; //12 second pause between self-starters polling the board.
     this.AnimalTendingDelay = 3900;
-    this.MaxAge = 120; // give them 2 minuts to complete *every* project; (increases slightly each level)
+    this.MaxAge = defaultCompletionTime; // give them this many seconds to complete *every* project; (increases slightly each level)
     this.StartTime = new Date();
     this.LifeTimeRevenue = 0;
     this.LifeTimeRevenueMinus1Minute = 0;
+    this.LifeTimePoints = 0;
+    this.LifeTimePointsMinus1Minute = 0;
     this.PositiveCashFlows = [];
+    this.PositivePointEvents = [];
   }
   Money: number;
   LifeTimeRevenue: number;
   LifeTimeRevenueMinus1Minute: number;
+  LifeTimePoints: number;
+  LifeTimePointsMinus1Minute: number;
   PositiveCashFlows: Payment[];
+  PositivePointEvents: Payment[]; //these payments are points not dollars;
   HighestMoney: number;
   Inflation: number;
   SmallInflation: number;
@@ -480,25 +505,26 @@ function removeStory(key: string):void {
 }
 
 function drawTimebar(target: HTMLSpanElement, key: string, story: Story):void { ///stories: { [x: string]: Story; }, top: boolean):void {
-
-  //const el = document.getElementById('kanbanboard');
-  //let s = el.querySelector('#' + key + " .time-bars .elapsed") as HTMLDivElement;
-
   if (target != null){
-    log("HEY");
-    //let story = stories[key];
     let percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
-    
-    target.style.height = "" + percent + "%";
-    target.style.minHeight = "" + percent + "%";
-    target.style.maxHeight = "" + percent + "%";
-
     let bg = "red";
     if (percent >= 40) {
       bg = "green";
     } else if (percent > 10) {
       bg = "orange";
     }
+    if (percent <= 0 && timePenaltyFeatureFlag) {
+        //The timebar becomes full height red if there will be a time penalty paid.
+        percent = 100; //full-height red bad. TODO: fix color blindness issue though.
+        //might be good to change some other aspect to highlight it is overdue.
+    }
+      
+    
+
+    target.style.height = "" + percent + "%";
+    target.style.minHeight = "" + percent + "%";
+    target.style.maxHeight = "" + percent + "%";
+
     log("percent " + percent);
     target.style.backgroundColor = bg;
   }
@@ -694,12 +720,21 @@ function drawPeople(people: { [id: string] : Person; }):void {
   }
 }
 
+
 function go():void {
+
   initGameState();
   drawRoom();
+  $id('start').classList.remove("pulse");   //hide 'start' button's pulse effect. 
   $id('start').classList.add("hidden");   //hide 'start' button
+  
+  //removeClass('#office', 'hidden');
+  $id('startscreen').classList.add('hidden');
+  $id('office').classList.remove('hidden');
   removeClass('#getLead', 'hidden'); //show 'purchase sales lead' button
+  removeClass('.metrics','hidden');
   addClass(".getPerson", 'hidden'); //hide 'buy dev/test/ba' buttons. (They are re-enabled when total >= 300)
+  
   drawMessage("STEP 1: press '🎁 find project'");
   startMainLoop();
 }
@@ -742,7 +777,7 @@ function getNewLead():void {
 
   if (isEmpty(game.Stories)) {
     // this was the first lead ever! give them a tip...
-    drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the Founder " + game.People["p1"].icon + " (or vice-versa)");
+    drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the " + game.People["p1"].icon + " Founder (or vice-versa)");
   }
 
   game.Stories['r' + newLead.id] = newLead;
@@ -1638,10 +1673,10 @@ function canFindBug(person:Person, skill:string){
 function bankStory(storyId: string) {
   let story = game.Stories[storyId];
 
-  //If story has a bug... customer will definitely find it! (it got past testing!)
+  // If story has a bug... customer will definitely find it! (it got past testing!)
   //and it will go all the way back to the ba column, even if it wasn't a spec bug!
   
-  //no bugs can be found until level 2, no spec bugs until level 3
+  // no bugs can be found until level 2, no spec bugs until level 3
   if ((game.Level > 1 && story.hasBug) || (game.Level > 2 && story.hasSpecBug)) {
     //remove from board
     removeStory(storyId);
@@ -1656,30 +1691,14 @@ function bankStory(storyId: string) {
     drawStory(storyId, game.Stories, true); //at the top.
     return;
   }
-  //But if there is no bug .. money will be paid... and if the project is thus completed, a completion payment is made.
-  //TODO: set appropriate price based on # points.
+
   let price = Math.floor(story.points * story.pointPrice);
   let message2 = ` for '${story.summary}'`;
   incrementXP(5);
-
-  //we need to work out if there is a quick time bonus... or a slow time penalty.
-
+  
   if (story.customerFoundBug) {
-    //price = Math.floor(price/2);
+    //(it was halved when it was first found)
     message2 += " (reduced as customer found that bug)";
-    //price is reduced because customer previously found a bug in this!.
-  }
-
-  let timeBonus = 0;
-  if (timeBarFeatureFlag) {
-    let tenths = getTenthsOfTimeElapsed(story);
-    if (tenths < 7) {
-      timeBonus = Math.ceil(0.1 * story.points * story.pointPrice);
-      message2 += " and time-bonus of 💲" + timeBonus + "❕";
-    } else if (tenths >= 10) {
-      timeBonus = Math.ceil(-0.5 * story.points * story.pointPrice);
-      message2 += " MINUS time-penalty 😭 of 💲" + Math.abs(timeBonus) + "❗";
-    } 
   }
 
   let projectId = game.Stories[storyId].projectId;
@@ -1692,29 +1711,44 @@ function bankStory(storyId: string) {
 
     //if there are no stories remaining then a project completion bonus is paid.
     if (project.stories.length == 0) {
+
       bonus = Math.ceil(project.lead.points * project.lead.pointPrice / 2);
-      message2 += ` plus 💲${bonus} for completing ${project.lead.summary} ${project.lead.logo}`;
+        
+      if (!timeBarFeatureFlag) {
+        message2 += ` plus 💲${bonus} for completing ${project.lead.summary} ${project.lead.logo}`;
+        incrementXP(10);
+
+      } else {
+        //timeBarFeatureFlag ...
+
+        let tenths = getTenthsOfTimeElapsed(story);
+
+        if (tenths < 10) {
+          bonus = Math.ceil(bonus  * ((17 - tenths ) * 0.1));
+          message2 += ` plus 💲${bonus} for early completion of ${project.lead.summary} ${project.lead.logo}❕`;
+          incrementXP(10);
+
+        } else if (timePenaltyFeatureFlag && tenths >= 10) {
+          bonus = Math.ceil(bonus * -0.5);
+          message2 += `...MINUS penalty 😭 of 💲${Math.abs(bonus)}❗ for late completion of ${project.lead.summary} ${project.lead.logo}❕`;  
+          incrementXP(2);
+
+        } else {
+          message2 += ` and you completed ${project.lead.summary} ${project.lead.logo}.`;
+          incrementXP(5);
+
+        }
+      }
 
       for(const s in project.stories){
         delete game.Stories[s];
       }
       delete game.Projects[projectId];
-      incrementXP(10);
-
-      if (timeBarFeatureFlag) {
-        let tenths = getTenthsOfTimeElapsed(story);
-        if (tenths < 7) {
-          timeBonus = Math.ceil(project.lead.points * project.lead.pointPrice * 0.1);
-          message2 += " ...and project time-bonus of 💲" + timeBonus + "❕";
-        } else if (tenths >= 10) {
-          timeBonus = Math.ceil(-1.9 * project.lead.points * project.lead.pointPrice);
-          message2 += " ...MINUS time-penalty 😭 of 💲" + Math.abs(timeBonus) + "❗";
-        }
-      }
     }
   }
 
-  incrementMoney(price + bonus + timeBonus);
+  incrememntPoints(story.points);
+  incrementMoney(price + bonus);// + timeBonus);
   drawMoney(game.Money);
   drawMessage(`Earned 💲${price}${message2}`);
   removeStory(storyId);
@@ -1797,9 +1831,9 @@ let catIcons = ['🐈', '😸','😼','😽','😾','😿','🙀','🐱‍👤',
 let dogIcons = ['🐕','🐶','🐩'];
 let catNames = ['Ace','Alfie','Alonzo','Amberjack','Angel','Angus','Ashes','Astro','Baby','Bagel','Baguette','Barb','Barley','Basil','Batfish','Bella','Bill','Birdie','Bitty','Blackie','Bobo','Bombalurina','Buddy','Buffy','Bugsy','Bustopher Jones','Butter','Buttercup','Butterscotch','Buzz','Cabbage','Captain','Carbucketty','Carrot','Cashew','Casper','Catalufa','Chai','Chairman Meow','Charlie','Cheddar','Cheerio','Cherubfish','Chesnut','Chickpea','Chloe','Churro','Cinnamon','Clementine','Cleo','Coco','Coffee','Comet','Cranberry','Croaker','Croissant','Crouton','Crumbs','Crêpe','Cubby','Curry','Cutthroat','Daggertooth','Daisy','Demeter','Dewey','Diesel','Doodle','Dory','Dottie','Dragonfish','Ducky','Dude','Dumpling','Dwight','Edward','Etcetera','Fangtooth','Felix','Fergus','Fig','Flapjack','Fluffy','Fondue','Fraidy','Fritter','Frodo','Fudge','Gibberfish','Ginger','Granola','Gravy','Grits','Grizabella','Guacamole','Gumbo','Gyro','Hades','Hamlet','Hash Brown','Hector','Hoagie','Jack','Jalapeño','Jambalaya','Jasper','Jellicle','Jellylorum','Jemima','Jennyanydots','Jet','Jimmy','Jules','Kabob','Kimchi','Kingfish','Kitty','Knifejaw','Kumquat','Lackets','Lala','Latke','Lemonshark','Lentil','Licorice','Linguini','Lucky','Lucy','Macaron','Macavity','Maggie','Manny','Marshmallow','Max','Meatball','Milkshake','Millie','Milo','Missy','Misty','Molly','Mooneye','Morty','Mousse','Mr. Mistoffelees','Muffin','Mungojerrie','Munkustrap','Mushroom','Mushu','Mustard','Nimbus','Noodlefish','Nugget','Nutella','Old Deuteronomy','Oliver','Opah','Oreo','Oscar','Otto','Parsnip','Patch','Patches','Peaches','Peanut','Pecan','Perogi','Phil','Pickles','Pistachio','Ponyfish','Popcorn','Poppy','Porkchop','Porky','Pouncival','Princess','Pudding','Puss','Radish','Raisin','Rambo','Ramen','Reuben','Rooster','Rum Tum','Rumpleteazer','Rumpus Cat','Sacha','Sam','Samantha','Sammy','Sausage','Scampi','Scaredy','Sea raven','Shadow','Shortcake','Simba','Simon','Skimbleshanks','Smokey','Smudge','Sneaky','Snook','Snooty','Snots','Sooty','Sophie','Sorbet','Spaghetti','Sparkles','Sparky','Splashes','Sploosh','Squash','Sriracha','Stan','Stickers','String Bean','Sweet Pea','Sylvester','Synonym','Taffy','Tallulah','Tapetail','Tesla','Thumper','Thunder','Thyme','Tiger','Tigger','Timmy','Tink','Tinks','Tinky','Tippy','Toast','Tofu','Tom','Toothless','Tootsie','Treefish','Truffle','Turbo','Turkeyfish','Turnip','Turtle','Twinkie','Velvetfish','Victoria the White Cat','Vimba','Wahoo','Walleye','Warmouth','Weasel shark','Whiskers','Whiskey','Wolf-eel','Wonton','Wrymouth','Yam','Yellow-eye mullet','Yogi','Zingle','Ziti','Ziggy'];
 let dogNames = ['Abbie', 'Abby', 'Abigail', 'Ace', 'Achilles', 'Addie', 'Ajax', 'Ali', 'Alice', 'Allie', 'Amber', 'Angel', 'Angus', 'Annie', 'Apollo', 'Archie', 'Arlo', 'Aspen', 'Athena', 'Atlas', 'Aurora', 'Axel', 'Babe', 'Baby', 'Baby Girl', 'Bailey', 'Bandit', 'Banjo', 'Barley', 'Baxter', 'Bear', 'Beau', 'Bella', 'Belle', 'Ben', 'Benny', 'Bentley', 'Bernie', 'Blaze', 'Blue', 'Bo', 'Bob', 'Bobby', 'Bodhi', 'Bolt', 'Boo', 'Boomer', 'Boots', 'Bowser', 'Brandy', 'Bristol', 'Brodie', 'Brody', 'Bruce', 'Bruno', 'Brutus', 'Bubba', 'Buddy', 'Buster', 'Caesar', 'Cali', 'Callie', 'Casey', 'Cash', 'Cassie', 'Chai', 'Chance', 'Charley', 'Charlie', 'Charlotte', 'Chase', 'Chena', 'Chevy', 'Chewy', 'Chica', 'Chico', 'Chief', 'Chinook', 'Chip', 'Chloe', 'Cinder', 'Cinnamon', 'Coal', 'Coco', 'Cocoa', 'Cody', 'Comet', 'Cookie', 'Cooper', 'Copper', 'Cosmo', 'Cricket', 'Daisy', 'Daisy Mae', 'Dakota', 'Dallas', 'Daphne', 'Dash', 'Dawson', 'Dax', 'Delilah', 'Denali', 'Deshka', 'Dexter', 'Diamond', 'Diego', 'Diesel', 'Dixie', 'Dobby', 'Doc', 'Dozer', 'Drake', 'Dude', 'Duke', 'Dusty', 'Dutch', 'Eddie', 'Ella', 'Ellie', 'Elsa', 'Elvis', 'Ember', 'Emma', 'Eva', 'Fancy', 'Finley', 'Finn', 'Fiona', 'Foxy', 'Frank', 'Frankie', 'Freya', 'Fritz', 'Frodo', 'George', 'Gertie', 'Gigi', 'Ginger', 'Gizmo', 'Goldie', 'Goose', 'Grace', 'Gracie', 'Grizzly', 'Gunner', 'Gus', 'Gypsy', 'Hank', 'Hannah', 'Harley', 'Hatcher', 'Hazel', 'Heidi', 'Henry', 'Hercules', 'Holly', 'Homer', 'Honey', 'Hope', 'Hunter', 'Indy', 'Isabella', 'Isis', 'Ivy', 'Izzy', 'Jack', 'Jackson', 'Jade', 'Jager', 'Jake', 'Jasmine', 'Jasper', 'Jax', 'Jaxx', 'Jazz', 'Jenny', 'Jesse', 'Jethro', 'Joe', 'Joey', 'Josie', 'Joy', 'Juno', 'Kai', 'Kaiser', 'Kane', 'Karma', 'Katie', 'Kaya', 'Kenai', 'Keta', 'Kiki', 'Kimber', 'King', 'Kinley', 'Kira', 'Kiska', 'Kita', 'Koa', 'Kobe', 'Kobuk', 'Koda', 'Kodiak', 'Koko', 'Kona', 'Lady', 'Layla', 'Leia', 'Lenny', 'Leo', 'Lexi', 'Lila', 'Lilly', 'Lily', 'Lincoln', 'Logan', 'Loki', 'Lola', 'Louie', 'Lucky', 'Lucy', 'Luka', 'Luke', 'Lulu', 'Luna', 'Mabel', 'Macy', 'Maddie', 'Maddy', 'Madison', 'Maggie', 'Major', 'Marley', 'Mason', 'Matilda', 'Mattie', 'Maui', 'Maverick', 'Max', 'Maximus', 'Maya', 'Mckinley', 'Mia', 'Mickey', 'Midnight', 'Mila', 'Miley', 'Millie', 'Milo', 'Mimi', 'Minnie', 'Mishka', 'Miska', 'Missy', 'Misty', 'Mocha', 'Mojo', 'Moki', 'Molly', 'Moose', 'Morgan', 'Murphy', 'Nala', 'Nanook', 'Nellie', 'Nikki', 'Nina', 'Nova', 'Nugget', 'Nukka', 'Oakley', 'Obi', 'Odie', 'Odin', 'Olive', 'Oliver', 'Ollie', 'Onyx', 'Oreo', 'Oscar', 'Otis', 'Otto', 'Ozzy', 'Panda', 'Papi', 'Parker', 'Patch', 'Peaches', 'Peanut', 'Pearl', 'Penelope', 'Penny', 'Pepper', 'Percy', 'Phoebe', 'Piper', 'Pixie', 'Poppy', 'Porter', 'Prince', 'Princess', 'Quinn', 'Radar', 'Raider', 'Ranger', 'Rascal', 'Raven', 'Rebel', 'Red', 'Reggie', 'Remi', 'Remington', 'Remy', 'Rex', 'Rico', 'Riley', 'Rio', 'Ripley', 'River', 'Rocco', 'Rocket', 'Rocky', 'Roger', 'Romeo', 'Roo', 'Roscoe', 'Rose', 'Rosie', 'Rowdy', 'Roxie', 'Roxy', 'Ruby', 'Rudy', 'Rufus', 'Ruger', 'Rusty', 'Ryder', 'Sadie', 'Sally', 'Sam', 'Samantha', 'Sammy', 'Sampson', 'Sandy', 'Sara', 'Sarge', 'Sasha', 'Sassy', 'Scooby', 'Scooter', 'Scout', 'Scrappy', 'Shadow', 'Sheba', 'Shelby', 'Sherman', 'Shiloh', 'Sierra', 'Simba', 'Simon', 'Sitka', 'Skippy', 'Skye', 'Smokey', 'Snickers', 'Sophia', 'Sophie', 'Sparky', 'Spike', 'Stanley', 'Star', 'Stella', 'Stormy', 'Sugar', 'Summer', 'Sunny', 'Sweet Pea', 'Sweetie', 'Sydney', 'Tallulah', 'Tank', 'Taz', 'Teddy', 'Thor', 'Thunder', 'Tiger', 'Tilly', 'Timber', 'Tinkerbell', 'Titan', 'Titus', 'Toby', 'Tonka', 'Tori', 'Trapper', 'Trigger', 'Trinity', 'Trixie', 'Trooper', 'Tucker', 'Tuffy', 'Tundra', 'Turbo', 'Tyson', 'Violet', 'Watson', 'Whiskey', 'Willow', 'Winnie', 'Winston', 'Wrigley', 'Xena', 'Yoda', 'Yuki', 'Yukon', 'Zeke', 'Zelda', 'Zeus', 'Ziggy', 'Ziva', 'Zoe', 'Zoey'];
-let projectPart0 = ['project', 'operation', 'system', 'the','strategy','industrial','project'];//,'account','group'];
-let projectPart1 = ['robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry'];
-let projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi'];
+let projectPart0 = ['project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'operation', 'system', 'the','strategy','industrial','project'];//,'account','group'];
+let projectPart1 = ['gold','robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry','peace','moon','fear','tyrano','arctic','bronze','silver','delta','bravo','oscar','stormy','blue','teal','indigo','purple','amber','orange','chartreuse','malachite','sapphire','drab','mauve','aegean','tense','terse','noble','suffering','seagreen','devout'];
+let projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi','palace','spear','dagger','saurus','gazelle','wolf','lion','giraffe','dolphin','husky','fox','wallaby','spider','gemstone','parakeet','marakesh','zanzibar','fortune','arms','dream'];
 
 function projectName() {
   return randomItem(projectPart0) + " " + randomItem(projectPart1) + "-" + randomItem(projectPart2);
@@ -1817,7 +1851,7 @@ let taskParts = ['validation','logical','virtual','structural','micro','hyper','
 
 // todo: alphabetic ordering
 // note: should be singular.
-let taskParts2 = ['logic','algo','mesh','structure','form','service','container','data','DB','UX','UI','layer','component','system','diagram','app','client','server','host','class','object','function','job','part','platform','framework','foundation','emailer','pager','plugin','addin','2.0','automation','cybernetics','drone','graphic','artwork','architecture','collector','list','heuristic','solver','network','net','9000','2001','multiplexor','switch','hub','paradigm','catalog','registry','RIA','SPA','IP','JSON','XML','CSV','Yaml','Macro','analytics','cluster','node','graph','avatar','reticulator','spline','hierarchy','thread','logging','engine','blockchain','map-reduce','content','exploit','hack','style','customization','RAM','DRM','GPGPU','wiki','devops','devoops','cta','funnel','theory','pixels','persona','parser','combinator','property','fields','attribute','column','sheet','datamodel','controller','sdk','DOM','RDBMS','vpn','vm','firewall','proxy','cache','laser','reactor','core','accelerator'];
+let taskParts2 = ['manifest','logic','algo','mesh','structure','form','service','container','data','DB','UX','UI','layer','component','system','diagram','app','client','server','host','class','object','function','job','part','platform','framework','foundation','emailer','pager','plugin','addin','2.0','automation','cybernetics','drone','graphic','artwork','architecture','collector','list','heuristic','solver','network','net','9000','2001','multiplexor','switch','hub','paradigm','catalog','registry','RIA','SPA','IP','JSON','XML','CSV','Yaml','Macro','analytics','cluster','node','graph','avatar','reticulator','spline','hierarchy','thread','logging','engine','blockchain','map-reduce','content','exploit','hack','style','customization','RAM','DRM','GPGPU','wiki','devops','devoops','cta','funnel','theory','pixels','persona','parser','combinator','property','fields','attribute','column','sheet','datamodel','controller','sdk','DOM','RDBMS','vpn','vm','firewall','proxy','cache','laser','reactor','core','accelerator'];
 
 function getTask() {
   return randomItem(taskParts) + ' ' + randomItem(taskParts2);
@@ -1898,6 +1932,11 @@ function Inflate(inflation:number, value:number) {
   return newValue;
 }
 
+
+function incrememntPoints(amount:number):void {
+  game.LifeTimePoints += amount;
+  game.PositivePointEvents.push({amount:amount, when:new Date()});
+}
 // TODO: add this to game class
 function incrementMoney(amount: number):void {
   game.Money += amount;
@@ -2048,8 +2087,64 @@ function trackIncome() {
       toRemove.push(x);
     }
     game.PositiveCashFlows = game.PositiveCashFlows.filter(item => !toRemove.includes(item))
+
+    toRemove = [];
+    for(let x of game.PositivePointEvents){
+      if (x.when > OneMinuteAgo) break;
+      game.LifeTimePointsMinus1Minute += x.amount;
+      
+      toRemove.push(x);
+    }
+    game.PositivePointEvents = game.PositivePointEvents.filter(item => !toRemove.includes(item))
   }
   let sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
+  let sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
   //<span id='rate' title='revenue rate'>💲0/min</span>
-  $id('rate').innerText = '~💲' + sixtySecondIncome + "/min";
+
+  $id('rate').innerText = `(~💲${sixtySecondIncome}/min, ~${sixtySecondPoints}📍/min)`;
+}
+
+/*
+
+// Save
+localStorage.setItem('game', JSON.stringify(game));
+
+// Load
+game = JSON.parse(localStorage.getItem('game')); drawRoom();
+
+*/
+
+function loadmenu():void {
+  $id('startscreen').classList.add('hidden');
+  $id('loadscreen').classList.remove('hidden');
+  drawLoadScreen();
+
+}
+
+function exitloadmenu():void {
+  $id('loadscreen').classList.add('hidden');
+  $id('startscreen').classList.remove('hidden');  
+}
+
+function drawLoadScreen():void {
+  let gamesJson = localStorage.getItem('games');
+  let games = JSON.parse(gamesJson);
+}
+
+function about() {
+//todo: show about screen
+$id('startscreen').classList.add('hidden');
+$id('aboutscreen').classList.remove('hidden');
+
+}
+
+function exitabout() {
+  //todo: show about screen
+  $id('aboutscreen').classList.add('hidden');
+  $id('startscreen').classList.remove('hidden');
+}
+  
+
+function joinemail() {
+  //todo: join mailing list function joinemail
 }

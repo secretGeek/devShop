@@ -11,6 +11,15 @@
 </head>
 <style>
 
+.pulse {
+  animation: pulse 1s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+@keyframes pulse {to {
+box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
+
+#start {
+  box-shadow:2px 2px 0 #CCC, 0 0 10px gold,0 0 10px gold;
+}
 .elapsed {
   position:absolute;
   background-color:red;
@@ -298,6 +307,7 @@ th {
 .person .skills, .person .itemList {
   display:block;
 }
+
 .skills,.itemList {
   margin-bottom:3px;
 }
@@ -307,11 +317,11 @@ th {
   margin:3px;
   padding:3px;
 }
+
 .skills .skill {
   border:1px solid #CCC;
   border-radius:4px;
 }
-
 
 .logo, .avatar, .avatar2, .secrets, .icon, .skill {
   font-family: arial;
@@ -347,18 +357,25 @@ th {
   font-size:10pt;
 }
 
-#helpLink {
+#helpLink,#aboutLink {
   position:absolute;
   bottom:5px;
   border:1px solid #CCC;
-  right: 0%;
   background-color:#CDF;
   box-shadow:0 0 2px #CCC, 0 0 5px #ACF inset, 0 0 2px #ACF inset;
-  xz-index:-1;
   padding:3px 7px;
   border-radius:10px;
-  margin-right:5px;
   text-decoration:none;
+}
+#aboutLink
+{
+  left:0%;
+  margin-left:5px;
+}
+
+#helpLink{
+  right: 0%;
+  margin-right:5px;
 }
 .story-detail {
  display:inline-block;
@@ -397,7 +414,7 @@ th {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-#store, #office {
+#store, #office, #startscreen, #loadscreen, #aboutscreen {
   position:absolute;
   max-height:calc(100vh - 60px);
   height:calc(100vh - 60px);
@@ -461,21 +478,108 @@ th {
 }
 </style>
 <body>
-<span id='money' title='cash on hand'>💲100</span>
-<span id='rate' title='revenue rate' class='hidden'>~💲0/min</span>
-<span id='xp' title='eXperience Points'>0/50🥓</span>
-<span id='level' title='Level'>1🥑</span>
+<span id='money' class='metrics hidden' title='cash on hand'>💲100</span>
+<span id='rate' class='hidden' title='revenue rate' class='hidden'>~💲0/min</span>
+<span id='xp' class='metrics hidden' title='eXperience Points'>0/50🥓</span>
+<span id='level' class='metrics hidden' title='Level'>1🥑</span>
+
+<div id='loadscreen' class='hidden'>
+
+<h1>LOADING...</h1>
+
+<p>This <em>loading screen</em> will soon let you choose a saved game to play.</p>
+<p>Oh, try <a href='https://NimbleText.com/live/' target='_blank'>NimbleText</a> I guess.</p>
+
+<div id='loadslots'>
+...slots here
+</div>
+<div class='button' id='exitload' onclick='exitloadmenu();' tabindex='0' role='button' >🏠 exit load</div>
+
+</div>
+<div id='aboutscreen' class='hidden'>
+
+
+<h1>ABOUT DevShop</h1>
+
+<p>This about screen will say something about DevShop soon.</p>
+<p>Oh, try <a href='https://NimbleText.com/live/' target='_blank'>NimbleText</a> I guess.</p>
+<div class='button' id='exitload' onclick='exitabout();' tabindex='0' role='button' >🏠 exit about</div>
+
+
+</div>
+
+<div id='startscreen'>
+<style>
+#startscreen h1 {
+  text-align:center;
+  font-size:38pt;
+  margin:30px auto;
+  transform: rotate(-12deg);
+}
+x#startscreen h1:after {
+content: '🥓🥓';
+font-size:0.5em;
+transform: rotate(12deg);
+}
+#startscreen h2 {
+  text-align:center;
+  xfont-size:38pt;
+  margin:30px auto;
+  xtransform: rotate(-12deg);
+padding-bottom:5px;margin-bottom:0;
+}
+#startscreen input[type=email]{
+  text-align:center;
+  margin:0 auto;
+  border:1px solid #000;
+  padding:3pt;
+  display:block;
+  width:200px;
+}
+#startscreen a {
+  text-align:center;
+  margin:0 auto;
+  display:block;
+  font-size:small;
+  text-decoration:none;
+  width:200px;
+}
+#startscreen .button {
+  display:flex;
+  margin:20px auto;
+}
+#startscreen .hidden, #startscreen input[type=email].hidden {
+  display:none;
+}
+#startscreen .button#joinemail {
+  margin-top:10px;
+}
+
+</style>
 
 <h1>DevShop</h1>
 
-<div class='button' id='start' onclick='go();'>🌟 start</div>
-<div id='office' style='clear:left'>
+<div class='button pulse' id='start' onclick='go();' tabindex='0' role='button' >🌟 start</div>
+<div class='button hidden' id='loadmenu' onclick='loadmenu();' tabindex='0' role='button' >💾 load</div>
+<!--<div class='button' id='about' onclick='about();' tabindex='0' role='button' >🥓 about</div>-->
+<div class='button hidden' id='timechallenge' onclick='timechallenge();' tabindex='0' role='button' >⏳ time challenge</div>
+
+<h2 class='hidden'>Mailing List</h2>
+<input type='email' placeholder="you@example.com" class='hidden' />
+<div class='button hidden' id='joinemail' onclick='joinemail();' tabindex='0' role='button' >💌 join mailing list</div>
+<a href='privacypolicy.html' target='_blank' class='hidden'>[privacy policy]</a>
+
+
+</div>
+<div id='office' style='clear:left' class='hidden'>
+<h1>DevShop</h1>
+
 <div id='buttons'>
-  <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!'><span class='icon'>🎁</span> find project (💲100)</div>
-  <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");'><span class='icon'>💻</span>hire dev (💲300)</div>
-  <div id='gettest' class='button getPerson hidden test' onclick='getNewPerson("test");'><span class='icon'>🔬</span>hire tester (💲300)</div>
-  <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");'><span class='icon'>🗣</span>hire BA (💲300)</div>
-  <div class='button visitStore hidden' onclick='visitStore();'><span class='icon'>🏪</span>visit store</div>
+  <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!' tabindex='0' role='button'><span class='icon'>🎁</span> find project (💲100)</div>
+  <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");' tabindex='0' role='button'><span class='icon'>💻</span>hire dev (💲300)</div>
+  <div id='gettest' class='button getPerson hidden test' onclick='getNewPerson("test");' tabindex='0' role='button'><span class='icon'>🔬</span>hire tester (💲300)</div>
+  <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");' tabindex='0' role='button'><span class='icon'>🗣</span>hire BA (💲300)</div>
+  <div class='button visitStore hidden' onclick='visitStore();' tabindex='0' role='button'><span class='icon'>🏪</span>visit store</div>
 </div>
   <table id='kanbanboard'>
   <thead>
@@ -522,13 +626,16 @@ th {
 </div>
 
 <div id='store' class='hidden'>
-  <div id='closeStore' class='button' onclick='leaveStore();'><span class='icon'>🏢</span> leave store</div>
+<h1>DevStore</h1>
+
+  <div id='closeStore' class='button' onclick='leaveStore();' tabindex='0' role='button'><span class='icon'>🏢</span> leave store</div>
   <div id='items'>
   ITEMS for SALE
   </div>
 </div>
 <span id='message'>Press '🌟 start' to begin.</span>
 <span id='storeMessage' class='hidden'>⭐ Welcome to the DevStore ⭐</span>
+<a id='aboutLink' href='about.html' target='_blank' style='float:left;left:0'>about</a>
 <a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
 <div id='debug' class='hidden' style='clear:both'></div>
 </body>
