@@ -64,9 +64,6 @@ if (debugOutput) {
     $id('debug').classList.remove('hidden');
     log('debug mode detected');
 }
-if (timeBarFeatureFlag) {
-    $id('rate').classList.remove('hidden');
-}
 var ItemCode;
 (function (ItemCode) {
     ItemCode[ItemCode["cat"] = 1] = "cat";
@@ -513,7 +510,9 @@ function go() {
     $id('startscreen').classList.add('hidden');
     $id('office').classList.remove('hidden');
     removeClass('#getLead', 'hidden'); //show 'purchase sales lead' button
-    removeClass('.metrics', 'hidden');
+    removeClass('.metrics', 'hidden'); // show heads up display.
+    if (!timeBarFeatureFlag)
+        $id('rate').classList.add('hidden');
     addClass(".getPerson", 'hidden'); //hide 'buy dev/test/ba' buttons. (They are re-enabled when total >= 300)
     drawMessage("STEP 1: press '🎁 find project'");
     startMainLoop();
@@ -1713,7 +1712,7 @@ function trackIncome() {
     var sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
     var sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
     //<span id='rate' title='revenue rate'>💲0/min</span>
-    $id('rate').innerText = "(~\uD83D\uDCB2" + sixtySecondIncome + "/min, ~" + sixtySecondPoints + "\uD83D\uDCCD/min)";
+    $id('rate').innerText = "(\uD83D\uDCB2" + sixtySecondIncome + "/min," + sixtySecondPoints + "\uD83D\uDCCD/min)";
 }
 /*
 

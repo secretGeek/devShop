@@ -179,7 +179,7 @@ th {
   margin-top:5px;
   border:1px solid #666;
   border-collapse: collapse;
-  width:calc(100vw - 6ch);
+  width:calc(100vw - 2ch);
   table-layout: fixed;
   height:30vh;
   min-height:30vh;
@@ -419,8 +419,8 @@ th {
   max-height:calc(100vh - 60px);
   height:calc(100vh - 60px);
   overflow-y:auto;
-  max-width:calc(100vw - 4ch);
-  width:calc(100vw - 4ch);
+  max-width:calc(100vw - 2ch);
+  width:calc(100vw - 2ch);
 }
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
@@ -475,11 +475,17 @@ th {
     width:80px;
     max-width:80px;
   }
+	.metrics {
+		font-size:7pt;
+	}
+	#xp, #level, #rate {
+	margin-right:4px;
+	}
 }
 </style>
 <body>
 <span id='money' class='metrics hidden' title='cash on hand'>💲100</span>
-<span id='rate' class='hidden' title='revenue rate' class='hidden'>~💲0/min</span>
+<span id='rate' class='metrics hidden' title='revenue rate' class='hidden'>(💲0/min,0📍/min)</span>
 <span id='xp' class='metrics hidden' title='eXperience Points'>0/50🥓</span>
 <span id='level' class='metrics hidden' title='Level'>1🥑</span>
 
