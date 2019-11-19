@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang='en'>
+<html lang='en' class='darkmode'>
 <head>
 <meta charset='utf-8' name='viewport' content='width=device-width, initial-scale=1.0'>
 <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -11,6 +11,41 @@
 </head>
 <style>
 
+:root {
+ --main:#333;
+ --main-bg:white;
+ --main-button-shadow:#AAA;
+ --column-count-bg:#DDD;
+ --main-button-bg:#EEE;
+ --main-button-hint-bg:#D0F0FF;
+ --main-border:#666;
+ --main-th:#666;
+ --main-shadow:#CCC;
+ --main-avatar-bg:#DEF;
+ --main-avatar-border:#8AF;
+ --main-message-bg:#FFC;
+ --main-negative-money:#E00;
+}
+
+@media (prefers-color-scheme: dark) {
+:root {
+ --main:#CCC;
+ --main-bg:#222;
+ --main-button-shadow:#000;
+ --column-count-bg:#DDD;
+ --main-button-bg:#555;
+ --main-button-hint-bg:#D0F0FF;
+ --main-border:#666;
+ --main-th:#AAA;
+ --main-shadow:#444;
+ --main-avatar-bg:#DEF;
+ --main-avatar-border:#8AF;
+ --main-message-bg:#FFC;
+ --main-negative-money:#E00;
+}
+
+}
+
 .pulse {
   animation: pulse 1s infinite cubic-bezier(0.66, 0, 0, 1);
 }
@@ -18,7 +53,7 @@
 box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
 
 #start {
-  box-shadow:2px 2px 0 #CCC, 0 0 10px gold,0 0 10px gold;
+  box-shadow:2px 2px 0 var(--main-button-shadow), 0 0 10px gold,0 0 10px gold;
 }
 .elapsed {
   position:absolute;
@@ -46,9 +81,7 @@ box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
   position:absolute;
   bottom:0;
   right:0;
-  background-color:#DDD;
-  xborder-radius:10px 0 0 0;
-  xbox-shadow:1px 1px 0 inset #888;
+  background-color:var(--column-count-bg);
   padding:2px 6px 1px 6px;
   margin:2px 0 0 2px;
   opacity:0.7;
@@ -75,7 +108,7 @@ box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
   position:relative;
   top:-9px;
   right:4px;
-  background-color:white;
+  background-color:var(--main-bg);
   border-radius:50%;
   width:11px;
   height:11px;
@@ -93,11 +126,12 @@ filter: grayscale(100%);
 }
 
 body {
+  background-color:var(--main-bg);
   font-family: 'lucida console', monospace;
   max-width:xcalc(100vw - 4ch);
   padding:2ch;
   margin:auto;
-  color:#333;
+  color:var(--main);
   font-size:1.0em;
   height:100%;
 }
@@ -112,8 +146,8 @@ body {
 h1,th {
   font-family: 'Press Start 2P', monospace;
   font-size:14pt;
-  color:#333;
-  text-shadow:2px 2px #AAA;
+  color:var(--main);
+  text-shadow:2px 2px var(--main-button-shadow);
   margin-block-start:0;
   margin-block-end:5px;
 }
@@ -150,29 +184,29 @@ h1,th {
 }
 
 .button {
-  background-color:#EEE;
-  box-shadow:2px 2px 0 #AAA;
+  background-color:var(--main-button-bg);
+  box-shadow:2px 2px 0 var(--main-button-shadow);
 }
 
 .hint {
-  box-shadow:2px 2px 0 #CCC, 1px 1px 2px cyan inset;
-  background-color:#D0F0FF;
+  box-shadow:2px 2px 0 var(--main-button-shadow), 1px 1px 2px cyan inset;
+  background-color:var(--main-button-hint-bg);
 }
 
 .story {
-  background-color:#FFF;
-  box-shadow:2px 2px 0 #DDD;
-  border:1px solid #666;
+  xbackground-color:#FFF;
+  box-shadow:2px 2px 0 var(--main-button-shadow);
+  border:1px solid var(--main-border);
 }
 .person {
-  box-shadow:2px 2px 0 #DDD;
+  box-shadow:2px 2px 0 var(--main-button-shadow);
 }
 
 th {
-  color:#666;
+  color:var(--main-th);
   font-size:10pt;
   padding:4px;
-  text-shadow:2px 2px #CCC;
+  text-shadow:2px 2px var(--main-shadow);
 }
 
 #kanbanboard {
@@ -184,7 +218,7 @@ th {
   height:30vh;
   min-height:30vh;
   max-height:30vh;
-  box-shadow:2px 2px 0 #CCC;
+  box-shadow:2px 2px 0 var(--main-button-shadow);
 }
 
 #kanbanboard th, #kanbanboard td {
@@ -280,13 +314,13 @@ th {
 }
 
 #money {
-  text-shadow:0 2px 2px #CCC;
+  text-shadow:0 2px 2px var(--main-shadow);
   float:right;
   margin:0 0;
 }
 
 #xp, #level, #rate {
-  text-shadow:0 2px 2px #CCC;
+  text-shadow:0 2px 2px var(--main-shadow);
   float:right;
   margin:0 20px 0 0;
 }
@@ -330,12 +364,12 @@ th {
 
 }
 .secrets {
-  background-color:#AAA;
+  background-color:var(--main-button-shadow);
   opacity:0.5;
 }
 .avatar {
-  border:1px solid #8AF;
-  background-color:#DEF;
+  border:1px solid var(--main-avatar-border);
+  background-color:var(--main-avatar-bg);
   border-radius:7px;
   padding:2px 0;
 }
@@ -351,9 +385,9 @@ th {
   border:1px solid #CCC;
   left: 50%;
   transform:translateX(-50%);
-  background-color:#FFC;
+  background-color:var(--main-message-bg);
   padding:1ch;
-  box-shadow:2px 2px #CCC;
+  box-shadow:2px 2px var(--main-button-shadow);
   font-size:10pt;
 }
 
@@ -391,7 +425,7 @@ th {
 }
 
 .negative {
-  color:#E00;
+  color:var(--main-negative-money);
 }
 
 #items {
@@ -430,7 +464,7 @@ th {
   }
   th,.story,.storeItem {
     font-size:7pt;
-    text-shadow:1px 1px #CCC;
+    text-shadow:1px 1px var(--main-shadow);
   }
   #message,#storeMessage {
     font-size:10pt;
@@ -454,7 +488,7 @@ th {
   }
   th,.story,.storeItem {
     font-size:6pt;
-    text-shadow:1px 1px #CCC;
+    text-shadow:1px 1px var(--main-shadow);
   }
   #message,#storeMessage {
     font-size:8pt;
