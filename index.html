@@ -13,10 +13,10 @@
 
 :root {
  --main:#333;
- --main-bg:white;
+ --main-bg:#EEE;
  --main-button-shadow:#AAA;
  --column-count-bg:#DDD;
- --main-button-bg:#EEE;
+ --main-button-bg:#D8D8D8;
  --main-button-hint-bg:#D0F0FF;
  --main-border:#666;
  --main-th:#666;
@@ -29,7 +29,8 @@
  --main-tr-shadow:#EEE;
  --main-helplink-border:#CCC;
  --main-helplink-bg:#CDF;
- --main-helplink-inset-shadow:#ACF
+ --main-helplink-inset-shadow:#ACF;
+ --main-title-shadow:#AAA;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,9 +39,9 @@
  --main-bg:#222;
  --main-button-shadow:#000;
  --column-count-bg:#DDD;
- --main-button-bg:#555;
+ --main-button-bg:#333;
  --main-button-hint-bg:#203066;
- --main-button-hint:#FFF;
+ --main-button-hint:#EEE;
  --main-border:#666;
  --main-th:#AAA;
  --main-shadow:#444;
@@ -53,6 +54,7 @@
  --main-helplink-border:#444;
  --main-helplink-bg:#235;
  --main-helplink-inset-shadow:#46A;
+ --main-title-shadow:#555;
 }
 
 }
@@ -161,6 +163,9 @@ h1,th {
   text-shadow:2px 2px var(--main-button-shadow);
   margin-block-start:0;
   margin-block-end:5px;
+}
+h1{
+  text-shadow:2px 2px var(--main-title-shadow);
 }
 
 .button, .story, .storeItem {
@@ -568,11 +573,13 @@ th {
   font-size:38pt;
   margin:30px auto;
   transform: rotate(-12deg);
+  text-shadow:4px 4px var(--main-title-shadow);
 }
 x#startscreen h1:after {
-content: '🥓🥓';
+content: '🥓';
 font-size:0.5em;
-transform: rotate(12deg);
+text-transform: rotate(120deg);
+margin-left:-12px;
 }
 #startscreen h2 {
   text-align:center;
