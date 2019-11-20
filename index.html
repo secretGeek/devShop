@@ -31,32 +31,39 @@
  --main-helplink-bg:#CDF;
  --main-helplink-inset-shadow:#ACF;
  --main-title-shadow:#AAA;
+ --main-title-shadow1:#FF0;
+ --main-title-shadow2:#48F;
+ --main-title-shadow3:#4F8;
+ --main-title-shadow4:#F00;
 }
 
 @media (prefers-color-scheme: dark) {
-:root {
- --main:#CCC;
- --main-bg:#222;
- --main-button-shadow:#000;
- --column-count-bg:#DDD;
- --main-button-bg:#333;
- --main-button-hint-bg:#203066;
- --main-button-hint:#EEE;
- --main-border:#666;
- --main-th:#AAA;
- --main-shadow:#444;
- --main-avatar-bg:#DEF;
- --main-avatar-border:#8AF;
- --main-message:#111;
- --main-message-bg:gold;
- --main-negative-money:#E00;
- --main-tr-shadow:#000;
- --main-helplink-border:#444;
- --main-helplink-bg:#235;
- --main-helplink-inset-shadow:#46A;
- --main-title-shadow:#555;
-}
-
+  :root {
+    --main:#CCC;
+    --main-bg:#222;
+    --main-button-shadow:#000;
+    --column-count-bg:#333;
+    --main-button-bg:#333;
+    --main-button-hint-bg:#203066;
+    --main-button-hint:#EEE;
+    --main-border:#666;
+    --main-th:#AAA;
+    --main-shadow:#444;
+    --main-avatar-bg:#DEF;
+    --main-avatar-border:#8AF;
+    --main-message:#111;
+    --main-message-bg:gold;
+    --main-negative-money:#E00;
+    --main-tr-shadow:#000;
+    --main-helplink-border:#444;
+    --main-helplink-bg:#235;
+    --main-helplink-inset-shadow:#46A;
+    --main-title-shadow:#555;
+    --main-title-shadow1:#880;
+    --main-title-shadow2:#248;
+    --main-title-shadow3:#284;
+    --main-title-shadow4:#800;
+  }
 }
 
 .pulse {
@@ -165,7 +172,8 @@ h1,th {
   margin-block-end:5px;
 }
 h1{
-  text-shadow:2px 2px var(--main-title-shadow);
+  text-shadow:1px 1px var(--main-title-shadow3), 2px 2px var(--main-title-shadow4);
+
 }
 
 .button, .story, .storeItem {
@@ -402,7 +410,7 @@ th {
   left: 50%;
   transform:translateX(-50%);
   background-color:var(--main-message-bg);
-	color:var(--main-message);
+  color:var(--main-message);
   padding:1ch;
   box-shadow:2px 2px var(--main-button-shadow);
   font-size:10pt;
@@ -417,7 +425,7 @@ th {
   padding:3px 7px;
   border-radius:10px;
   text-decoration:none;
-	color:var(--main);
+  color:var(--main);
 }
 #aboutLink
 {
@@ -527,12 +535,12 @@ th {
     width:80px;
     max-width:80px;
   }
-	.metrics {
-		font-size:7pt;
-	}
-	#xp, #level, #rate {
-	margin-right:4px;
-	}
+  .metrics {
+    font-size:7pt;
+  }
+  #xp, #level, #rate {
+  margin-right:4px;
+  }
 }
 </style>
 <body>
@@ -573,7 +581,8 @@ th {
   font-size:38pt;
   margin:30px auto;
   transform: rotate(-12deg);
-  text-shadow:4px 4px var(--main-title-shadow);
+  /*text-shadow:4px 4px var(--main-title-shadow);*/
+  text-shadow:1px 1px var(--main-title-shadow1), 2px 2px var(--main-title-shadow2), 3px 3px var(--main-title-shadow3), 4px 4px var(--main-title-shadow4);
 }
 x#startscreen h1:after {
 content: '🥓';
