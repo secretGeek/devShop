@@ -39,7 +39,8 @@
  --main-button-shadow:#000;
  --column-count-bg:#DDD;
  --main-button-bg:#555;
- --main-button-hint-bg:#D0F0FF;
+ --main-button-hint-bg:#203066;
+ --main-button-hint:#FFF;
  --main-border:#666;
  --main-th:#AAA;
  --main-shadow:#444;
@@ -199,8 +200,9 @@ h1,th {
 }
 
 .hint {
-  box-shadow:2px 2px 0 var(--main-button-shadow), 1px 1px 2px cyan inset;
+  box-shadow:2px 2px 0 var(--main-button-shadow), 0 0 2px cyan inset;
   background-color:var(--main-button-hint-bg);
+  color: var(--main-button-hint);
 }
 
 .story {
@@ -403,7 +405,7 @@ th {
 
 #helpLink,#aboutLink {
   position:absolute;
-  bottom:5px;
+  bottom:7px;
   border:1px solid var(--main-helplink-border);
   background-color:var(--main-helplink-bg);
   box-shadow:0 0 2px var(--main-shadow), 0 0 5px var(--main-helplink-inset-shadow) inset, 0 0 2px var(--main-helplink-inset-shadow) inset;
