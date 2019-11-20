@@ -23,11 +23,16 @@
  --main-shadow:#CCC;
  --main-avatar-bg:#DEF;
  --main-avatar-border:#8AF;
+ --main-message:#333;
  --main-message-bg:#FFC;
  --main-negative-money:#E00;
+ --main-tr-shadow:#EEE;
+ --main-helplink-border:#CCC;
+ --main-helplink-bg:#CDF;
+ --main-helplink-inset-shadow:#ACF
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: xdark) {
 :root {
  --main:#CCC;
  --main-bg:#222;
@@ -40,8 +45,13 @@
  --main-shadow:#444;
  --main-avatar-bg:#DEF;
  --main-avatar-border:#8AF;
- --main-message-bg:#FFC;
+ --main-message:#111;
+ --main-message-bg:gold;
  --main-negative-money:#E00;
+ --main-tr-shadow:#000;
+ --main-helplink-border:#444;
+ --main-helplink-bg:#235;
+ --main-helplink-inset-shadow:#46A;
 }
 
 }
@@ -154,7 +164,7 @@ h1,th {
 
 .button, .story, .storeItem {
   font-size:0.7em;
-  border:1px solid #333;
+  border:1px solid var(--main-border);
   font-family: 'lucida console', monospace;
   border-radius:0;
   min-height:40px;
@@ -194,7 +204,6 @@ h1,th {
 }
 
 .story {
-  xbackground-color:#FFF;
   box-shadow:2px 2px 0 var(--main-button-shadow);
   border:1px solid var(--main-border);
 }
@@ -211,7 +220,7 @@ th {
 
 #kanbanboard {
   margin-top:5px;
-  border:1px solid #666;
+  border:1px solid var(--main-border);
   border-collapse: collapse;
   width:calc(100vw - 2ch);
   table-layout: fixed;
@@ -222,12 +231,12 @@ th {
 }
 
 #kanbanboard th, #kanbanboard td {
-  border:1px solid #666;
+  border:1px solid var(--main-border);
   position:relative;
 
 }
 #kanbanboard tr {
-  box-shadow:2px 2px 2px inset #EEE;
+  box-shadow:2px 2px 2px inset var(--main-tr-shadow);
 }
 
 #kanbanboard td {
@@ -263,7 +272,7 @@ th {
   max-width:100px;
   min-height:50px;
   text-align:center;
-  border:1px solid #333;
+  border:1px solid var(--main-border);
   border-radius:10px;
 }
 
@@ -276,7 +285,7 @@ th {
 .storeItem-catalog {
   font-family: 'lucida console', monospace;
   font-size: 8pt;
-  border:1px solid #333;
+  border:1px solid var(--main-border);
   position:relative;
   margin:4px 0;
   width:calc(100vw - 6ch);
@@ -305,8 +314,8 @@ th {
 }
 
 .busy, #done .inner .story {
-  opacity:0.5;
-  border:1px solid #CCC;
+  opacity:0.4;
+  border:1px solid var(--main-border);
 }
 
 .doer:not(.busy):hover, .receiver:not(.busy):hover, .button {
@@ -353,7 +362,7 @@ th {
 }
 
 .skills .skill {
-  border:1px solid #CCC;
+  border:1px solid var(--main-border);
   border-radius:4px;
 }
 
@@ -382,10 +391,11 @@ th {
 #message,#storeMessage {
   position:absolute;
   bottom:2ch;
-  border:1px solid #CCC;
+  border:1px solid var(--main-border);
   left: 50%;
   transform:translateX(-50%);
   background-color:var(--main-message-bg);
+	color:var(--main-message);
   padding:1ch;
   box-shadow:2px 2px var(--main-button-shadow);
   font-size:10pt;
@@ -394,12 +404,13 @@ th {
 #helpLink,#aboutLink {
   position:absolute;
   bottom:5px;
-  border:1px solid #CCC;
-  background-color:#CDF;
-  box-shadow:0 0 2px #CCC, 0 0 5px #ACF inset, 0 0 2px #ACF inset;
+  border:1px solid var(--main-helplink-border);
+  background-color:var(--main-helplink-bg);
+  box-shadow:0 0 2px var(--main-shadow), 0 0 5px var(--main-helplink-inset-shadow) inset, 0 0 2px var(--main-helplink-inset-shadow) inset;
   padding:3px 7px;
   border-radius:10px;
   text-decoration:none;
+	color:var(--main);
 }
 #aboutLink
 {
@@ -571,7 +582,7 @@ padding-bottom:5px;margin-bottom:0;
 #startscreen input[type=email]{
   text-align:center;
   margin:0 auto;
-  border:1px solid #000;
+  border:1px solid var(--main-border);
   padding:3pt;
   display:block;
   width:200px;
