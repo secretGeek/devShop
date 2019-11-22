@@ -174,7 +174,16 @@ no: are observations now chained with self-start? seems too extreme. REMOVING ob
 
 
 # DONE
-
+[x] all dogs have same icon after first choice (no, there just weren't enough icons for dogs, so i broadened by canine definition)
+[x] move initiative up.
+[x] have starting initiative be much much slower ??
+[x] bugs repeat too much in early levels when you only have 1/2 people. A re-cycled card should have less and less chance of having new bugs. 
+[x] start button
+[x] load button (Or replace 'load' with 'resume' and have it say "12 🥑 153 🥓" .. and perhaps a time you last opened it??)
+[x] exit load screen
+[x] about button
+[x] exit about
+[x] mailing list controls
 [x] donut machine 🏭 - similar effects to coffee machine. Doesn't seem advisable though.
 [x] cards and projects age. After X minutes, they are worth 0. progress bar along the side.
 [x] show 💲/min

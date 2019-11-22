@@ -1,13 +1,18 @@
+// *******************************************************
+// ** Pull requests not actually welcome at this moment **
+// *******************************************************
+// as described in the readme, I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that. 
+// Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
 //Definitely
-// (Or replace 'load' with 'resume' and have it say "12 🥑 153 🥓" .. and perhaps a time??)
-// [x] start button
-// [x] load button
+// [ ] select skill from inbox, a worker is highlighted. but when their initiative ticks over, they lose their highlight.
+// [ ] height of buttons at top must be consistent. Table layout maybe?
+// [ ] sorting workers
+// [ ] have time flag turn itself on, for a growing fraction of cards. once they've added initiative to some people -- and then notify the player of its existence.
+//   Some projects are time critical. You get a bonus for completing them early. Notice the green bar on their right edge: that's the count down.
+//   ? requires a notification modal. 😡
+//   ? also could show a modal near the start "So much rework needed... visit the store to upskill your team members"
 // [ ] populate load screen
-// [x] exit load screen
-// [x] about button
 // [ ] about screen (content)
-// [x] exit about
-// [x] mailing list controls
 // [ ] join mailing list functionality joinemail
 // [ ] privacy policy content -- mailing list, google analytics
 // [ ] How to exit the game, and when/how to save.
@@ -15,8 +20,8 @@
 //  ?  Time Challenge
 // [ ] add google analytics
 // [ ] size on ipad: too wide. why?
-// [ ] Store: column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
 // [ ] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
+//       includes... column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
 // [ ] 🐛Words wrap in store
 // [ ] 🐛Icons and help icon are not vertically centered in store (other content is not either)
 // [ ] Training should have a time cost (? increases at higher levels of training)
@@ -50,12 +55,12 @@ var storeFeatureFlag = true; //testMode;
 var timeBarFeatureFlag = false;
 var timePenaltyFeatureFlag = false;
 var debugOutput = false;
-var avgDuration = testMode ? 4 : 600; // factor that all work durations are based on, in milliseconds
-var startingMoney = testMode ? 100 : 100;
-var defaultCompletionTime = testMode ? 10 : 100; //how long have you got to complete a project, in seconds?
 var game;
 // basic test modes
 testMode = (testMode || getParameterByName('testmode') == "true");
+var avgDuration = testMode ? 4 : 600; // factor that all work durations are based on, in milliseconds
+var startingMoney = testMode ? 100 : 100;
+var defaultCompletionTime = testMode ? 10 : 100; //how long have you got to complete a project, in seconds?
 debugOutput = (debugOutput || testMode || getParameterByName('debug') == "true");
 // basic feature flags  
 timeBarFeatureFlag = (timeBarFeatureFlag || getParameterByName('timebarflag') == "true"); //?timebarflag=true
@@ -108,17 +113,17 @@ function getAllLevelItems() {
         ],
         "l3": //Level 3 Items
         [{ id: 20, name: 'Upskill Developer: Efficiency Development Series', price: 120, icon: "📗", skillneeded: "dev", busy: false, code: ItemCode.upskillDev, activeDuration: 0, description: 'Already a developer? This advanced training course will reduce the number of bugs you create.', enabled: false },
-            { id: 30, name: 'Mechanical keyboard upgrade', price: 400, icon: "⌨", skillneeded: "any", busy: false, code: ItemCode.keyboard, activeDuration: 0, description: 'This mechanical keyboard upgrade will boost your speed at every task.', enabled: false },
         ],
         "l4": [
             { id: 50, name: 'Upskill Tester: Fast and Thorough Book Series', price: 80, icon: "📘", skillneeded: "test", busy: false, code: ItemCode.upskillTest, activeDuration: 0, description: 'Already a tester? Be a better tester!', enabled: false },
-            { id: 90, name: 'Pizza', price: 50, icon: "🍕", skillneeded: "any", busy: false, code: ItemCode.pizza, activeDuration: 180, description: 'Food can trap your workers in the office by giving them no reason to leave.', enabled: false },
-            { id: 100, name: 'Banana', price: 25, icon: "🍌", skillneeded: "any", busy: false, code: ItemCode.banana, activeDuration: 50, description: 'This healthy snack gives a short-lived energy boost', enabled: false },
-            { id: 105, name: 'Cupcake', price: 100, icon: "🧁", skillneeded: "any", busy: false, code: ItemCode.cupcake, activeDuration: 25, description: 'A cupcake to enjoy. Increase motivation, but not for long.', enabled: false },
+            { id: 80, name: 'Pizza', price: 50, icon: "🍕", skillneeded: "any", busy: false, code: ItemCode.pizza, activeDuration: 180, description: 'Food can trap your workers in the office by giving them no reason to leave.', enabled: false },
+            { id: 100, name: '⭐ Initiative Training ⭐', price: 500, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled: false },
         ],
         "l5": [
-            { id: 107, name: 'Upskill BA: Powerful communication book series', price: 70, icon: "📕", skillneeded: "ba", busy: false, code: ItemCode.upskillBA, activeDuration: 0, description: 'Improves your Business Analysis Skills, for faster better work!', enabled: false },
-            { id: 120, name: 'Office cat', price: 5000, icon: "🐱", skillneeded: "any", busy: false, code: ItemCode.cat, activeDuration: 200, description: 'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled: false },
+            { id: 105, name: 'Upskill BA: Powerful communication book series', price: 70, icon: "📕", skillneeded: "ba", busy: false, code: ItemCode.upskillBA, activeDuration: 0, description: 'Improves your Business Analysis Skills, for faster better work!', enabled: false },
+            { id: 110, name: 'Banana', price: 25, icon: "🍌", skillneeded: "any", busy: false, code: ItemCode.banana, activeDuration: 50, description: 'This healthy snack gives a short-lived energy boost', enabled: false },
+            { id: 130, name: 'Cupcake', price: 100, icon: "🧁", skillneeded: "any", busy: false, code: ItemCode.cupcake, activeDuration: 25, description: 'A cupcake to enjoy. Increase motivation, but not for long.', enabled: false },
+            { id: 140, name: 'Mechanical keyboard upgrade', price: 300, icon: "⌨", skillneeded: "any", busy: false, code: ItemCode.keyboard, activeDuration: 0, description: 'This mechanical keyboard upgrade will boost your speed at every task.', enabled: false },
         ],
         "l6": [
             { id: 150, name: 'Seat upgrade', price: 400, icon: "💺", skillneeded: "any", busy: false, code: ItemCode.seat, activeDuration: 0, description: 'A comfortable seat upgrade makes any worker more efficient.', enabled: false },
@@ -131,7 +136,7 @@ function getAllLevelItems() {
             { id: 170, name: 'Piece of Toast', price: 10, icon: "🍞", skillneeded: "any", busy: false, code: ItemCode.toast, activeDuration: 35, description: 'It\'s a piece of toast. How much could it be?', enabled: false },
         ],
         "l9": [
-            { id: 175, name: '⭐ Initiative Training ⭐', price: 500, icon: "🚀", skillneeded: "any", busy: false, code: ItemCode.selfstart, activeDuration: 0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled: false },
+            { id: 175, name: 'Office cat', price: 5000, icon: "🐱", skillneeded: "any", busy: false, code: ItemCode.cat, activeDuration: 200, description: 'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled: false },
         ],
         "l10": [
             { id: 180, name: 'Coffee Machine', price: 4000, icon: "⛽", skillneeded: "any", busy: false, code: ItemCode.coffeemachine, activeDuration: 0, description: 'A coffee machine at your desk, your performance will be irreparably improved.', enabled: false },
@@ -140,7 +145,6 @@ function getAllLevelItems() {
             { id: 200, name: 'Inspirational poster', price: 30000, icon: "🌄", skillneeded: "any", busy: false, code: ItemCode.poster, activeDuration: 0, description: 'Enhance your cubicle and improve your concentration.', enabled: false },
         ],
         "l12": [
-            { id: 210, name: 'Desk cactus', price: 1100, icon: "🌵", skillneeded: "any", busy: false, code: ItemCode.cactus, activeDuration: 0, description: 'A desk cactus has been scientifically proven to have no impact on your productivity at all. But it\'s cool.', enabled: false },
             { id: 220, name: 'Desk plant', price: 502, icon: "🌳", skillneeded: "any", busy: false, code: ItemCode.deskplant, activeDuration: 0, description: 'Beautiful desk plant improves the workplace and decreases your error rate.', enabled: false },
         ],
         "l13": [
@@ -151,7 +155,9 @@ function getAllLevelItems() {
             { id: 250, name: 'Mystical Statue', price: 40000, icon: "🗿", skillneeded: "any", busy: false, code: ItemCode.statue2, activeDuration: 0, description: 'Mystical statue improves your workplace.', enabled: false },
         ],
         "l16": [],
-        "l17": [],
+        "l17": [
+            { id: 270, name: 'Desk cactus', price: 2000, icon: "🌵", skillneeded: "any", busy: false, code: ItemCode.cactus, activeDuration: 0, description: 'A desk cactus has been scientifically proven to have no impact on your productivity at all. But it\'s cool.', enabled: false },
+        ],
         "l18": [
             { id: 300, name: 'Awe inspiring statue', price: 80000, icon: "🗽", skillneeded: "any", busy: false, code: ItemCode.statue, activeDuration: 0, description: 'Can this statue fill your workplace with wonder, joy and hard work?', enabled: false },
         ],
@@ -173,6 +179,12 @@ function getAllPeopleTypes() {
         "ba": { skill: "ba", price: 250, icon: "🗣", title: "business analyst" }
     };
 }
+// REMINDER....
+// *******************************************************
+// ** Pull requests not actually welcome at this moment **
+// *******************************************************
+// as described in the readme (and above), I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that. 
+// Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
 var Game = /** @class */ (function () {
     function Game(startingMoney) {
         this.Money = startingMoney;
@@ -204,7 +216,7 @@ var Game = /** @class */ (function () {
         this.Items = {};
         this.SelectedDoer = null;
         this.SelectedReceiver = null;
-        this.DefaultSelfStartDelay = testMode ? 12000 : 12000; //12 second pause between self-starters polling the board.
+        this.DefaultSelfStartDelay = testMode ? 18000 : 18000; //12 second pause between self-starters polling the board.
         this.AnimalTendingDelay = 3900;
         this.MaxAge = defaultCompletionTime; // give them this many seconds to complete *every* project; (increases slightly each level)
         this.StartTime = new Date();
@@ -403,7 +415,7 @@ function updateColumnCount(column) {
 }
 function drawStories(stories) {
     for (var key in stories) {
-        drawStory(key, stories, stories[key].rework);
+        drawStory(key, stories, stories[key].reworkLevel > 0);
     }
 }
 function drawTimebars(stories) {
@@ -545,7 +557,7 @@ function getNewLead() {
         hasSpecBug: false,
         customerFoundBug: null,
         projectId: null,
-        rework: false,
+        reworkLevel: 0,
         startingTime: new Date(),
         maxAge: game.MaxAge
     };
@@ -831,7 +843,7 @@ function applyItem(person, item) {
             person.busy = true;
             var animal = item.code == ItemCode.dog ? "dog" : "cat";
             person.summary = "Tending to " + item.name + " " + item.icon + " (the " + animal + ")";
-            drawMessage(person.name + " " + person.icon + " has the " + item.icon + " " + item.name);
+            drawMessage(person.name + " " + person.icon + " has the " + animal + " " + item.name + " " + item.icon);
             setTimeout(function () { usingFinishedBusyPhase(person, item); }, game.AnimalTendingDelay);
             setTimeout(function () { usingFinished(person, item); }, item.activeDuration * 500);
             // length of time cat/dog spends with someone increase each time they visit. (Controversial?)
@@ -877,17 +889,20 @@ function personFree(person) {
 }
 function trySelfStart(person) {
     if (person.selfStarterLevel > 0) {
-        // the brain instead of the 💤 is because we're a self starter and we're awake
+        // the brain instead of the 💤 is because we're a self starter and we're **awake**
         person.summary = "🧠";
+        //How many elevenths of an 18 second delay, do we have to wait before polling the board?
+        //with self starter level 1, we wait ten/elevenths of 18 seconds... i.e. 16.4 seconds.
         var delay = (person.selfStartDelay / 11) * (11 - Math.min(10, person.selfStarterLevel));
+        // if they have a dog, we wait only half that time!
         if (personHas(person, ItemCode.dog))
             delay = delay / 2;
         log("Will check board in " + delay);
         var triggerTime_1 = new Date();
         person.triggerTime = triggerTime_1;
         if (game.SelectedDoer == ('p' + person.id)) {
-            //can't self start while selected... try again in a little bit...
-            setTimeout(function () { trySelfStart(person); }, delay);
+            //can't self start while selected... try to try again in a little bit...
+            setTimeout(function () { trySelfStart(person); }, 1000);
         }
         else {
             setTimeout(function () { selfStart(person, triggerTime_1); }, delay);
@@ -915,7 +930,7 @@ function selfStart(person, triggerTime) {
         return;
     }
     if (game.SelectedDoer == ('p' + person.id)) {
-        //can't self start while selected... try again in a little bit...
+        //can't self start while selected... try to try again in a little bit...
         setTimeout(function () { trySelfStart(person); }, 1000);
         return;
     }
@@ -989,7 +1004,7 @@ function doIt(doId, receiverId) {
     person.summary = getSummary(story);
     drawMessage(person.name + " is " + person.summary);
     drawPerson(doId, game.People);
-    drawStory(receiverId, game.Stories, story.rework);
+    drawStory(receiverId, game.Stories, story.reworkLevel > 0);
     var duration = getDuration(person, story);
     log("Duration: of " + story.summary + " " + story.skillneeded + ": " + Math.floor(duration));
     setTimeout(function () { done(receiverId); }, duration);
@@ -1056,8 +1071,8 @@ function getDuration(person, story) {
     var duration = story.points * avgDuration * (1.0 / getEfficiency(person, story.skillneeded)) * getTaskFactor(story.skillneeded);
     // All rework is faster. This is a little over-simplified, but it will do.
     // rework also has a lower chance of introducing fresh bugs (that is covered elsewhere)
-    if (story.rework && (story.skillneeded == "ba" || story.skillneeded == "dev")) {
-        duration = duration / 2;
+    if (story.reworkLevel > 0 && (story.skillneeded == "ba" || story.skillneeded == "dev")) {
+        duration = duration / (story.reworkLevel + 1); // Math.pow(2, story.reworkLevel);
     }
     if (personHas(person, ItemCode.dog)) {
         // A person in possession of a dog works twice as fast. No-one understands why.
@@ -1151,9 +1166,9 @@ function doneBa(storyId) {
     person.busy = false;
     person.summary = "💤";
     drawPerson('p' + person.id, game.People);
-    //The original lead is removed from the board.
+    // The original lead is removed from the board.
     removeStory(storyId);
-    //The new stories are added (to the 'backlog' column)
+    // The new stories are added (to the bottom of the 'backlog' column)
     for (var _i = 0, newCards_1 = newCards; _i < newCards_1.length; _i++) {
         var cc = newCards_1[_i];
         drawStory('r' + cc.id, game.Stories, false);
@@ -1161,16 +1176,16 @@ function doneBa(storyId) {
 }
 function determineIfAddingSkillBug(person, story, skill) {
     var skillPointBugLikelihood = 100.0 * getBuginess(person, skill);
-    if (story.rework) {
+    if (story.reworkLevel > 0) {
         // an item being reworked is quicker to work on (handled elsewhere), and has MUCH less chance of new bugs being introduced.
-        skillPointBugLikelihood = skillPointBugLikelihood / 2.5;
+        skillPointBugLikelihood = skillPointBugLikelihood / Math.pow(2, story.reworkLevel);
     }
     // it is a truth universally told that a person in possession of a cat is half as likely to create a spec bug.
     if (personHas(person, ItemCode.cat)) {
         log("Lower likelihood of " + skill + " bugs when you have that 😸!");
         skillPointBugLikelihood = skillPointBugLikelihood / 2;
     }
-    log("A " + skill + " bug is " + Math.floor(skillPointBugLikelihood) + "% likely on each point of this " + story.points + " point card");
+    log("A " + skill + " bug is " + Math.floor(skillPointBugLikelihood) + "% likely on each point of this " + story.points + " point card, rework: " + story.reworkLevel + " ");
     for (var i = 0; i < story.points; i++) {
         if (Math.floor(Math.random() * 100) < skillPointBugLikelihood) {
             return true;
@@ -1201,7 +1216,7 @@ function ElaborateProject(project, person) {
             hasBug: false,
             hasSpecBug: false,
             customerFoundBug: null,
-            rework: false,
+            reworkLevel: 0,
             startingTime: project.startingTime,
             maxAge: project.maxAge
         };
@@ -1251,7 +1266,7 @@ function doneDev(storyId) {
             story.hasBug = null;
             story.icon = "💥";
             story.skillneeded = "ba";
-            story.rework = true;
+            story.reworkLevel += 1;
             removeStory(storyId);
             drawStory(storyId, game.Stories, true);
             return;
@@ -1277,7 +1292,7 @@ function doneDev0(storyId) {
     story.person = null;
     story.icon = null;
     log("Story: " + story.summary + " is ready for testing.");
-    drawStory(storyId, game.Stories, story.rework);
+    drawStory(storyId, game.Stories, story.reworkLevel > 0);
     person.busy = false;
     person.summary = "💤";
     drawPerson('p' + person.id, game.People);
@@ -1303,7 +1318,7 @@ function doneTest(storyId) {
             story.hasSpecBug = null;
             story.icon = "🐛";
             story.skillneeded = "dev";
-            story.rework = true;
+            story.reworkLevel += 1;
             drawStory(storyId, game.Stories, true);
             return;
         }
@@ -1320,7 +1335,7 @@ function doneTest(storyId) {
             story.hasSpecBug = null;
             story.icon = "💥";
             story.skillneeded = "ba";
-            story.rework = true;
+            story.reworkLevel += 1;
             drawStory(storyId, game.Stories, true);
             return;
         }
@@ -1330,7 +1345,7 @@ function doneTest(storyId) {
     log("Story: " + story.summary + " passed testing. Done!");
     story.skillneeded = "done";
     story.icon = "✔";
-    drawStory(storyId, game.Stories, story.rework);
+    drawStory(storyId, game.Stories, story.reworkLevel > 0);
     //the 'done' card dissappears after a while.
     setTimeout(function () { bankStory(storyId); }, avgDuration * 5);
 }
@@ -1359,7 +1374,7 @@ function bankStory(storyId) {
         story.person = null;
         story.icon = "🐞";
         story.skillneeded = "ba"; //goes all the way back to the BA column.
-        story.rework = true;
+        story.reworkLevel += 1;
         drawStory(storyId, game.Stories, true); //at the top.
         return;
     }
@@ -1477,7 +1492,7 @@ function getName() {
     return randomItem(names);
 }
 var catIcons = ['🐈', '😸', '😼', '😽', '😾', '😿', '🙀', '🐱‍👤', '🐱‍🐉', '🐱‍👓', '🐱‍🚀', '🐱‍🏍', '😹', '😻'];
-var dogIcons = ['🐕', '🐶', '🐩'];
+var dogIcons = ['🐕', '🐶', '🐩', '🐺', '🐕', '🐶', '🐩', '🐺', '🐻', '🐨', '🌭'];
 var catNames = ['Ace', 'Alfie', 'Alonzo', 'Amberjack', 'Angel', 'Angus', 'Ashes', 'Astro', 'Baby', 'Bagel', 'Baguette', 'Barb', 'Barley', 'Basil', 'Batfish', 'Bella', 'Bill', 'Birdie', 'Bitty', 'Blackie', 'Bobo', 'Bombalurina', 'Buddy', 'Buffy', 'Bugsy', 'Bustopher Jones', 'Butter', 'Buttercup', 'Butterscotch', 'Buzz', 'Cabbage', 'Captain', 'Carbucketty', 'Carrot', 'Cashew', 'Casper', 'Catalufa', 'Chai', 'Chairman Meow', 'Charlie', 'Cheddar', 'Cheerio', 'Cherubfish', 'Chesnut', 'Chickpea', 'Chloe', 'Churro', 'Cinnamon', 'Clementine', 'Cleo', 'Coco', 'Coffee', 'Comet', 'Cranberry', 'Croaker', 'Croissant', 'Crouton', 'Crumbs', 'Crêpe', 'Cubby', 'Curry', 'Cutthroat', 'Daggertooth', 'Daisy', 'Demeter', 'Dewey', 'Diesel', 'Doodle', 'Dory', 'Dottie', 'Dragonfish', 'Ducky', 'Dude', 'Dumpling', 'Dwight', 'Edward', 'Etcetera', 'Fangtooth', 'Felix', 'Fergus', 'Fig', 'Flapjack', 'Fluffy', 'Fondue', 'Fraidy', 'Fritter', 'Frodo', 'Fudge', 'Gibberfish', 'Ginger', 'Granola', 'Gravy', 'Grits', 'Grizabella', 'Guacamole', 'Gumbo', 'Gyro', 'Hades', 'Hamlet', 'Hash Brown', 'Hector', 'Hoagie', 'Jack', 'Jalapeño', 'Jambalaya', 'Jasper', 'Jellicle', 'Jellylorum', 'Jemima', 'Jennyanydots', 'Jet', 'Jimmy', 'Jules', 'Kabob', 'Kimchi', 'Kingfish', 'Kitty', 'Knifejaw', 'Kumquat', 'Lackets', 'Lala', 'Latke', 'Lemonshark', 'Lentil', 'Licorice', 'Linguini', 'Lucky', 'Lucy', 'Macaron', 'Macavity', 'Maggie', 'Manny', 'Marshmallow', 'Max', 'Meatball', 'Milkshake', 'Millie', 'Milo', 'Missy', 'Misty', 'Molly', 'Mooneye', 'Morty', 'Mousse', 'Mr. Mistoffelees', 'Muffin', 'Mungojerrie', 'Munkustrap', 'Mushroom', 'Mushu', 'Mustard', 'Nimbus', 'Noodlefish', 'Nugget', 'Nutella', 'Old Deuteronomy', 'Oliver', 'Opah', 'Oreo', 'Oscar', 'Otto', 'Parsnip', 'Patch', 'Patches', 'Peaches', 'Peanut', 'Pecan', 'Perogi', 'Phil', 'Pickles', 'Pistachio', 'Ponyfish', 'Popcorn', 'Poppy', 'Porkchop', 'Porky', 'Pouncival', 'Princess', 'Pudding', 'Puss', 'Radish', 'Raisin', 'Rambo', 'Ramen', 'Reuben', 'Rooster', 'Rum Tum', 'Rumpleteazer', 'Rumpus Cat', 'Sacha', 'Sam', 'Samantha', 'Sammy', 'Sausage', 'Scampi', 'Scaredy', 'Sea raven', 'Shadow', 'Shortcake', 'Simba', 'Simon', 'Skimbleshanks', 'Smokey', 'Smudge', 'Sneaky', 'Snook', 'Snooty', 'Snots', 'Sooty', 'Sophie', 'Sorbet', 'Spaghetti', 'Sparkles', 'Sparky', 'Splashes', 'Sploosh', 'Squash', 'Sriracha', 'Stan', 'Stickers', 'String Bean', 'Sweet Pea', 'Sylvester', 'Synonym', 'Taffy', 'Tallulah', 'Tapetail', 'Tesla', 'Thumper', 'Thunder', 'Thyme', 'Tiger', 'Tigger', 'Timmy', 'Tink', 'Tinks', 'Tinky', 'Tippy', 'Toast', 'Tofu', 'Tom', 'Toothless', 'Tootsie', 'Treefish', 'Truffle', 'Turbo', 'Turkeyfish', 'Turnip', 'Turtle', 'Twinkie', 'Velvetfish', 'Victoria the White Cat', 'Vimba', 'Wahoo', 'Walleye', 'Warmouth', 'Weasel shark', 'Whiskers', 'Whiskey', 'Wolf-eel', 'Wonton', 'Wrymouth', 'Yam', 'Yellow-eye mullet', 'Yogi', 'Zingle', 'Ziti', 'Ziggy'];
 var dogNames = ['Abbie', 'Abby', 'Abigail', 'Ace', 'Achilles', 'Addie', 'Ajax', 'Ali', 'Alice', 'Allie', 'Amber', 'Angel', 'Angus', 'Annie', 'Apollo', 'Archie', 'Arlo', 'Aspen', 'Athena', 'Atlas', 'Aurora', 'Axel', 'Babe', 'Baby', 'Baby Girl', 'Bailey', 'Bandit', 'Banjo', 'Barley', 'Baxter', 'Bear', 'Beau', 'Bella', 'Belle', 'Ben', 'Benny', 'Bentley', 'Bernie', 'Blaze', 'Blue', 'Bo', 'Bob', 'Bobby', 'Bodhi', 'Bolt', 'Boo', 'Boomer', 'Boots', 'Bowser', 'Brandy', 'Bristol', 'Brodie', 'Brody', 'Bruce', 'Bruno', 'Brutus', 'Bubba', 'Buddy', 'Buster', 'Caesar', 'Cali', 'Callie', 'Casey', 'Cash', 'Cassie', 'Chai', 'Chance', 'Charley', 'Charlie', 'Charlotte', 'Chase', 'Chena', 'Chevy', 'Chewy', 'Chica', 'Chico', 'Chief', 'Chinook', 'Chip', 'Chloe', 'Cinder', 'Cinnamon', 'Coal', 'Coco', 'Cocoa', 'Cody', 'Comet', 'Cookie', 'Cooper', 'Copper', 'Cosmo', 'Cricket', 'Daisy', 'Daisy Mae', 'Dakota', 'Dallas', 'Daphne', 'Dash', 'Dawson', 'Dax', 'Delilah', 'Denali', 'Deshka', 'Dexter', 'Diamond', 'Diego', 'Diesel', 'Dixie', 'Dobby', 'Doc', 'Dozer', 'Drake', 'Dude', 'Duke', 'Dusty', 'Dutch', 'Eddie', 'Ella', 'Ellie', 'Elsa', 'Elvis', 'Ember', 'Emma', 'Eva', 'Fancy', 'Finley', 'Finn', 'Fiona', 'Foxy', 'Frank', 'Frankie', 'Freya', 'Fritz', 'Frodo', 'George', 'Gertie', 'Gigi', 'Ginger', 'Gizmo', 'Goldie', 'Goose', 'Grace', 'Gracie', 'Grizzly', 'Gunner', 'Gus', 'Gypsy', 'Hank', 'Hannah', 'Harley', 'Hatcher', 'Hazel', 'Heidi', 'Henry', 'Hercules', 'Holly', 'Homer', 'Honey', 'Hope', 'Hunter', 'Indy', 'Isabella', 'Isis', 'Ivy', 'Izzy', 'Jack', 'Jackson', 'Jade', 'Jager', 'Jake', 'Jasmine', 'Jasper', 'Jax', 'Jaxx', 'Jazz', 'Jenny', 'Jesse', 'Jethro', 'Joe', 'Joey', 'Josie', 'Joy', 'Juno', 'Kai', 'Kaiser', 'Kane', 'Karma', 'Katie', 'Kaya', 'Kenai', 'Keta', 'Kiki', 'Kimber', 'King', 'Kinley', 'Kira', 'Kiska', 'Kita', 'Koa', 'Kobe', 'Kobuk', 'Koda', 'Kodiak', 'Koko', 'Kona', 'Lady', 'Layla', 'Leia', 'Lenny', 'Leo', 'Lexi', 'Lila', 'Lilly', 'Lily', 'Lincoln', 'Logan', 'Loki', 'Lola', 'Louie', 'Lucky', 'Lucy', 'Luka', 'Luke', 'Lulu', 'Luna', 'Mabel', 'Macy', 'Maddie', 'Maddy', 'Madison', 'Maggie', 'Major', 'Marley', 'Mason', 'Matilda', 'Mattie', 'Maui', 'Maverick', 'Max', 'Maximus', 'Maya', 'Mckinley', 'Mia', 'Mickey', 'Midnight', 'Mila', 'Miley', 'Millie', 'Milo', 'Mimi', 'Minnie', 'Mishka', 'Miska', 'Missy', 'Misty', 'Mocha', 'Mojo', 'Moki', 'Molly', 'Moose', 'Morgan', 'Murphy', 'Nala', 'Nanook', 'Nellie', 'Nikki', 'Nina', 'Nova', 'Nugget', 'Nukka', 'Oakley', 'Obi', 'Odie', 'Odin', 'Olive', 'Oliver', 'Ollie', 'Onyx', 'Oreo', 'Oscar', 'Otis', 'Otto', 'Ozzy', 'Panda', 'Papi', 'Parker', 'Patch', 'Peaches', 'Peanut', 'Pearl', 'Penelope', 'Penny', 'Pepper', 'Percy', 'Phoebe', 'Piper', 'Pixie', 'Poppy', 'Porter', 'Prince', 'Princess', 'Quinn', 'Radar', 'Raider', 'Ranger', 'Rascal', 'Raven', 'Rebel', 'Red', 'Reggie', 'Remi', 'Remington', 'Remy', 'Rex', 'Rico', 'Riley', 'Rio', 'Ripley', 'River', 'Rocco', 'Rocket', 'Rocky', 'Roger', 'Romeo', 'Roo', 'Roscoe', 'Rose', 'Rosie', 'Rowdy', 'Roxie', 'Roxy', 'Ruby', 'Rudy', 'Rufus', 'Ruger', 'Rusty', 'Ryder', 'Sadie', 'Sally', 'Sam', 'Samantha', 'Sammy', 'Sampson', 'Sandy', 'Sara', 'Sarge', 'Sasha', 'Sassy', 'Scooby', 'Scooter', 'Scout', 'Scrappy', 'Shadow', 'Sheba', 'Shelby', 'Sherman', 'Shiloh', 'Sierra', 'Simba', 'Simon', 'Sitka', 'Skippy', 'Skye', 'Smokey', 'Snickers', 'Sophia', 'Sophie', 'Sparky', 'Spike', 'Stanley', 'Star', 'Stella', 'Stormy', 'Sugar', 'Summer', 'Sunny', 'Sweet Pea', 'Sweetie', 'Sydney', 'Tallulah', 'Tank', 'Taz', 'Teddy', 'Thor', 'Thunder', 'Tiger', 'Tilly', 'Timber', 'Tinkerbell', 'Titan', 'Titus', 'Toby', 'Tonka', 'Tori', 'Trapper', 'Trigger', 'Trinity', 'Trixie', 'Trooper', 'Tucker', 'Tuffy', 'Tundra', 'Turbo', 'Tyson', 'Violet', 'Watson', 'Whiskey', 'Willow', 'Winnie', 'Winston', 'Wrigley', 'Xena', 'Yoda', 'Yuki', 'Yukon', 'Zeke', 'Zelda', 'Zeus', 'Ziggy', 'Ziva', 'Zoe', 'Zoey'];
 var projectPart0 = ['project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'operation', 'system', 'the', 'strategy', 'industrial', 'project']; //,'account','group'];
