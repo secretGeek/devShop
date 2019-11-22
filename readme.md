@@ -1,6 +1,6 @@
 # DevShop!
 
-I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and decided to implement a minimal non-viable product of it, in vanilla js, with the no-framework.
+I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and decided to implement a minimal, non-viable product of it, in vanilla js, with the no-framework.
 
 It's a kind of 'lemonade stand' game, but instead of buying lemons 🍋 and making lemonade 🍹, you hire developers/testers and business analysts, and complete tasks on a kanban board.
 
