@@ -1,6 +1,6 @@
 # DevShop!
 
-I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and decided to implement a minimal non-viable product of it, in vanilla js, with the no-framework.
+I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and decided to implement a minimal version of it, in vanilla js, with the *no-framework*.
 
 It's a kind of 'lemonade stand' game, but instead of buying lemons 🍋 and making lemonade 🍹, you hire developers/testers and business analysts, and complete tasks on a kanban board.
 
@@ -51,15 +51,18 @@ Some keystrokes....
 
 Make sure to buy "⭐initiative⭐" from the store (when it is available) -- once the workers have initiative you are free to manage the work at a higher level.
 
-## lessons
+## Lessons
+
+If you consider it as a tutorial on Kanban or Lean, there are some lessons you can learn by playing this game. These include the following:
+
 
 * If work took no time to complete, you would only need 1 worker.
 * The earlier in the process a bug is found and fixed, the cheaper it is to rectify.
 * Bugs should be removed before they get to the customer.
-* Work should flow right to left.
+* Work should flow left to right.
 * You need higher proportions of workers for steps that take longer (e.g. development in this game)
 * The smaller the stories the better. They are less likely to have bugs, and faster to work with.
-* Multi-skilling is helpful at alleviating bottlenecks.
+* Multi-skilled workers are helpful for alleviating bottlenecks.
 * In a system where bugs and irregular work happen, bottlenecks can appear anywhere.
 * Throughput is a more useful measure than idle time.
 * Good teams are self-organizing, and this requires *initiative*.
@@ -67,15 +70,15 @@ Make sure to buy "⭐initiative⭐" from the store (when it is available) -- onc
 * The system needs to have some slack in it, or there will be no way to respond to bottlenecks.
 * A founder, in the early days, needs to be able to do anything. Later employees can be increasingly specialised.
 * Resource levels need to be appropriately balanced.
-* Given a choice between doing something well or doing it quickly, it's better to do it well. It saves times soon enough.
+* Given a choice between doing something well or doing it quickly, it's better to do it well. It saves time soon enough.
 * People can only work on one thing at a time. If they worked on more than one thing at a time, it would decrease throughput. Multi-tasking is a waste of time. (But multi-skilling is not!)
-* A functioning and growing business can afford to pay a *lot* for good coffee.
+* A functioning and growing business can afford to pay a *lot* for good coffee ☕.
 
 
 
 ## Non-lessons
 
-There are many features of the real world, and of work places, that are not modelled in this game.
+There are many features of the real world, and of workplaces, that are not modelled in this game.
 
 > "All models are wrong, some models are useful."
 
@@ -107,5 +110,7 @@ Regarding the risk of skilled employees leaving, I love this:
 ## Contributions
 
 **Pull requests not actually welcome at this moment.** I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that. 
+
+I love PRs normally. Please send PRs to other projects.
 
 The code is in typescript now.
