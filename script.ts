@@ -6,6 +6,7 @@
 
 //Definitely
 
+// [ ] show # 📍 -- points in the column labels.
 // [ ] select skill from inbox, a worker is highlighted. but when their initiative ticks over, they lose their highlight.
 // [ ] height of buttons at top must be consistent. Table layout maybe?
 // [ ] sorting workers
@@ -677,7 +678,9 @@ function drawPerson(key: string, people: { [x: string]: Person; }):void {
   let skillsDiv = getSkillsDiv(person.skills);
   let itemsHtml = getItemsHtml(person);
   let selected = game.SelectedDoer == ('p' + person.id) ? " selected" : "";
-  let phtml = "<span class='person doer" + busy + selected + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
+  //TODO: possible?
+  let possible = isPossiblePerson(person) ? " possible" : "";
+  let phtml = "<span class='person doer" + busy + selected + possible + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
   let newPersonElement = htmlToElement(phtml);
 
   for (let key of Object.keys(person.skills)) {
@@ -882,6 +885,8 @@ document.onkeypress = function(e):void {
 }
 
 function isPossible(story:Story):boolean {
+
+  if (story.busy) return false;
   if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
     if (story.skillneeded == "any") return true;
     console.log("skillneeded", story.skillneeded);
@@ -892,6 +897,18 @@ function isPossible(story:Story):boolean {
     }
   }
   return false;
+}
+
+function isPossiblePerson(person:Person):boolean {
+    // As a 'receiver' -- highlight everything that can do this (where not busy)
+  if (person.busy) return false;
+
+  if (game.SelectedReceiver != undefined && game.SelectedReceiver != null) {  
+    let receiver:IReceiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
+    if (receiver.skillneeded == "any")  return true;
+    if (Object.keys(person.skills).includes(receiver.skillneeded)) return true;
+  }
+  return false;  
 }
 
 function updatePossible():void {
@@ -2120,8 +2137,8 @@ function trackIncome() {
   let sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
   let sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
   //<span id='rate' title='revenue rate'>💲0/min</span>
-
-  $id('rate').innerText = `(💲${sixtySecondIncome}/min,${sixtySecondPoints}📍/min)`;
+  //removed: 💲${sixtySecondIncome}/min,
+  $id('rate').innerText = `(${sixtySecondPoints}📍/min)`;
 }
 
 /*

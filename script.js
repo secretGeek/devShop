@@ -4,6 +4,7 @@
 // as described in the readme, I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that. 
 // Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
 //Definitely
+// [ ] show # 📍 -- points in the column labels.
 // [ ] select skill from inbox, a worker is highlighted. but when their initiative ticks over, they lose their highlight.
 // [ ] height of buttons at top must be consistent. Table layout maybe?
 // [ ] sorting workers
@@ -456,7 +457,9 @@ function drawPerson(key, people) {
     var skillsDiv = getSkillsDiv(person.skills);
     var itemsHtml = getItemsHtml(person);
     var selected = game.SelectedDoer == ('p' + person.id) ? " selected" : "";
-    var phtml = "<span class='person doer" + busy + selected + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
+    //TODO: possible?
+    var possible = isPossiblePerson(person) ? " possible" : "";
+    var phtml = "<span class='person doer" + busy + selected + possible + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
     var newPersonElement = htmlToElement(phtml);
     for (var _i = 0, _a = Object.keys(person.skills); _i < _a.length; _i++) {
         var key_1 = _a[_i];
@@ -640,6 +643,8 @@ document.onkeypress = function (e) {
     }
 };
 function isPossible(story) {
+    if (story.busy)
+        return false;
     if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
         if (story.skillneeded == "any")
             return true;
@@ -649,6 +654,19 @@ function isPossible(story) {
         if (Object.keys(skills).includes(story.skillneeded)) {
             return true;
         }
+    }
+    return false;
+}
+function isPossiblePerson(person) {
+    // As a 'receiver' -- highlight everything that can do this (where not busy)
+    if (person.busy)
+        return false;
+    if (game.SelectedReceiver != undefined && game.SelectedReceiver != null) {
+        var receiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
+        if (receiver.skillneeded == "any")
+            return true;
+        if (Object.keys(person.skills).includes(receiver.skillneeded))
+            return true;
     }
     return false;
 }
@@ -1727,7 +1745,8 @@ function trackIncome() {
     var sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
     var sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
     //<span id='rate' title='revenue rate'>💲0/min</span>
-    $id('rate').innerText = "(\uD83D\uDCB2" + sixtySecondIncome + "/min," + sixtySecondPoints + "\uD83D\uDCCD/min)";
+    //removed: 💲${sixtySecondIncome}/min,
+    $id('rate').innerText = "(" + sixtySecondPoints + "\uD83D\uDCCD/min)";
 }
 /*
 

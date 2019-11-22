@@ -1,12 +1,12 @@
 # DevShop!
 
-I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and decided to implement a minimal version of it, in vanilla js, with the *no-framework*.
+I had this idea 10 years ago for a game called [DevShop](http://www.secretgeek.net/devshop_i) and finally decided to implement a minimal version of it.
 
-It's a kind of 'lemonade stand' game, but instead of buying lemons 🍋 and making lemonade 🍹, you hire developers/testers and business analysts, and complete tasks on a kanban board.
+It's a kind of 'lemonade stand' game, but instead of buying lemons 🍋 and making lemonade 🍹, you hire developers 💻, testers 🔬 and business analysts 🗣, and complete tasks on a kanban board.
 
 Play it online here:
 
-<https://secretgeek.github.io/devShop/>
+<https://devshop.secretgeek.net>
 
 
 ## Walkthrough
@@ -68,7 +68,7 @@ If you consider it as a tutorial on Kanban or Lean, there are some lessons you c
 * Good teams are self-organizing, and this requires *initiative*.
 * A newbie thinks "I wish I could hire a manager to assign the tasks automatically" -- a wise person thinks "I wish the workers had enough initiative to select the tasks for themselves."
 * The system needs to have some slack in it, or there will be no way to respond to bottlenecks.
-* A founder, in the early days, needs to be able to do anything. Later employees can be increasingly specialised.
+* A founder, in the early days, needs to be able to do *anything*. Later employees can be increasingly specialised.
 * Resource levels need to be appropriately balanced.
 * Given a choice between doing something well or doing it quickly, it's better to do it well. It saves time soon enough.
 * People can only work on one thing at a time. If they worked on more than one thing at a time, it would decrease throughput. Multi-tasking is a waste of time. (But multi-skilling is not!)
@@ -113,4 +113,3 @@ Regarding the risk of skilled employees leaving, I love this:
 
 I love PRs normally. Please send PRs to other projects.
 
-The code is in typescript now.
