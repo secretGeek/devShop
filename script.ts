@@ -6,13 +6,18 @@
 
 //Definitely
 
-// [ ] show # 📍 -- points in the column labels.
-// [ ] select skill from inbox, a worker is highlighted. but when their initiative ticks over, they lose their highlight.
+// [x] limit should be placed on the next column not the current column
+// [x] limit should show points/max points and not show number of cards at all
+// [x] customer finds bug -- logo should be 👿 - remove angry face with horns from emojis of staff
+// [x] make expired timebar full RED. 
+// [ ] Once limits are enabled: - detect + and - (plus and minus) keys and use them to alter limits...
 // [ ] height of buttons at top must be consistent. Table layout maybe?
 // [ ] sorting workers
-// [ ] have time flag turn itself on, for a growing fraction of cards. once they've added initiative to some people -- and then notify the player of its existence.
+// [x] have time flag turn itself on at about level 7 or 8
+//       at first it is on for 20% of projects... grows by a further 20% every level
+//       do we first have to wait for them to add initiative to a player?
 //   Some projects are time critical. You get a bonus for completing them early. Notice the green bar on their right edge: that's the count down.
-//   ? requires a notification modal. 😡
+// [ ] ?? ? requires a notification modal. 😡
 //   ? also could show a modal near the start "So much rework needed... visit the store to upskill your team members"
 // [ ] populate load screen
 // [ ] about screen (content)
@@ -60,8 +65,8 @@
 
 let testMode = false;//true;
 let storeFeatureFlag = true;//testMode;
-let timeBarFeatureFlag = false;
-let timePenaltyFeatureFlag = false;
+//let timeBarFeatureFlag = false;
+let timePenaltyFeatureFlag = true;
 let debugOutput = false; 
 let game: Game;
 
@@ -76,12 +81,12 @@ let defaultCompletionTime = testMode? 10 : 100; //how long have you got to compl
 debugOutput = (debugOutput || testMode || getParameterByName('debug') == "true");
 
 // basic feature flags  
-timeBarFeatureFlag = (timeBarFeatureFlag || getParameterByName('timebarflag') == "true"); //?timebarflag=true
+//timeBarFeatureFlag = (timeBarFeatureFlag || getParameterByName('timebarflag') == "true"); //?timebarflag=true
 storeFeatureFlag = (storeFeatureFlag || getParameterByName('storeflag') == "true"); //?storeflag=true
 
 if (debugOutput) {
-  $id('debug').classList.remove('hidden');
-  log('debug mode detected');
+  //$id('debug').classList.remove('hidden');
+  //log('debug mode detected');
 }
 
 
@@ -115,7 +120,8 @@ enum ItemCode {
   cookie,
   headphones,
   deskplant,
-  cactus
+  cactus,
+  buybot
 }
 
 function getAllLevelItems(): { [id: string]: StoreItem[]; } {
@@ -164,6 +170,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        "l9":
        [
         {id:175,name:'Office cat', price:5000, icon:"🐱", skillneeded:"any", busy:false, code:ItemCode.cat, activeDuration:200, description:'This friendly feline will vastly improve the quality of one person\'s work at a time.', enabled:false},
+        {id:177,name:'Buy-Bot', price:21000, icon:"🤖", skillneeded:"any", busy:false, code:ItemCode.buybot, activeDuration:0, description: 'A robot at your desk! The buy-bot buys new projects for you (unless the backlog is over its limit)', enabled:false},
 
        ],
        "l10":
@@ -316,7 +323,13 @@ class Game {
     this.LifeTimePointsMinus1Minute = 0;
     this.PositiveCashFlows = [];
     this.PositivePointEvents = [];
+    this.ColumnLimits = {"ba":-1, "dev":-1,"dev0":-1,"test":-1}; //-1 means "there is no limit/do not display a limit"
+    this.TimeBarFeatureFlag = false;
+    this.TimeBarChance = 0; // % chance of project being Time sensitive (having a max age)
+    this.HasInitiativeLevel = 0;
+    this.FirstTimeSensitiveProject = false;
   }
+  //Initially there are no limits shown or enforced.
   Money: number;
   LifeTimeRevenue: number;
   LifeTimeRevenueMinus1Minute: number;
@@ -350,6 +363,11 @@ class Game {
   AnimalTendingDelay: number; // how long does it take to settle an animal down at your desk. (Can this involve the following emoji? 💩)
   MaxAge:number;
   StartTime:Date;
+  ColumnLimits: { [id:string]:number;};
+  TimeBarFeatureFlag: boolean;
+  TimeBarChance: number;
+  HasInitiativeLevel: number; // has initiative been applied to any players in the game?
+  FirstTimeSensitiveProject: boolean;
 }
 
 interface Payment {
@@ -368,7 +386,7 @@ interface Person {
   skills: { [id:string]: SkillDetail;}
   name: string;
   summary: string;
-  icon: string;
+  avatar: string;
   //efficiency: number;
   XP: number;
   busy: boolean;
@@ -378,6 +396,7 @@ interface Person {
   seatLevel: number; //how good is your seat?
   keyboardLevel: number; //how good is your keyboard?
   headphoneLevel: number; //how good are your headphones?
+  buyBotLevel: number;
   has: { [id:string] : StoreItem; } // coffee, donuts and puppies go here.
 }
 
@@ -405,7 +424,7 @@ interface Story {
   projectId: string; //contains 'r'
   pointPrice: number;
   startingTime: Date;
-  maxAge:number; //how many seconds before this job is considered kaput.
+  maxAge:number; //how many seconds before this job is considered kaput. `-1` means "no max age"
 }
 
 interface StoreItem {
@@ -414,7 +433,7 @@ interface StoreItem {
   price: number;
   icon: string;
   skillneeded: string;
-  busy: boolean;
+  busy: boolean; // this is only here to fulfill the IReceiver interface
   code: ItemCode; //'code' is a short, readable, ID, such as 'dog' used in switch statement somewhere for all the deep logic/capabilities of StoreItems... as they can ultimately do anything. 
   description: string;
   activeDuration: number; //how long does the item act on the person? (0 for indefinitely)
@@ -445,7 +464,7 @@ function initGameState():void
       skills: allSkills, 
       name: "Founder", 
       summary: "💤", 
-      icon:"🤔", 
+      avatar:"🤔", 
       XP: 0, 
       busy: false, 
       selfStarterLevel: 0, 
@@ -454,7 +473,9 @@ function initGameState():void
       keyboardLevel:0, 
       headphoneLevel:0, 
       selfStartDelay: game.DefaultSelfStartDelay, 
-      triggerTime:null};
+      triggerTime:null,
+      buyBotLevel:0
+  };
   game.People['p' + player.id] = player;
   incrementXP(0);
   incrementMoney(0);
@@ -528,12 +549,10 @@ function drawTimebar(target: HTMLSpanElement, key: string, story: Story):void { 
       bg = "orange";
     }
     if (percent <= 0 && timePenaltyFeatureFlag) {
-        //The timebar becomes full height red if there will be a time penalty paid.
+        bg = "red"; //The timebar becomes full height red if there will be a time penalty paid.
         percent = 100; //full-height red bad. TODO: fix color blindness issue though.
-        //might be good to change some other aspect to highlight it is overdue.
+        //consider: would be good to change another aspect to highlight "overdue"
     }
-      
-    
 
     target.style.height = "" + percent + "%";
     target.style.minHeight = "" + percent + "%";
@@ -573,7 +592,8 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean):
 
   // if the story is done, don't add a click handler.
   let handler = story.skillneeded == "done" ? "" : `onclick='clickReceiver(\"${key}\");'`;
-  let timebar = timeBarFeatureFlag? generateTimebarHtml(story) : "";
+
+  let timebar = story.maxAge > 0 ? generateTimebarHtml(story) : "";
   let shtml = `<span class='story receiver ${story.skillneeded}${busy}${selected}' id='${key}' ${handler}><span class='story-detail'>${logo} ${story.summary}</span>${avatar}${points}${timebar}</span>`;
 
   if (s != null) {
@@ -588,7 +608,7 @@ function drawStory(key: string, stories: { [x: string]: Story; }, top: boolean):
     }
   }
 
-  if (timeBarFeatureFlag) {
+  if (game.TimeBarFeatureFlag && story.maxAge != -1) {
     let target = el.querySelector('#' + key + " .time-bars .elapsed") as HTMLSpanElement;
     drawTimebar(target, key, story);
   }
@@ -622,15 +642,41 @@ function generateTimebarHtml(story:Story):string {
 
 function updateColumnCount(column:string):void {
   let target = $('#' + column + ' .inner .count');
+  let limit = game.ColumnLimits[column];
   if (target && target.length == 1) {
-    const count = $('#' + column + ' .inner .story').length;
-    target[0].innerText = '' + count;
-    target[0].setAttribute('data-count', '' + count); 
+    let points:number = 0;
+    for(let s of $('#' + column + ' .inner .story .points')){
+      //s.innerText;
+      points += Number(s.innerText);
+    }
+    const cardCount = $('#' + column + ' .inner .story').length;
+    
+    if (limit != null && limit != -1){
+      target[0].innerHTML = `<span class='up' onclick='updateColumnLimit("${column}",1);'>➕</span>${points}/${limit}📍<span class='dn' onclick='updateColumnLimit("${column}",-1);'>➖</span>`;
+      target[0].classList.add("limited");
+      target[0].setAttribute('title', `${cardCount} stories worth ${points} points, with a soft limit of ${limit} points.`); 
+    } else {
+      target[0].innerHTML = `${points}📍`;
+      target[0].setAttribute('title', `${cardCount} stories worth ${points} points`); 
+    }
+
+    target[0].setAttribute('data-count', '' + cardCount); 
+    
     // consider: check the number of people who have this skill. 
     //If the count > (#people) make the color yellowish;
     //if the count > (#people * 2 + 2) make the color redish;
   }
 }
+
+function updateColumnLimit(column:string, delta:number) {
+  let value = game.ColumnLimits[column];
+  value += delta;
+  if (value >= 0) { //even limits have limits
+    game.ColumnLimits[column] = value;
+    updateColumnCount(column); 
+  }
+}
+
 function drawStories(stories: {[id: string] : Story}):void {
   for(const key in stories) {
     drawStory(key, stories, stories[key].reworkLevel > 0);
@@ -641,11 +687,13 @@ function drawTimebars(stories: {[id: string] : Story}):void {
   const el = document.getElementById('kanbanboard');
   
   for(const key in stories) {
-    let target = el.querySelector('#' + key + " .time-bars .elapsed") as HTMLSpanElement;
-    drawTimebar(target, key, stories[key]);;
+    // only applies to stories that *have* a max age (-1 means, none)
+    if (stories[key].maxAge != -1) {
+      let target = el.querySelector('#' + key + " .time-bars .elapsed") as HTMLSpanElement;
+      drawTimebar(target, key, stories[key]);
+    }
   }
 }
-
 
 function drawInboxItem(key: string, item: StoreItem):void {
   let el = $id('kanbanboard')
@@ -680,7 +728,7 @@ function drawPerson(key: string, people: { [x: string]: Person; }):void {
   let selected = game.SelectedDoer == ('p' + person.id) ? " selected" : "";
   //TODO: possible?
   let possible = isPossiblePerson(person) ? " possible" : "";
-  let phtml = "<span class='person doer" + busy + selected + possible + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.icon + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
+  let phtml = "<span class='person doer" + busy + selected + possible + "' id='" + key + "' onclick='clickDoer(\"" + key + "\");'><span class='avatar2'>" + person.avatar + "</span><div class='name'>" + person.name + "</div>" + skillsDiv + " " + itemsHtml + "<div class='summary'>" + person.summary + "</div></span>";
   let newPersonElement = htmlToElement(phtml);
 
   for (let key of Object.keys(person.skills)) {
@@ -749,7 +797,7 @@ function go():void {
   $id('office').classList.remove('hidden');
   removeClass('#getLead', 'hidden'); //show 'purchase sales lead' button
   removeClass('.metrics','hidden'); // show heads up display.
-  if (!timeBarFeatureFlag) $id('rate').classList.add('hidden');
+  if (!game.TimeBarFeatureFlag) $id('rate').classList.add('hidden');
   
   addClass(".getPerson", 'hidden'); //hide 'buy dev/test/ba' buttons. (They are re-enabled when total >= 300)
   
@@ -766,15 +814,14 @@ function getNewLead():void {
   let price = game.LeadPrice;
   
   if (game.Money < 0) {
-    drawMessage("Will need to go FURTHER into debt to get this lead.");
+    drawMessage("Will need to go FURTHER into debt to get this lead. 😫");
   } else if (game.Money < price) {
-    drawMessage("Will need to go into debt to get this lead.");
+    drawMessage("Will need to go into debt to get this lead. 😢");
   }
 
   incrementMoney(price * -1);
   incrementXP(5);
-  // TODO: instead of 10 points and value 1000....
-  // should be based on current level... some randomness.
+  // TODO: story should be created by a constructor on story
   let newLead:Story = { 
       id: nextId(), 
       points:game.ProjectSize, 
@@ -792,12 +839,24 @@ function getNewLead():void {
       projectId: null,
       reworkLevel:0,
       startingTime: new Date(),
-      maxAge: game.MaxAge
+      maxAge: -1
     };
+
+  if (game.TimeBarFeatureFlag) {
+    if (Math.floor(Math.random() * 100) < game.TimeBarChance) {
+      if (!game.FirstTimeSensitiveProject) {
+        game.FirstTimeSensitiveProject = true;
+        //TODO: MAKE it a modal message!
+        drawMessage("⏰⏰⏰This project is time sensitive! Get it done quickly! ⏰⏰⏰");
+      }
+      
+      newLead.maxAge = game.MaxAge;
+    }
+  }
 
   if (isEmpty(game.Stories)) {
     // this was the first lead ever! give them a tip...
-    drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the " + game.People["p1"].icon + " Founder (or vice-versa)");
+    drawMessage("STEP 2: Click the project " + newLead.logo + ", then click the " + game.People["p1"].avatar + " Founder (or vice-versa)");
   }
 
   game.Stories['r' + newLead.id] = newLead;
@@ -836,22 +895,24 @@ function getNewPerson(skill: string):void {
   let id = nextId();
   let skillo = {};
   skillo[skill] = { level: 1};
-  let newEmployee: Person = 
-    { id: id, 
-      skills: skillo, 
-      summary: "💤", 
-      icon: getIcon(), 
-      name: getName(), 
-      XP: 0, 
-      busy: false, 
-      selfStarterLevel: 0,
-      has: {},
-      seatLevel: 0,
-      keyboardLevel:0,
-      headphoneLevel:0,
-      selfStartDelay: game.DefaultSelfStartDelay,
-      triggerTime:null
-    };
+  let newEmployee: Person = { 
+    id: id, 
+    skills: skillo, 
+    summary: "💤", 
+    avatar: getAvatar(), 
+    name: getName(), 
+    XP: 0, 
+    busy: false, 
+    selfStarterLevel: 0,
+    has: {},
+    seatLevel: 0,
+    keyboardLevel:0,
+    headphoneLevel:0,
+    selfStartDelay: game.DefaultSelfStartDelay,
+    triggerTime:null,
+    buyBotLevel:0
+  };
+
   game.People['p' + id] = newEmployee;
   drawPerson('p' + id, game.People);
   // Every time you hire a person the price for that type inflates by a LOT.
@@ -908,7 +969,7 @@ function isPossiblePerson(person:Person):boolean {
     if (receiver.skillneeded == "any")  return true;
     if (Object.keys(person.skills).includes(receiver.skillneeded)) return true;
   }
-  return false;  
+  return false;
 }
 
 function updatePossible():void {
@@ -958,7 +1019,7 @@ function clickDoer(id: string) {
   
   // can't select (or deselect) a busy person.
   if (game.People[id].busy) {
-    log("can't select (or deselect) a busy item. (" + game.People[id].name + " " + game.People[id].icon + ")");
+    log("can't select (or deselect) a busy item. (" + game.People[id].name + " " + game.People[id].avatar + ")");
     return;
   }
 
@@ -1067,13 +1128,42 @@ function useIt(doId: string, item: StoreItem){
 
 function applyItem(person:Person, item:StoreItem) {
   switch(item.code){
+    case ItemCode.buybot:
+      // this is a very custom item.
+      person.buyBotLevel += 1;
+      let message = `The buy-bot ${item.icon} will buy projects for you, (if the inbox is below the points limit (set with ➕ and ➖), and you have spare 💲)`;
+      game.TimeBarFeatureFlag = true;
+      if (game.ColumnLimits["ba"] == -1) {
+        game.ColumnLimits["ba"] = 20;
+        updateColumnCount("ba");
+      } 
+      if (game.ColumnLimits["dev"] == -1) {
+        game.ColumnLimits["dev"] = 20;
+        updateColumnCount("dev");
+      } 
+      
+      if (person.selfStarterLevel == 0) {
+        person.selfStarterLevel++;
+        game.HasInitiativeLevel++;
+        //TODO: grab initiative item from all items collection
+        let ss:StoreItem = {id:nextId(),name:'⭐ Initiative Training ⭐', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false};
+        message += `, and ${person.name} ${person.avatar} has initiative now!`;
+        person.has['i'+ss.id] = ss;
+      } else {
+        message += ".";
+      }
+
+      person.has['i'+item.id] = item;
+      drawMessage(message);
+      break;
     case ItemCode.selfstart:
+      game.HasInitiativeLevel++;
       person.selfStarterLevel++;
       if (person.selfStarterLevel == 1) {
         person.has['i'+item.id] = item;
-        drawMessage(`${person.name} ${person.icon} will display initiative!`);
+        drawMessage(`${person.name} ${person.avatar} has initiative now!`);
       } else {
-        drawMessage(`${person.name} ${person.icon} will display ⭐more⭐ initiative (level ${person.selfStarterLevel}).`);
+        drawMessage(`${person.name} ${person.avatar} has ⭐more⭐ initiative (level ${person.selfStarterLevel}).`);
       }
       
       if (person.busy == false) {
@@ -1128,7 +1218,7 @@ function applyItem(person:Person, item:StoreItem) {
       person.busy = true;
       let animal = item.code == ItemCode.dog? "dog" : "cat";
       person.summary = `Tending to ${item.name} ${item.icon} (the ${animal})` ;
-      drawMessage(`${person.name} ${person.icon} has the ${animal} ${item.name} ${item.icon}`);
+      drawMessage(`${person.name} ${person.avatar} has the ${animal} ${item.name} ${item.icon}`);
       setTimeout(function() { usingFinishedBusyPhase(person, item);}, game.AnimalTendingDelay); 
       setTimeout(function() { usingFinished(person, item);}, item.activeDuration*500);
       
@@ -1171,7 +1261,7 @@ function usingFinishedBusyPhase(person:Person, item:StoreItem) {
 }
 
 function personFree(person:Person):void {
-  log(`${person.name} ${person.icon} is now free`);
+  log(`${person.name} ${person.avatar} is now free`);
   updatePossible();
   trySelfStart(person);
 }
@@ -1226,12 +1316,41 @@ function selfStart(person:Person, triggerTime:Date){
   }
 
   log("Self starter is awake...");
-  log(person.name + " " + person.icon + " is busy? " + person.busy);
+  log(person.name + " " + person.avatar + " is busy? " + person.busy);
   if (!person.busy) {
-    log(`${person.name} ${person.icon} is checking the board now....`);
+    log(`${person.name} ${person.avatar} is checking the board now....`);
     //TODO: implement this. And log above instead of 'drawmessage'  
     
     let columns:string[] = [];
+
+
+    if (person.buyBotLevel > 0){
+      //consider sending the bot off to buy a project lead...
+      updateColumnCount
+      let baPoints = 0;
+      let devPoints = 0;
+      for(let s of $('#ba .inner .story .points')){
+        //s.innerText;
+        baPoints += Number(s.innerText);
+      }
+
+      for(let s of $('#dev .inner .story .points')){
+        //s.innerText;
+        devPoints += Number(s.innerText);
+      }
+      
+
+      if (baPoints < game.ColumnLimits["ba"]
+      && devPoints < game.ColumnLimits["dev"]){
+        //hmmm, ba column isn't full...
+        // and dev column isn't full...
+        if (game.Money > game.LeadPrice) {
+          let price = game.LeadPrice;
+          getNewLead();
+          drawMessage("⭐Buybot 🤖 just bought a new project for 💲" + price + "⭐");
+        }
+      }
+    }
 
     // we prioritise self-starting from the back of the board.
     if (person.skills["test"] && person.skills["test"].level > 0) {
@@ -1242,18 +1361,19 @@ function selfStart(person:Person, triggerTime:Date){
       columns.push("dev");
     }
 
+
     if (person.skills["ba"] && person.skills["ba"].level > 0) {
       columns.push("ba");
     }
 
-    if (columns.length == 0)  log(`${person.name} ${person.icon} has no skills worth a damn, apparently!`);
+    if (columns.length == 0)  log(`${person.name} ${person.avatar} has no skills worth a damn, apparently!`);
 
     // check each column in the order of the array columns.
     for(let column of columns) {
       let nextCards = $(`#${column} .inner .story.receiver:not(.busy)`);
       if (nextCards.length > 0) {
         let nextCardId = nextCards[0].id;
-        log(`${person.name} ${person.icon} is doing ${game.Stories[nextCardId].summary}`);
+        log(`${person.name} ${person.avatar} is doing ${game.Stories[nextCardId].summary}`);
         doIt('p' + person.id, nextCardId);
         break;
       }
@@ -1279,7 +1399,7 @@ function usingFinished(person:Person, item:StoreItem) {
     case ItemCode.dog:
     case ItemCode.cat:
         drawInboxItem('i' + item.id, item);
-        drawMessage(item.name + ' ' + item.icon + ' has left ' + person.name + ' ' + person.icon + ' and is back to the inbox');
+        drawMessage(item.name + ' ' + item.icon + ' has left ' + person.name + ' ' + person.avatar + ' and is back to the inbox');
         break;
   } 
 
@@ -1301,7 +1421,7 @@ function doIt(doId: string, receiverId: string) {
   
   let person = game.People[doId];
   story.busy = true;
-  story.icon = person.icon;
+  story.icon = person.avatar;
   story.person = doId;
   person.busy = true;
   person.summary = getSummary(story);
@@ -1722,7 +1842,7 @@ function bankStory(storyId: string) {
     //HALVE the amount this card is worth! (hope the customer doesn't find ANOTHER bug in this one......)
     story.pointPrice = story.pointPrice / 2;
     story.person = null;
-    story.icon = "🐞";
+    story.icon = "👿";
     story.skillneeded = "ba"; //goes all the way back to the BA column.
     story.reworkLevel += 1;
     drawStory(storyId, game.Stories, true); //at the top.
@@ -1751,7 +1871,7 @@ function bankStory(storyId: string) {
 
       bonus = Math.ceil(project.lead.points * project.lead.pointPrice / 2);
         
-      if (!timeBarFeatureFlag) {
+      if (!game.TimeBarFeatureFlag || project.lead.maxAge == -1) {
         message2 += ` plus 💲${bonus} for completing ${project.lead.summary} ${project.lead.logo}`;
         incrementXP(10);
 
@@ -1866,20 +1986,22 @@ function getName() {
 
 let catIcons = ['🐈', '😸','😼','😽','😾','😿','🙀','🐱‍👤','🐱‍🐉','🐱‍👓','🐱‍🚀','🐱‍🏍','😹','😻'];
 let dogIcons = ['🐕','🐶','🐩','🐺','🐕','🐶','🐩','🐺','🐻','🐨','🌭'];
-let catNames = ['Ace','Alfie','Alonzo','Amberjack','Angel','Angus','Ashes','Astro','Baby','Bagel','Baguette','Barb','Barley','Basil','Batfish','Bella','Bill','Birdie','Bitty','Blackie','Bobo','Bombalurina','Buddy','Buffy','Bugsy','Bustopher Jones','Butter','Buttercup','Butterscotch','Buzz','Cabbage','Captain','Carbucketty','Carrot','Cashew','Casper','Catalufa','Chai','Chairman Meow','Charlie','Cheddar','Cheerio','Cherubfish','Chesnut','Chickpea','Chloe','Churro','Cinnamon','Clementine','Cleo','Coco','Coffee','Comet','Cranberry','Croaker','Croissant','Crouton','Crumbs','Crêpe','Cubby','Curry','Cutthroat','Daggertooth','Daisy','Demeter','Dewey','Diesel','Doodle','Dory','Dottie','Dragonfish','Ducky','Dude','Dumpling','Dwight','Edward','Etcetera','Fangtooth','Felix','Fergus','Fig','Flapjack','Fluffy','Fondue','Fraidy','Fritter','Frodo','Fudge','Gibberfish','Ginger','Granola','Gravy','Grits','Grizabella','Guacamole','Gumbo','Gyro','Hades','Hamlet','Hash Brown','Hector','Hoagie','Jack','Jalapeño','Jambalaya','Jasper','Jellicle','Jellylorum','Jemima','Jennyanydots','Jet','Jimmy','Jules','Kabob','Kimchi','Kingfish','Kitty','Knifejaw','Kumquat','Lackets','Lala','Latke','Lemonshark','Lentil','Licorice','Linguini','Lucky','Lucy','Macaron','Macavity','Maggie','Manny','Marshmallow','Max','Meatball','Milkshake','Millie','Milo','Missy','Misty','Molly','Mooneye','Morty','Mousse','Mr. Mistoffelees','Muffin','Mungojerrie','Munkustrap','Mushroom','Mushu','Mustard','Nimbus','Noodlefish','Nugget','Nutella','Old Deuteronomy','Oliver','Opah','Oreo','Oscar','Otto','Parsnip','Patch','Patches','Peaches','Peanut','Pecan','Perogi','Phil','Pickles','Pistachio','Ponyfish','Popcorn','Poppy','Porkchop','Porky','Pouncival','Princess','Pudding','Puss','Radish','Raisin','Rambo','Ramen','Reuben','Rooster','Rum Tum','Rumpleteazer','Rumpus Cat','Sacha','Sam','Samantha','Sammy','Sausage','Scampi','Scaredy','Sea raven','Shadow','Shortcake','Simba','Simon','Skimbleshanks','Smokey','Smudge','Sneaky','Snook','Snooty','Snots','Sooty','Sophie','Sorbet','Spaghetti','Sparkles','Sparky','Splashes','Sploosh','Squash','Sriracha','Stan','Stickers','String Bean','Sweet Pea','Sylvester','Synonym','Taffy','Tallulah','Tapetail','Tesla','Thumper','Thunder','Thyme','Tiger','Tigger','Timmy','Tink','Tinks','Tinky','Tippy','Toast','Tofu','Tom','Toothless','Tootsie','Treefish','Truffle','Turbo','Turkeyfish','Turnip','Turtle','Twinkie','Velvetfish','Victoria the White Cat','Vimba','Wahoo','Walleye','Warmouth','Weasel shark','Whiskers','Whiskey','Wolf-eel','Wonton','Wrymouth','Yam','Yellow-eye mullet','Yogi','Zingle','Ziti','Ziggy'];
-let dogNames = ['Abbie', 'Abby', 'Abigail', 'Ace', 'Achilles', 'Addie', 'Ajax', 'Ali', 'Alice', 'Allie', 'Amber', 'Angel', 'Angus', 'Annie', 'Apollo', 'Archie', 'Arlo', 'Aspen', 'Athena', 'Atlas', 'Aurora', 'Axel', 'Babe', 'Baby', 'Baby Girl', 'Bailey', 'Bandit', 'Banjo', 'Barley', 'Baxter', 'Bear', 'Beau', 'Bella', 'Belle', 'Ben', 'Benny', 'Bentley', 'Bernie', 'Blaze', 'Blue', 'Bo', 'Bob', 'Bobby', 'Bodhi', 'Bolt', 'Boo', 'Boomer', 'Boots', 'Bowser', 'Brandy', 'Bristol', 'Brodie', 'Brody', 'Bruce', 'Bruno', 'Brutus', 'Bubba', 'Buddy', 'Buster', 'Caesar', 'Cali', 'Callie', 'Casey', 'Cash', 'Cassie', 'Chai', 'Chance', 'Charley', 'Charlie', 'Charlotte', 'Chase', 'Chena', 'Chevy', 'Chewy', 'Chica', 'Chico', 'Chief', 'Chinook', 'Chip', 'Chloe', 'Cinder', 'Cinnamon', 'Coal', 'Coco', 'Cocoa', 'Cody', 'Comet', 'Cookie', 'Cooper', 'Copper', 'Cosmo', 'Cricket', 'Daisy', 'Daisy Mae', 'Dakota', 'Dallas', 'Daphne', 'Dash', 'Dawson', 'Dax', 'Delilah', 'Denali', 'Deshka', 'Dexter', 'Diamond', 'Diego', 'Diesel', 'Dixie', 'Dobby', 'Doc', 'Dozer', 'Drake', 'Dude', 'Duke', 'Dusty', 'Dutch', 'Eddie', 'Ella', 'Ellie', 'Elsa', 'Elvis', 'Ember', 'Emma', 'Eva', 'Fancy', 'Finley', 'Finn', 'Fiona', 'Foxy', 'Frank', 'Frankie', 'Freya', 'Fritz', 'Frodo', 'George', 'Gertie', 'Gigi', 'Ginger', 'Gizmo', 'Goldie', 'Goose', 'Grace', 'Gracie', 'Grizzly', 'Gunner', 'Gus', 'Gypsy', 'Hank', 'Hannah', 'Harley', 'Hatcher', 'Hazel', 'Heidi', 'Henry', 'Hercules', 'Holly', 'Homer', 'Honey', 'Hope', 'Hunter', 'Indy', 'Isabella', 'Isis', 'Ivy', 'Izzy', 'Jack', 'Jackson', 'Jade', 'Jager', 'Jake', 'Jasmine', 'Jasper', 'Jax', 'Jaxx', 'Jazz', 'Jenny', 'Jesse', 'Jethro', 'Joe', 'Joey', 'Josie', 'Joy', 'Juno', 'Kai', 'Kaiser', 'Kane', 'Karma', 'Katie', 'Kaya', 'Kenai', 'Keta', 'Kiki', 'Kimber', 'King', 'Kinley', 'Kira', 'Kiska', 'Kita', 'Koa', 'Kobe', 'Kobuk', 'Koda', 'Kodiak', 'Koko', 'Kona', 'Lady', 'Layla', 'Leia', 'Lenny', 'Leo', 'Lexi', 'Lila', 'Lilly', 'Lily', 'Lincoln', 'Logan', 'Loki', 'Lola', 'Louie', 'Lucky', 'Lucy', 'Luka', 'Luke', 'Lulu', 'Luna', 'Mabel', 'Macy', 'Maddie', 'Maddy', 'Madison', 'Maggie', 'Major', 'Marley', 'Mason', 'Matilda', 'Mattie', 'Maui', 'Maverick', 'Max', 'Maximus', 'Maya', 'Mckinley', 'Mia', 'Mickey', 'Midnight', 'Mila', 'Miley', 'Millie', 'Milo', 'Mimi', 'Minnie', 'Mishka', 'Miska', 'Missy', 'Misty', 'Mocha', 'Mojo', 'Moki', 'Molly', 'Moose', 'Morgan', 'Murphy', 'Nala', 'Nanook', 'Nellie', 'Nikki', 'Nina', 'Nova', 'Nugget', 'Nukka', 'Oakley', 'Obi', 'Odie', 'Odin', 'Olive', 'Oliver', 'Ollie', 'Onyx', 'Oreo', 'Oscar', 'Otis', 'Otto', 'Ozzy', 'Panda', 'Papi', 'Parker', 'Patch', 'Peaches', 'Peanut', 'Pearl', 'Penelope', 'Penny', 'Pepper', 'Percy', 'Phoebe', 'Piper', 'Pixie', 'Poppy', 'Porter', 'Prince', 'Princess', 'Quinn', 'Radar', 'Raider', 'Ranger', 'Rascal', 'Raven', 'Rebel', 'Red', 'Reggie', 'Remi', 'Remington', 'Remy', 'Rex', 'Rico', 'Riley', 'Rio', 'Ripley', 'River', 'Rocco', 'Rocket', 'Rocky', 'Roger', 'Romeo', 'Roo', 'Roscoe', 'Rose', 'Rosie', 'Rowdy', 'Roxie', 'Roxy', 'Ruby', 'Rudy', 'Rufus', 'Ruger', 'Rusty', 'Ryder', 'Sadie', 'Sally', 'Sam', 'Samantha', 'Sammy', 'Sampson', 'Sandy', 'Sara', 'Sarge', 'Sasha', 'Sassy', 'Scooby', 'Scooter', 'Scout', 'Scrappy', 'Shadow', 'Sheba', 'Shelby', 'Sherman', 'Shiloh', 'Sierra', 'Simba', 'Simon', 'Sitka', 'Skippy', 'Skye', 'Smokey', 'Snickers', 'Sophia', 'Sophie', 'Sparky', 'Spike', 'Stanley', 'Star', 'Stella', 'Stormy', 'Sugar', 'Summer', 'Sunny', 'Sweet Pea', 'Sweetie', 'Sydney', 'Tallulah', 'Tank', 'Taz', 'Teddy', 'Thor', 'Thunder', 'Tiger', 'Tilly', 'Timber', 'Tinkerbell', 'Titan', 'Titus', 'Toby', 'Tonka', 'Tori', 'Trapper', 'Trigger', 'Trinity', 'Trixie', 'Trooper', 'Tucker', 'Tuffy', 'Tundra', 'Turbo', 'Tyson', 'Violet', 'Watson', 'Whiskey', 'Willow', 'Winnie', 'Winston', 'Wrigley', 'Xena', 'Yoda', 'Yuki', 'Yukon', 'Zeke', 'Zelda', 'Zeus', 'Ziggy', 'Ziva', 'Zoe', 'Zoey'];
-let projectPart0 = ['project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'operation', 'system', 'the','strategy','industrial','project'];//,'account','group'];
-let projectPart1 = ['gold','robot','red','crimson','magenta','violet','shocking','hot','neat','wonder','tasty','cruel','crisp','brave','rasping','ghostly','shrieking','sneaky','slippy','steam','chaos','hot','nasty','pure','cold','black','orange','blue','green','violet','crystal','steam','ocean','plaid','sabre','icy','dry','peace','moon','fear','tyrano','arctic','bronze','silver','delta','bravo','oscar','stormy','blue','teal','indigo','purple','amber','orange','chartreuse','malachite','sapphire','drab','mauve','aegean','tense','terse','noble','suffering','seagreen','devout'];
-let projectPart2 = ['hat','puzzle','cobra','window','monkey', 'donkey','blaze','jacobite','zebra','centurion','dawn','alpha','wave','banjo','cats','axe','teeth','calculo','whisper','december','axe','narwhal','sloth','otter','bacon','penguin','tiger','island','duck','goat','disco','torch','ember','cargo','flare','night','creek','gnocchi','palace','spear','dagger','saurus','gazelle','wolf','lion','giraffe','dolphin','husky','fox','wallaby','spider','gemstone','parakeet','marakesh','zanzibar','fortune','arms','dream'];
+let catNames = ['Lackets','Ace','Alfie','Alonzo','Amberjack','Angel','Angus','Ashes','Astro','Baby','Bagel','Baguette','Barb','Barley','Basil','Batfish','Bella','Bill','Birdie','Bitty','Blackie','Bobo','Bombalurina','Buddy','Buffy','Bugsy','Bustopher Jones','Butter','Buttercup','Butterscotch','Buzz','Cabbage','Captain','Carbucketty','Carrot','Cashew','Casper','Catalufa','Chai','Chairman Meow','Charlie','Cheddar','Cheerio','Cherubfish','Chesnut','Chickpea','Chloe','Churro','Cinnamon','Clementine','Cleo','Coco','Coffee','Comet','Cranberry','Croaker','Croissant','Crouton','Crumbs','Crêpe','Cubby','Curry','Cutthroat','Daggertooth','Daisy','Demeter','Dewey','Diesel','Doodle','Dory','Dottie','Dragonfish','Ducky','Dude','Dumpling','Dwight','Edward','Etcetera','Fangtooth','Felix','Fergus','Fig','Flapjack','Fluffy','Fondue','Fraidy','Fritter','Frodo','Fudge','Gibberfish','Ginger','Granola','Gravy','Grits','Grizabella','Guacamole','Gumbo','Gyro','Hades','Hamlet','Hash Brown','Hector','Hoagie','Jack','Jalapeño','Jambalaya','Jasper','Jellicle','Jellylorum','Jemima','Jennyanydots','Jet','Jimmy','Jules','Kabob','Kimchi','Kingfish','Kitty','Knifejaw','Kumquat','Lackets','Lala','Latke','Lemonshark','Lentil','Licorice','Linguini','Lucky','Lucy','Macaron','Macavity','Maggie','Manny','Marshmallow','Max','Meatball','Milkshake','Millie','Milo','Missy','Misty','Molly','Mooneye','Morty','Moses','Mousse','Mr. Mistoffelees','Muffin','Mungojerrie','Munkustrap','Mushroom','Mushu','Mustard','Nimbus','Noodlefish','Nugget','Nutella','Old Deuteronomy','Oliver','Opah','Oreo','Oscar','Otto','Parsnip','Patch','Patches','Peaches','Peanut','Pecan','Perogi','Phil','Pickles','Pistachio','Ponyfish','Popcorn','Poppy','Porkchop','Porky','Pouncival','Princess','Pudding','Puss','Radish','Raisin','Rambo','Ramen','Reuben','Rooster','Rum Tum','Rumpleteazer','Rumpus Cat','Sacha','Sam','Samantha','Sammy','Sausage','Scampi','Scaredy','Sea raven','Shadow','Shortcake','Simba','Simon','Skimbleshanks','Smokey','Smudge','Sneaky','Snook','Snooty','Snots','Sooty','Sophie','Sorbet','Spaghetti','Sparkles','Sparky','Splashes','Sploosh','Squash','Sriracha','Stan','Stickers','String Bean','Sweet Pea','Sylvester','Synonym','Taffy','Tallulah','Tapetail','Tesla','Thumper','Thunder','Thyme','Tiger','Tigger','Timmy','Tink','Tinks','Tinky','Tippy','Toast','Tofu','Tom','Toothless','Tootsie','Treefish','Truffle','Turbo','Turkeyfish','Turnip','Turtle','Twinkie','Velvetfish','Victoria the White Cat','Vimba','Wahoo','Walleye','Warmouth','Weasel shark','Whiskers','Whiskey','Wolf-eel','Wonton','Wrymouth','Yam','Yellow-eye mullet','Yogi','Zingle','Ziti','Ziggy'];
+let dogNames = ['Brackets','Stickers','Abbie', 'Abby', 'Abigail', 'Ace', 'Achilles', 'Addie', 'Ajax', 'Ali', 'Alice', 'Allie', 'Amber', 'Angel', 'Angus', 'Annie', 'Apollo', 'Archie', 'Arlo', 'Aspen', 'Athena', 'Atlas', 'Aurora', 'Axel', 'Babe', 'Baby', 'Baby Girl', 'Bailey', 'Bandit', 'Banjo', 'Barley', 'Baxter', 'Bear', 'Beau', 'Bella', 'Belle', 'Ben', 'Benny', 'Bentley', 'Bernie', 'Blaze', 'Blue', 'Bo', 'Bob', 'Bobby', 'Bodhi', 'Bolt', 'Boo', 'Boomer', 'Boots', 'Bowser', 'Brandy', 'Bristol', 'Brodie', 'Brody', 'Bruce', 'Bruno', 'Brutus', 'Bubba', 'Buddy', 'Buster', 'Caesar', 'Cali', 'Callie', 'Casey', 'Cash', 'Cassie', 'Chai', 'Chance', 'Charley', 'Charlie', 'Charlotte', 'Chase', 'Chena', 'Chevy', 'Chewy', 'Chica', 'Chico', 'Chief', 'Chinook', 'Chip', 'Chloe', 'Cinder', 'Cinnamon', 'Coal', 'Coco', 'Cocoa', 'Cody', 'Comet', 'Cookie', 'Cooper', 'Copper', 'Cosmo', 'Cricket', 'Daisy', 'Daisy Mae', 'Dakota', 'Dallas', 'Daphne', 'Dash', 'Dawson', 'Dax', 'Delilah', 'Denali', 'Deshka', 'Dexter', 'Diamond', 'Diego', 'Diesel', 'Dixie', 'Dobby', 'Doc', 'Dozer', 'Drake', 'Dude', 'Duke', 'Dusty', 'Dutch', 'Eddie', 'Ella', 'Ellie', 'Elsa', 'Elvis', 'Ember', 'Emma', 'Eva', 'Fancy', 'Finley', 'Finn', 'Fiona', 'Foxy', 'Frank', 'Frankie', 'Freya', 'Fritz', 'Frodo', 'George', 'Gertie', 'Gigi', 'Ginger', 'Gizmo', 'Goldie', 'Goose', 'Grace', 'Gracie', 'Grizzly', 'Gunner', 'Gus', 'Gypsy', 'Hank', 'Hannah', 'Harley', 'Hatcher', 'Hazel', 'Heidi', 'Henry', 'Hercules', 'Holly', 'Homer', 'Honey', 'Hope', 'Hunter', 'Indy', 'Isabella', 'Isis', 'Ivy', 'Izzy', 'Jack', 'Jackson', 'Jade', 'Jager', 'Jake', 'Jasmine', 'Jasper', 'Jax', 'Jaxx', 'Jazz', 'Jenny', 'Jesse', 'Jethro', 'Joe', 'Joey', 'Josie', 'Joy', 'Juno', 'Kai', 'Kaiser', 'Kane', 'Karma', 'Katie', 'Kaya', 'Kenai', 'Keta', 'Kiki', 'Kimber', 'King', 'Kinley', 'Kira', 'Kiska', 'Kita', 'Koa', 'Kobe', 'Kobuk', 'Koda', 'Kodiak', 'Koko', 'Kona', 'Lady', 'Layla', 'Leia', 'Lenny', 'Leo', 'Lexi', 'Lila', 'Lilly', 'Lily', 'Lincoln', 'Logan', 'Loki', 'Lola', 'Louie', 'Lucky', 'Lucy', 'Luka', 'Luke', 'Lulu', 'Luna', 'Mabel', 'Macy', 'Maddie', 'Maddy', 'Madison', 'Maggie', 'Major', 'Marley', 'Mason', 'Matilda', 'Mattie', 'Maui', 'Maverick', 'Max', 'Maximus', 'Maya', 'Mckinley', 'Mia', 'Mickey', 'Midnight', 'Mila', 'Miley', 'Millie', 'Milo', 'Mimi', 'Minnie', 'Mishka', 'Miska', 'Missy', 'Misty', 'Mocha', 'Mojo', 'Moki', 'Molly', 'Moose', 'Morgan', 'Murphy', 'Nala', 'Nanook', 'Nellie', 'Nikki', 'Nina', 'Nova', 'Nugget', 'Nukka', 'Oakley', 'Obi', 'Odie', 'Odin', 'Olive', 'Oliver', 'Ollie', 'Onyx', 'Oreo', 'Oscar', 'Otis', 'Otto', 'Ozzy', 'Panda', 'Papi', 'Parker', 'Patch', 'Peaches', 'Peanut', 'Pearl', 'Penelope', 'Penny', 'Pepper', 'Percy', 'Phoebe', 'Piper', 'Pixie', 'Poppy', 'Porter', 'Prince', 'Princess', 'Quinn', 'Radar', 'Raider', 'Ranger', 'Rascal', 'Raven', 'Rebel', 'Red', 'Reggie', 'Remi', 'Remington', 'Remy', 'Rex', 'Rico', 'Riley', 'Rio', 'Ripley', 'River', 'Rocco', 'Rocket', 'Rocky', 'Roger', 'Romeo', 'Roo', 'Roscoe', 'Rose', 'Rosie', 'Rowdy', 'Roxie', 'Roxy', 'Ruby', 'Rudy', 'Rufus', 'Ruger', 'Rusty', 'Ryder', 'Sadie', 'Sally', 'Sam', 'Samantha', 'Sammy', 'Sampson', 'Sandy', 'Sara', 'Sarge', 'Sasha', 'Sassy', 'Scooby', 'Scooter', 'Scout', 'Scrappy', 'Shadow', 'Sheba', 'Shelby', 'Sherman', 'Shiloh', 'Sierra', 'Simba', 'Simon', 'Sitka', 'Skippy', 'Skye', 'Smokey', 'Snickers', 'Sophia', 'Sophie', 'Sparky', 'Spike', 'Stanley', 'Star', 'Stella', 'Stormy', 'Sugar', 'Summer', 'Sunny', 'Sweet Pea', 'Sweetie', 'Sydney', 'Tallulah', 'Tank', 'Taz', 'Teddy', 'Thor', 'Thunder', 'Tiger', 'Tilly', 'Timber', 'Tinkerbell', 'Titan', 'Titus', 'Toby', 'Tonka', 'Tori', 'Trapper', 'Trigger', 'Trinity', 'Trixie', 'Trooper', 'Tucker', 'Tuffy', 'Tundra', 'Turbo', 'Tyson', 'Violet', 'Watson', 'Whiskey', 'Willow', 'Winnie', 'Winston', 'Wrigley', 'Xena', 'Yoda', 'Yuki', 'Yukon', 'Zeke', 'Zelda', 'Zeus', 'Ziggy', 'Ziva', 'Zoe', 'Zoey'];
+let projectPart0 = ['project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'project', 'operation', 'operation','system', 'the','strategy','industrial','project'];//,'account','group'];
+let projectPart1 = ['rattling','slate','aegean','amber','angry','arctic','black','bleak','blue','brave','bravo','bronze','chaos','chartreuse','chilled','cold','constant','crimson','crisp','cruel','crystal','cyan','delta','devout','diamond','drab','dry','emerald','fear','frozen','ghostly','gold','green','hot','icy','indigo','magenta','malachite','mauve','moon','nasty','neat','noble','ocean','orange','oscar','peace','plaid','platinum','pure','purple','rasping','red','resolute','robot','sabre','sane','sapphire','seagreen','shocking','shrieking','silver','slippy','sneaky','steam','steel','stoic','stormy','suffering','tasty','teal','tense','terse','tyrano','violet','wild','wise','wonder'];
+let projectPart2 = ['viper','alpha','arms','arrow','axe','bacon','banjo','bishop','birch','blaze','calculo','cargo','castle','cats','centurion','chateau','cobra','creek','cup','dagger','dawn','december','disco','dolphin','donkey','dream','duck','ember','flare','fortune','fox','gazelle','gemstone','gimlet','giraffe','gnocchi','goat','hat','hound','husky','island','jacobite','key','knight','lion','marakesh','monkey','narwhal','night','oak','otter','palace','parakeet','pawn','penguin','puzzle','queen','rook','saurus','skull','sloth','spear','spider','teeth','tiger','timber','torch','wallaby','warrior','wave','whisper','window','wolf','zanzibar','zebra'];
 
 function projectName() {
   return randomItem(projectPart0) + " " + randomItem(projectPart1) + "-" + randomItem(projectPart2);
 }
-let icons = ['😕','😉','😕','🙄','🤣','😀','🙃','😁','😂','🤣','😃','😄','😅','😆','😗','😘','😍','😎','😋','😊','😉','😙','😚','🙂','🤗','🤔','😜','😛','😌','😴','😫','😪','😯','🤐','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😰','😬','😨','😩','😬','😰','😠','😵','😳','😱','😡','😷','🤒','🤕','🤢','🤧','🤥','🤡','🤠','😇','🤓','😈','👿','👹','👺'];
-function getIcon() {
-  return randomItem(icons);
+let avatars = ['😕','😉','😕','🙄','🤣','😀','🙃','😁','😂','🤣','😃','😄','😅','😆','😗','😘','😍','😎','😋','😊','😉','😙','😚','🙂','🤗','🤔','😜','😛','😌','😴','😫','😪','😯','🤐','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😰','😬','😨','😩','😬','😰','😠','😵','😳','😱','😡','😷','🤒','🤕','🤢','🤧','🤥','🤡','🤠','😇','🤓','😈','👹','👺'];
+function getAvatar() {
+  return randomItem(avatars);
 }
-let logos = ['🎈','🎈','🎆','🎇','✨','🎉','🎊','🎃','🎄','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎗','🎟','🎫','🎠','🎡','🎢','🎪','🎭','🖼','🎨','🛒','👓','🕶','🧥','👔','👕','👖','🧣','🧤','🧦','👗','👘','👙','👚','👛','👜','👝','🛍','🎒','👞','👟','👠','👢','👑','🧢','👒','🎩','🎓','💋','💄','💍','💎','⚽','⚾','🏀','🏐','🏈','🏉','🎱','🎳','🥌','⛳','⛸','🎣','🎽','🛶','🎿','🛷','🥅','🏒'];
+
+let logos = ['🎈','🎆','🎇','✨','🎉','🎊','🎃','🎄','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎗','🎟','🎫','🎠','🎡','🎢','🎪','🎭','🖼','🎨','🛒','👓','🕶','🧥','👔','👕','👖','🧣','🧤','🧦','👗','👘','👙','👚','👛','👜','👝','🛍','🎒','👞','👟','👠','👢','👑','🧢','👒','🎩','🎓','💋','💄','💍','💎','⚽','⚾','🏀','🏐','🏈','🏉','🎱','🎳','🥌','⛳','⛸','🎣','🎽','🛶','🎿','🛷','🥅','🏒'];
+
 function getLogo() {
   return randomItem(logos);
 }
@@ -1919,6 +2041,17 @@ function LevelUp() {
     }
   }
 
+  if (game.TimeBarFeatureFlag) {
+    //increase the chance of a project being time based.
+    game.TimeBarChance = Math.min(100, game.TimeBarChance + 20);
+  }
+  if (game.TimeBarFeatureFlag == false &&
+      game.Level > 7 &&
+      game.HasInitiativeLevel > 1) {
+        game.TimeBarFeatureFlag = true;
+        game.TimeBarChance = 20;
+  }
+
   switch(game.Level) {
     case 2:
     //show 'hire dev/tester/ba' buttons
@@ -1937,6 +2070,11 @@ function LevelUp() {
       removeClass('.getPerson.ba', 'hidden'); 
       addClass('.getPerson.ba', 'hint');
       break;
+    case 5:
+      //TODO: Show modal message about timebars...
+      // game.TimeBarFeatureFlag = true;
+      break;
+
   }
 
 }
@@ -2008,7 +2146,11 @@ function describe(itemId:number){
   let item:StoreItem = game.StoreItems[itemId];
   if (!item.enabled){
     // TODO: Until level X
-    drawStoreMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
+    if (item.name.indexOf("OUT OF STOCK") != -1) {
+      drawStoreMessage(`Sorry, ${item.name} ${item.icon} 😭`);  
+    } else {
+      drawStoreMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
+    }
     return;
   }
   drawStoreMessage(`"${item.name} ${item.icon}" ${item.description}`);
@@ -2020,10 +2162,14 @@ function drawStore() {
   // add store items to #items  
   for (let key of Object.keys(game.StoreItems)) {
     let item = game.StoreItems[key];
-    let shtml = `<div class='storeItem-catalog ${item.enabled? 'item-enabled' : 'item-disabled'}'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div><span class='storeIcon'>${item.icon}</span> <span class='item-name'>${item.name}</span><span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
+    let shtml = getStoreItemHtml(item);
     let newItem = htmlToElement(shtml);
     itemList.appendChild(newItem);
   }
+}
+
+function getStoreItemHtml(item:StoreItem) {
+return  `<div class='storeItem-catalog ${item.enabled? 'item-enabled' : 'item-disabled'}' id='storeitem-${item.id}'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div><span class='storeIcon'>${item.icon}</span> <span class='item-name'>${item.name}</span><span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
 }
 
 function leaveStore() {
@@ -2040,7 +2186,15 @@ function purchase(itemId:number):void {
   let item:StoreItem = game.StoreItems[itemId];//.filter(i => i.id == itemId)[0];
   
   if (!item.enabled) {
-    drawStoreMessage(`The ${item.name} ${item.icon} is not yet available`);
+
+    // TODO: Until level X
+    if (item.name.indexOf("OUT OF STOCK") != -1) {
+      drawStoreMessage(`Sorry, ${item.name} ${item.icon} 😭`);  
+    } else {
+      drawStoreMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
+    }
+    console.log(item);
+
     return;
   }
 
@@ -2071,6 +2225,16 @@ function purchase(itemId:number):void {
   // consider: some specific items should have a different inflation curve. 
   item.price = Inflate(game.MediumInflation, item.price);
 
+  // todo: make this a feature of the store, rather than a special case of the buybot.
+  if (item.code == ItemCode.buybot){
+    item.name = item.name + " OUT OF STOCK";
+    item.enabled = false;
+    //refresh the item
+    let html = getStoreItemHtml(item);
+    $id(`storeitem-${item.id}`).outerHTML = html;
+
+  }
+
   drawInboxItem("i" + clone.id, clone);
   $id("store-button-" + itemId).innerText = `💲${item.price}`;
 }
@@ -2082,8 +2246,8 @@ function jalert(obj:any){
 
 function log(message:string){
   if (debugOutput) {
-    let m = htmlToElement(`<div>${message}</div>`);
-    $id('debug').appendChild(m);
+    //let m = htmlToElement(`<div>${message}</div>`);
+    //$id('debug').appendChild(m);
   }
 
   console.log(message);
@@ -2101,7 +2265,7 @@ function stopMainLoop() {
 function mainLoop() {
   //detect age of cards.
   //nah -- just update the timebars.
-  if (timeBarFeatureFlag) {
+  if (game.TimeBarFeatureFlag) {
     drawTimebars(game.Stories);
     trackIncome();
   }

@@ -100,6 +100,41 @@ A few ideas
 --> a tender item pays no money along the way, and only pays money if you win the tender and complete the project, but the project pays a premium (to make up for the tender cost)
 
 
+** time management ideas **
+
+if it was implemented as a time management system then there would be little modal tasks  that pop up
+
+for example to create cards:
+
+	As a ..... <role>
+	I want a ..... <thing >
+	So that. <benefit>
+
+where role:=
+	User
+	Sophisticated user
+	Teacher
+	
+	Adjective-profession or role
+	
+	People win chess
+	Astronauts solve problem 
+	Life becomes wonderful
+
+
+When there's Code to be written 
+
+	—- Tao tap tap -- code gets written
+	
+Front end to be tested....
+
+		tap each element -- see if a bug emerges...
+
+Bugs to be fixed
+
+	Front end - tap each bug
+	Code - tap each bug 
+
 
 **probably not**
 
@@ -132,16 +167,17 @@ store game state in local storage
 
 ## Defer/Maybe
 
+[ ] Cumulative flow diagrams
 [ ] ability to re-arrange workers
-[ ] How to do determine if a job has become too stale? has taken too long to complete? and if determind, how to show it visually?
-[ ] Self-start... also randomly fire if unallocated for too long.
-[ ] Dark mode
-[ ] drawMessage "You gave Alan a developer upgrade" 
+[done] How to do determine if a job has become too stale? has taken too long to complete? and if determind, how to show it visually?
+[done] Self-start... also randomly fire if unallocated for too long.
+[done] Dark mode
+[done] drawMessage "You gave Alan a developer upgrade" 
 [ ] drawMessage "Founder is enjoying that donut"
 [ ] StoreItem: Master BA: breaks a project into two smaller projects. (applies if the project size > half of the current points per project level)
      calls them {original name} A and {original name} B.
      can only be given to a person once. (How to do selection/highlighting?)
-[ ] Hire a scrum master... once you hire them -- they take over for you, basically... and you can then open a second DevShop...
+[no](buy bot instead) Hire a scrum master... once you hire them -- they take over for you, basically... and you can then open a second DevShop...
 [ ] how to show attributes/stats sheet of a person? (see stats button)
 ? limited number of slots for people. cannot hire more than level number... until 
 ? dual-skill cannot be better than "4/5" at either skill
@@ -174,6 +210,20 @@ no: are observations now chained with self-start? seems too extreme. REMOVING ob
 
 
 # DONE
+
+* Selecting the buy bot:
+  [x] Must be assigned to someone who has initiative. No: I just give the person minimum initiative
+  [x] If selected from inbox and no one possible to assign: a display message will explain why no target recipients. No, see above.
+[x] emoji font not used for message areas - 🖼 doesn't look right
+[x] show # 📍 -- points in the column labels.
+[x] robot 🤖 buy-bot: robo-caller -- A robot at your desk! The buy-bot buys new projects for you (unless the backlog is over its limit) 
+[x] only 1 buy bot allowed. 
+[x] Buying the buy bot...... 
+   [x] it does not refresh the display right away
+   [x] it says "out of stock is not available until a higher level"
+[x] select skill from inbox, a worker is highlighted. but when their initiative ticks over, they lose their highlight.
+
+
 [x] all dogs have same icon after first choice (no, there just weren't enough icons for dogs, so i broadened by canine definition)
 [x] move initiative up.
 [x] have starting initiative be much much slower ??

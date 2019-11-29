@@ -16,6 +16,7 @@
  --main-bg:#EEE;
  --main-button-shadow:#AAA;
  --column-count-bg:#DDD;
+ --column-count-updn-bg:#AAA;
  --main-button-bg:#D8D8D8;
  --main-button-hint-bg:#D0F0FF;
  --main-border:#666;
@@ -43,6 +44,7 @@
     --main-bg:#222;
     --main-button-shadow:#000;
     --column-count-bg:#333;
+    --column-count-updn-bg:#555;
     --main-button-bg:#333;
     --main-button-hint-bg:#203066;
     --main-button-hint:#EEE;
@@ -66,15 +68,39 @@
   }
 }
 
+.up, .dn {
+  padding:7px;
+  display:inline-block;
+  opacity:0.8;
+  background-color:var(--column-count-updn-bg);
+}
+
+.up:hover, .dn:hover {
+  background-color:#AAA;
+  cursor:pointer;
+}
+
+.count.limited {
+  right: 50%;
+  transform:translateX(50%);
+  margin-left: auto;
+  margin-right: auto;
+  display:inline-block;
+  white-space: nowrap;
+  padding:0 0;
+}
+
 .pulse {
   animation: pulse 1s infinite cubic-bezier(0.66, 0, 0, 1);
 }
+
 @keyframes pulse {to {
 box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
 
 #start {
   box-shadow:2px 2px 0 var(--main-button-shadow), 0 0 10px gold,0 0 10px gold;
 }
+
 .elapsed {
   position:absolute;
   background-color:red;
@@ -87,6 +113,7 @@ box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
   bottom:0;
   right:0;
 }
+
 .time-bars {
  position:absolute;
  right:0;
@@ -107,9 +134,15 @@ box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
   opacity:0.7;
   z-index:2;
 }
+
 .count[data-count='0'],.count[data-count='1'],.count[data-count='2'],.count[data-count='3'],.count[data-count='4']{
  display:none;
 }
+
+.count.limited[data-count] {
+ display:inline-block;
+}
+
 .skill,.icon {
   max-width:20px;
   display:inline-block;
@@ -119,9 +152,11 @@ box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
   padding:0 !important;
   position:relative;
 }
+
 .button .icon {
  font-size:10px;
 }
+
 .skill[data-level]:after,.icon[data-level]:after {
   content: attr(data-level);
   font-size:10px;
@@ -141,8 +176,8 @@ box-shadow:2px 2px 0 10px rgba(212, 175, 55, 0);}}
 }
 
 .item-disabled {
-opacity:0.4;
-filter: grayscale(100%);
+  opacity:0.4;
+  filter: grayscale(100%);
 }
 
 body {
@@ -171,6 +206,7 @@ h1,th {
   margin-block-start:0;
   margin-block-end:5px;
 }
+
 h1{
   text-shadow:1px 1px var(--main-title-shadow3), 2px 2px var(--main-title-shadow4);
 
@@ -278,6 +314,7 @@ th {
 .possible {
   box-shadow:0 0 1px #FF0,0 0 2px #FF0,0 0 3px #FF0,0 0 4px #FF0,0 0 5px #FF0;
 }
+
 .person {
   display:inline-block;
   vertical-align:top;
@@ -294,7 +331,6 @@ th {
 .story,.storeItem {
   position:relative;
   margin:3px 3px 0 3px;
-
 }
 
 .storeItem-catalog {
@@ -381,16 +417,22 @@ th {
   border-radius:4px;
 }
 
-.logo, .avatar, .avatar2, .secrets, .icon, .skill {
+.logo, .avatar, .avatar2, .secrets, .icon, .skill, #message, #storeMessage {
   font-family: arial;
   font-size:12pt;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-
 }
+
+h1 .icon {
+  font-size:inherit;
+  text-shadow:none;
+}
+
 .secrets {
   background-color:var(--main-button-shadow);
   opacity:0.5;
 }
+
 .avatar {
   border:1px solid var(--main-avatar-border);
   background-color:var(--main-avatar-bg);
@@ -413,7 +455,7 @@ th {
   color:var(--main-message);
   padding:1ch;
   box-shadow:2px 2px var(--main-button-shadow);
-  font-size:10pt;
+  font-size:12pt;
 }
 
 #helpLink,#aboutLink {
@@ -427,6 +469,7 @@ th {
   text-decoration:none;
   color:var(--main);
 }
+
 #aboutLink
 {
   left:0%;
@@ -437,6 +480,7 @@ th {
   right: 0%;
   margin-right:5px;
 }
+
 .story-detail {
  display:inline-block;
  whitespace:pre-wrap;
@@ -444,6 +488,7 @@ th {
  overflow-x:hidden;
  margin-left:3px;
 }
+
 .points {
   position:absolute;
   bottom:1px;
@@ -469,6 +514,7 @@ th {
   min-width:20px;
   float:right;
 }
+
 .storeIcon {
   font-size:3em;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -482,6 +528,7 @@ th {
   max-width:calc(100vw - 2ch);
   width:calc(100vw - 2ch);
 }
+
 /* tablet/large phone layout */
 @media screen and (max-width: 720px)
 {
@@ -496,6 +543,7 @@ th {
     font-size:10pt;
   }
 }
+
 @media screen and (max-height: 500px)
 {
   #kanbanboard td .inner {
@@ -506,6 +554,7 @@ th {
     max-height:150px;
   }
 }
+
 /* small phone layout */
 @media screen and (max-width: 480px)
 {
@@ -585,17 +634,15 @@ th {
   text-shadow:1px 1px var(--main-title-shadow1), 2px 2px var(--main-title-shadow2), 3px 3px var(--main-title-shadow3), 4px 4px var(--main-title-shadow4);
 }
 x#startscreen h1:after {
-content: '🥓';
-font-size:0.5em;
-text-transform: rotate(120deg);
-margin-left:-12px;
+  content: '🥓';
+  font-size:0.5em;
+  text-transform: rotate(120deg);
+  margin-left:-12px;
 }
 #startscreen h2 {
   text-align:center;
-  xfont-size:38pt;
   margin:30px auto;
-  xtransform: rotate(-12deg);
-padding-bottom:5px;margin-bottom:0;
+  padding-bottom:5px;margin-bottom:0;
 }
 #startscreen input[type=email]{
   text-align:center;
@@ -648,7 +695,7 @@ padding-bottom:5px;margin-bottom:0;
   <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");' tabindex='0' role='button'><span class='icon'>💻</span>hire dev (💲300)</div>
   <div id='gettest' class='button getPerson hidden test' onclick='getNewPerson("test");' tabindex='0' role='button'><span class='icon'>🔬</span>hire tester (💲300)</div>
   <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");' tabindex='0' role='button'><span class='icon'>🗣</span>hire BA (💲300)</div>
-  <div class='button visitStore hidden' onclick='visitStore();' tabindex='0' role='button'><span class='icon'>🏪</span>visit store</div>
+  <div class='button visitStore hidden' onclick='visitStore();' tabindex='0' role='button'><span class='icon'>🛍</span>visit store</div>
 </div>
   <table id='kanbanboard'>
   <thead>
@@ -695,7 +742,7 @@ padding-bottom:5px;margin-bottom:0;
 </div>
 
 <div id='store' class='hidden'>
-<h1>DevStore</h1>
+<h1>DevStore<span class='icon'>🛍</span></h1>
 
   <div id='closeStore' class='button' onclick='leaveStore();' tabindex='0' role='button'><span class='icon'>🏢</span> leave store</div>
   <div id='items'>
