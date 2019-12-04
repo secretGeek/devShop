@@ -10,7 +10,28 @@
 <title>DevShop</title>
 </head>
 <style>
+a{
+ background-color:var(--main-bg);
+ color:var(--main);
+ text-decoration:underline;
+}
+input[type=email]{
+ background-color:var(--main-bg);
+ color:var(--main);
+ box-shadow:2px 2px 2px inset var(--main-tr-shadow);
+}
 
+.pp{
+  max-width:70ch;
+  padding:2ch;
+  margin:auto;
+  font-size:1.2em;
+  font-family:sans-serif;
+}
+
+.wtf {
+display:none;
+}
 :root {
  --main:#333;
  --main-bg:#EEE;
@@ -198,7 +219,7 @@ body {
   top:calc(100vh - 4ch);
 }
 
-h1,th {
+h1,th,.twop {
   font-family: 'Press Start 2P', monospace;
   font-size:14pt;
   color:var(--main);
@@ -206,8 +227,11 @@ h1,th {
   margin-block-start:0;
   margin-block-end:5px;
 }
+.twop{
+ font-size:12pt;
+}
 
-h1{
+h1, .twop{
   text-shadow:1px 1px var(--main-title-shadow3), 2px 2px var(--main-title-shadow4);
 
 }
@@ -258,6 +282,7 @@ h1{
   box-shadow:2px 2px 0 var(--main-button-shadow);
   border:1px solid var(--main-border);
 }
+
 .person {
   box-shadow:2px 2px 0 var(--main-button-shadow);
 }
@@ -348,6 +373,21 @@ th {
 .item-name {
   display:inline-block;
   whitespace:pre-wrap;
+  max-width:calc(100% - 160px);
+  position:absolute;
+  left:120px;
+  top:50%;
+  transform:translateY(-50%);
+}
+
+.storeItem-catalog {
+  position:relative;
+}
+
+.storeIcon{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
 }
 
 .storeItem-catalog .button {
@@ -512,7 +552,11 @@ h1 .icon {
   padding:5px;
   margin:5px;
   min-width:20px;
-  float:right;
+  xfloat:right;
+  position:absolute;
+  right:5px;
+  top:50%;
+  transform:translateY(-50%);
 }
 
 .storeIcon {
@@ -560,6 +604,13 @@ h1 .icon {
 {
   body {
     padding:1ch;
+  }
+  .count{
+    font-size:6pt;
+    margin:0;
+  }
+  .up, .dn {
+    padding:4px;
   }
   th,.story,.storeItem {
     font-size:6pt;
@@ -659,6 +710,10 @@ x#startscreen h1:after {
   font-size:small;
   text-decoration:none;
   width:200px;
+  background-color:var(--main-bg);
+  color:var(--main);
+  text-decoration:underline;
+
 }
 #startscreen .button {
   display:flex;
@@ -667,8 +722,11 @@ x#startscreen h1:after {
 #startscreen .hidden, #startscreen input[type=email].hidden {
   display:none;
 }
-#startscreen .button#joinemail {
+#startscreen .button#joinemail, #startscreen .button.joinemail {
   margin-top:10px;
+  color:var(--main);
+  white-space:normal;
+  box-sizing:content-box;
 }
 
 </style>
@@ -680,12 +738,84 @@ x#startscreen h1:after {
 <!--<div class='button' id='about' onclick='about();' tabindex='0' role='button' >🥓 about</div>-->
 <div class='button hidden' id='timechallenge' onclick='timechallenge();' tabindex='0' role='button' >⏳ time challenge</div>
 
-<h2 class='hidden'>Mailing List</h2>
-<input type='email' placeholder="you@example.com" class='hidden' />
-<div class='button hidden' id='joinemail' onclick='joinemail();' tabindex='0' role='button' >💌 join mailing list</div>
-<a href='privacypolicy.html' target='_blank' class='hidden'>[privacy policy]</a>
+<h2 class='twop'>Mailing List</h2>
+<form action="https://secretGeek.us4.list-manage.com/subscribe/post?u=2c8d4a2f270735de4d2cf3845&amp;id=64ebe920c2" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+
+<input type="email" value="" name="EMAIL" class="xemail" id="mce-EMAIL" placeholder="you@example.com" required>
+<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_2c8d4a2f270735de4d2cf3845_64ebe920c2" tabindex="-1" value=""></div>
+<input type="submit" value="💌 join mailing list" name="subscribe" id="mc-embedded-subscribe" class="button joinemail">
+<a href='#privacy' onclick='visitPrivacy();return false;'>privacy policy</a>
+</form>
+
+</div>
+
+<div id='privacy' style='clear:left' class='hidden pp'>
+<h1>DevShop</h1>
+
+<br />
+<div id='closePrivacy' class='button' onclick='leavePrivacy();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<br />
+<br />
+
+<h2 class='twop'>Privacy Policy 🔏</h2>
+
+<h3>(Well isn't this fun.)</h3>
+
+<p><em>This policy was last updated 2019-12-04</em></p>
+<p>NimbleThing Pty Ltd (&quot;us&quot;, &quot;we&quot;, or &quot;our&quot;) operates https://DevShop.SecretGeek.net (the
+&quot;Site&quot;). This page informs you of our policies regarding the collection, use and disclosure of
+Personal Information we receive from users of the Site.</p>
+<p>We use your Personal Information only for providing and improving the Site. By using the Site, you
+agree to the collection and use of information in accordance with this policy.</p>
+<h2 class='twop'>Information Collection And Use 💌</h2>
+<p>While using our Site, we may ask you to provide us with certain personally identifiable information
+that can be used to contact or identify you. Personally identifiable information may include, but is not
+limited to your name (&quot;Personal Information&quot;).</p>
+<h2 class='twop'>Log Data 🤷‍♂️</h2>
+<p>Like many site operators, we collect information that your browser sends whenever you visit our Site
+(&quot;Log Data&quot;).</p>
+<p>This Log Data may include information such as your computer's Internet Protocol (&quot;IP&quot;) address,
+browser type, browser version, the pages of our Site that you visit, the time and date of your visit,
+the time spent on those pages and other statistics.</p>
+<p>In addition, we use Google Analytics to collect, monitor and
+analyze traffic to the Site. Please refer to Googles terms of service for further details: https://policies.google.com/privacy?hl=en-US</p>
+<h2 class='twop'>Communications 📣</h2>
+<p>We may use your Personal Information to contact you with newsletters, educational sequences of email, marketing or promotional
+materials and other information related to the Site.</p>
+<p>Some emails are transactional in nature and do not include unsubscribe instructions. For example, if you purchase a license, you will receive a confirmation of license details via email: this email is transactional and does not include an unsubscribe link. Similarly, password reset or security emails are examples of transactional emails.</p>
+<p>All non-transactional emails from the Site will include a link you can use to unsubscribe from further emails. Additionally, you can contact us to request that you be removed from any future communication.</p>
+<h2 class='twop'>Cookies 🍪</h2>
+<p>And in this case when we say "Cookies" we don't mean delicious cooked biscuits. By "Cookies" we mean files with small amount of data, which may include an anonymous unique identifier.
+Cookies are sent to your browser from a web site and stored on your computer's hard drive.
+Like many sites, we use &quot;cookies&quot; to collect information. You can instruct your browser to refuse all
+cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may
+not be able to use some portions of our Site.</p>
+<h2 class='twop'>Security 🕵️‍♀️</h2>
+<p>The security of your Personal Information is important to us, but remember that no method of
+transmission over the Internet, or method of electronic storage, is 100% secure. While we strive to
+use commercially acceptable means to protect your Personal Information, we cannot guarantee its
+absolute security.</p>
+<h2 class='twop'>Changes To This Privacy Policy 🤹‍♀️</h2>
+<p>This Privacy Policy is effective as of 2019-12-04 and will remain in effect except with respect to any
+changes in its provisions in the future, which will be in effect immediately after being posted on this
+page.</p>
+<p>We reserve the right to update or change our Privacy Policy at any time and you should check this
+Privacy Policy periodically. Your continued use of the Service after we post any modifications to the
+Privacy Policy on this page will constitute your acknowledgment of the modifications and your
+consent to abide and be bound by the modified Privacy Policy.</p>
+<p>If we make any material changes to this Privacy Policy, we will notify you either through the email
+address you have provided us, or by placing a prominent notice on our website.</p>
+<h2 class='twop'>Contact Us 💌</h2>
+<p>If you have any questions about this Privacy Policy, please contact us. (We can be reached at &quot;Support<span class="wtf">omit this
+</span>@<span class="wtf">
+omit this                </span>NimbleText.com&quot;)</p>
 
 
+
+
+
+
+  <div id='closePrivacy' class='button' onclick='leavePrivacy();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 </div>
 <div id='office' style='clear:left' class='hidden'>
 <h1>DevShop</h1>

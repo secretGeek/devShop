@@ -167,6 +167,9 @@ store game state in local storage
 
 ## Defer/Maybe
 
+
+[ ] Training should have a time cost (? increases at higher levels of training)
+
 [ ] Cumulative flow diagrams
 [ ] ability to re-arrange workers
 [done] How to do determine if a job has become too stale? has taken too long to complete? and if determind, how to show it visually?
@@ -211,9 +214,22 @@ no: are observations now chained with self-start? seems too extreme. REMOVING ob
 
 # DONE
 
+
+
+[x] limit should be placed on the next column not the current column
+[x] limit should show points/max points and not show number of cards at all
+[x] customer finds bug -- logo should be 👿 - remove angry face with horns from emojis of staff
+[x] make expired timebar full RED. 
+[x] have time flag turn itself on at about level 7 or 8
+      at first it is on for 20% of projects... grows by a further 20% every level
+      do we first have to wait for them to add initiative to a player?
+
+
 * Selecting the buy bot:
   [x] Must be assigned to someone who has initiative. No: I just give the person minimum initiative
   [x] If selected from inbox and no one possible to assign: a display message will explain why no target recipients. No, see above.
+[x] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
+      includes... column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
 [x] emoji font not used for message areas - 🖼 doesn't look right
 [x] show # 📍 -- points in the column labels.
 [x] robot 🤖 buy-bot: robo-caller -- A robot at your desk! The buy-bot buys new projects for you (unless the backlog is over its limit) 
@@ -365,10 +381,10 @@ Memory management:
 
 
 Answered/resolved (in a different topic)
-// ? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
-// ? When is interest added to the loan!?
-//    after a certain amount of time.... (is it a turn based game or a time-based game?)
-//      some things about it are time based... delays for example
-//    whenever levelling up... whenever a story is finished? whenever an action occurs
+? when purchasing a project... cannot go more than $100 * level into the red (?) or 100* #people ??
+? When is interest added to the loan!?
+   after a certain amount of time.... (is it a turn based game or a time-based game?)
+     some things about it are time based... delays for example
+   whenever levelling up... whenever a story is finished? whenever an action occurs
 
 

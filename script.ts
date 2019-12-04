@@ -4,20 +4,21 @@
 // as described in the readme, I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that. 
 // Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
 
-//Definitely
+// Definitely
 
-// [x] limit should be placed on the next column not the current column
-// [x] limit should show points/max points and not show number of cards at all
-// [x] customer finds bug -- logo should be 👿 - remove angry face with horns from emojis of staff
-// [x] make expired timebar full RED. 
-// [ ] Once limits are enabled: - detect + and - (plus and minus) keys and use them to alter limits...
+// [ ] headphone "LEVEL"
+// [x] refactor selfstart to initiative
+// [ ] Microdose lsd in store: shadertoy.com effects -- or other animated bg effects. 
+// [ ] seasonal mods: st patricks day whiskey/green beer. halloween products 🎃 🦇. xmas items 🎄 🎅. thanksgiving turkey 🦃 valentines 💟; 
+// [ ] chaos monkey 🐒
+// [x] size of +/- on iphone
+// [ ] place limit on all columns
+// [ ] statting limit should be the value of a new project / 2
+// [ ] defer: Once limits are enabled: - detect + and - (plus and minus) keys and use them to alter limits... (this would only work if the limits were only on one columns)
 // [ ] height of buttons at top must be consistent. Table layout maybe?
 // [ ] sorting workers
-// [x] have time flag turn itself on at about level 7 or 8
-//       at first it is on for 20% of projects... grows by a further 20% every level
-//       do we first have to wait for them to add initiative to a player?
-//   Some projects are time critical. You get a bonus for completing them early. Notice the green bar on their right edge: that's the count down.
 // [ ] ?? ? requires a notification modal. 😡
+//   modal: Some projects are time critical. You get a bonus for completing them early. Notice the green bar on their right edge: that's the count down.
 //   ? also could show a modal near the start "So much rework needed... visit the store to upskill your team members"
 // [ ] populate load screen
 // [ ] about screen (content)
@@ -26,15 +27,10 @@
 // [ ] How to exit the game, and when/how to save.
 //  ?  Your high scores?
 //  ?  Time Challenge
-
 // [ ] add google analytics
 // [ ] size on ipad: too wide. why?
-
-// [ ] Robo-Caller skill: if all columns have less than N*2 + 4 items (where N = # with that skill) *and* cash-on-hand > 2 * proj cost... then buy proj.
-//       includes... column limits based on # points with + and - buttons on them, shown as [+| 29/3 points|-] ... and have it affect behavior of upstream people
-// [ ] 🐛Words wrap in store
+// [x] 🐛Words wrap in store
 // [ ] 🐛Icons and help icon are not vertically centered in store (other content is not either)
-// [ ] Training should have a time cost (? increases at higher levels of training)
 // [ ] Multi-skilled person choosing task to do could be based on: 
 //        total number of points in a column divided by number of people with that skill. 
 //        Worst ratio? Do that next. In case of tie-break, go with right most column.
@@ -43,7 +39,7 @@
 // [ ] show (but disabled) buy dev / buy tester button when first starting
 // [ ] keybinding -- letters to people
 // [ ] keybinding -- multiple presses of a number will cycle through the cards in that column
-// [ ] Consider: have a slow loop that checks if any one with selfStart who is not selected or busy has a triggerTime that's stale by > 2* maxtriggertime and if so call 'trySelfStart'
+// [no] Consider: have a slow loop that checks if any one with selfStart who is not selected or busy has a triggerTime that's stale by > 2* maxtriggertime and if so call 'trySelfStart'
 // [ ] more technical names for tasks
 // [ ] add to store:
 //  - Games console 🕹
@@ -62,10 +58,10 @@
 // limited people?
 // 
 
-
 let testMode = false;//true;
 let storeFeatureFlag = true;//testMode;
 //let timeBarFeatureFlag = false;
+
 let timePenaltyFeatureFlag = true;
 let debugOutput = false; 
 let game: Game;
@@ -77,18 +73,27 @@ let avgDuration = testMode ? 4 : 600;  // factor that all work durations are bas
 let startingMoney = testMode ? 100 : 100;
 let defaultCompletionTime = testMode? 10 : 100; //how long have you got to complete a project, in seconds?
 
-
 debugOutput = (debugOutput || testMode || getParameterByName('debug') == "true");
+
+
+let privacy = (getParameterByName('privacy') == "true");
+
+let hashLocation = window.location.hash.substr(1);
+
+privacy = privacy || (hashLocation == 'privacy');
+
+if (privacy) {
+  visitPrivacy();
+}
 
 // basic feature flags  
 //timeBarFeatureFlag = (timeBarFeatureFlag || getParameterByName('timebarflag') == "true"); //?timebarflag=true
 storeFeatureFlag = (storeFeatureFlag || getParameterByName('storeflag') == "true"); //?storeflag=true
 
 if (debugOutput) {
-  //$id('debug').classList.remove('hidden');
-  //log('debug mode detected');
+  $id('debug').classList.remove('hidden');
+  log('debug mode detected');
 }
-
 
 enum ItemCode {
   cat = 1,
@@ -96,7 +101,7 @@ enum ItemCode {
   upskillTest, 
   upskillDev, 
   upskillBA,
-  selfstart,
+  initiative,
   seat, 
   coffee, 
   coffeemachine,
@@ -133,7 +138,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
       { "l2": //Level 2 Items
        [{id:5,name:'Tasty donut', price:5, icon:"🍩", skillneeded:"any", busy:false, code:ItemCode.donut, activeDuration:30, description: 'A sugary fix will speed you up... but not for long.', enabled:false},
        {id:10,name:'Cup of coffee', price:10, icon:"☕", skillneeded:"any", busy:false, code:ItemCode.coffee, activeDuration:60, description: 'A cup of joe will speed up any worker …if only for a little while.', enabled:false},      
-       //{id:14,name:'Initiative Training', price:5, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
+       //{id:14,name:'Initiative Training', price:5, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.initiative, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
        ],
         "l3": //Level 3 Items
        [{id:20,name:'Upskill Developer: Efficiency Development Series', price:120, icon:"📗", skillneeded:"dev", busy:false, code:ItemCode.upskillDev, activeDuration:0, description:'Already a developer? This advanced training course will reduce the number of bugs you create.', enabled:false},
@@ -142,7 +147,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[]; } {
        [
         {id:50,name:'Upskill Tester: Fast and Thorough Book Series', price:80, icon:"📘", skillneeded:"test", busy:false, code:ItemCode.upskillTest, activeDuration:0, description:'Already a tester? Be a better tester!', enabled:false},
         {id:80,name:'Pizza', price:50, icon:"🍕", skillneeded:"any", busy:false, code:ItemCode.pizza, activeDuration:180, description: 'Food can trap your workers in the office by giving them no reason to leave.', enabled:false},
-        {id:100,name:'⭐ Initiative Training ⭐', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
+        {id:100,name:'⭐ Initiative Training ⭐', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.initiative, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
       ],
         "l5":
        [
@@ -313,7 +318,7 @@ class Game {
     this.Items = {};
     this.SelectedDoer = null;
     this.SelectedReceiver = null;
-    this.DefaultSelfStartDelay = testMode? 18000 : 18000; //12 second pause between self-starters polling the board.
+    this.DefaultInitiativeDelay = testMode? 18000 : 18000; //12 second pause between self-starters polling the board.
     this.AnimalTendingDelay = 3900;
     this.MaxAge = defaultCompletionTime; // give them this many seconds to complete *every* project; (increases slightly each level)
     this.StartTime = new Date();
@@ -335,11 +340,11 @@ class Game {
   LifeTimeRevenueMinus1Minute: number;
   LifeTimePoints: number;
   LifeTimePointsMinus1Minute: number;
+  SmallInflation: number;
   PositiveCashFlows: Payment[];
   PositivePointEvents: Payment[]; //these payments are points not dollars;
   HighestMoney: number;
   Inflation: number;
-  SmallInflation: number;
   MediumInflation: number;
   HyperInflation: number; 
   Level: number;
@@ -357,9 +362,9 @@ class Game {
   AllPeopleTypes: { [id:string]: PersonType; } // the skills
   StoreItems: { [id:string]: StoreItem;} // the items that are currently available in the store.
   Items: { [id: string]: StoreItem; } //all items that have been purchased and added to the game, start with "i"
-  SelectedDoer: string; //id of selected person
-  SelectedReceiver: string; //id of selected story
-  DefaultSelfStartDelay: number;
+  SelectedDoer!: string; //id of selected person
+  SelectedReceiver!: string; //id of selected story
+  DefaultInitiativeDelay: number;
   AnimalTendingDelay: number; // how long does it take to settle an animal down at your desk. (Can this involve the following emoji? 💩)
   MaxAge:number;
   StartTime:Date;
@@ -390,8 +395,8 @@ interface Person {
   //efficiency: number;
   XP: number;
   busy: boolean;
-  selfStarterLevel: number;
-  selfStartDelay:number; //how long they wait between polling the board (shorter numbers are faster)
+  initiativeLevel: number;
+  initiativeDelay:number; //how long they wait between polling the board (shorter numbers are faster)
   triggerTime:Date;
   seatLevel: number; //how good is your seat?
   keyboardLevel: number; //how good is your keyboard?
@@ -406,7 +411,37 @@ interface IReceiver {
 }
 
 
-interface Story {
+class Story {
+  constructor(status:string, skillneeded:string, summary:string, project:Story) {
+    this.init();
+    this.status=status; 
+    this.skillneeded=skillneeded;
+    this.summary = summary;
+    
+    if (project != null){
+      this.projectId = 'r' + project.id;
+      this.startingTime = project.startingTime;
+      this.maxAge = project.maxAge;
+      this.pointPrice = project.pointPrice;
+    }
+
+  }
+  init() {
+    this.id= nextId(); 
+    this.points=game.ProjectSize; 
+    this.pointPrice=game.PointPrice; 
+    this.logo= getLogo();
+    this.person= null;
+    this.busy= false;
+    this.icon= null;
+    this.hasBug= false;
+    this.hasSpecBug= false;
+    this.customerFoundBug= null;
+    this.projectId= null;
+    this.reworkLevel=0;
+    this.startingTime= new Date();
+    this.maxAge= -1;
+  }
   person: string;
   id: number;
   skillneeded: string;
@@ -467,12 +502,12 @@ function initGameState():void
       avatar:"🤔", 
       XP: 0, 
       busy: false, 
-      selfStarterLevel: 0, 
+      initiativeLevel: 0, 
       has: {}, 
       seatLevel: 0, 
       keyboardLevel:0, 
       headphoneLevel:0, 
-      selfStartDelay: game.DefaultSelfStartDelay, 
+      initiativeDelay: game.DefaultInitiativeDelay, 
       triggerTime:null,
       buyBotLevel:0
   };
@@ -750,7 +785,7 @@ function getItemsHtml(person:Person):string{
     let item = person.has[itemKey];
     let levelAttribute = '';
     if (item.code == ItemCode.seat) levelAttribute=` data-level='${person.seatLevel > 9 ? "∞" : person.seatLevel}'`;
-    if (item.code == ItemCode.selfstart) levelAttribute=` data-level='${person.selfStarterLevel > 9 ? "∞" : person.selfStarterLevel}'`;
+    if (item.code == ItemCode.initiative) levelAttribute=` data-level='${person.initiativeLevel > 9 ? "∞" : person.initiativeLevel}'`;
     if (item.code == ItemCode.keyboard) levelAttribute=` data-level='${person.keyboardLevel > 9 ? "∞" : person.keyboardLevel}'`;
 
     result += `<span class='icon'${levelAttribute}>${item.icon}</span>`;
@@ -822,7 +857,8 @@ function getNewLead():void {
   incrementMoney(price * -1);
   incrementXP(5);
   // TODO: story should be created by a constructor on story
-  let newLead:Story = { 
+  let newLead:Story = new Story("lead", "ba", projectName(), null);
+  /*{ 
       id: nextId(), 
       points:game.ProjectSize, 
       pointPrice:game.PointPrice, 
@@ -841,7 +877,7 @@ function getNewLead():void {
       startingTime: new Date(),
       maxAge: -1
     };
-
+*/
   if (game.TimeBarFeatureFlag) {
     if (Math.floor(Math.random() * 100) < game.TimeBarChance) {
       if (!game.FirstTimeSensitiveProject) {
@@ -903,12 +939,12 @@ function getNewPerson(skill: string):void {
     name: getName(), 
     XP: 0, 
     busy: false, 
-    selfStarterLevel: 0,
+    initiativeLevel: 0,
     has: {},
     seatLevel: 0,
     keyboardLevel:0,
     headphoneLevel:0,
-    selfStartDelay: game.DefaultSelfStartDelay,
+    initiativeDelay: game.DefaultInitiativeDelay,
     triggerTime:null,
     buyBotLevel:0
   };
@@ -1142,11 +1178,11 @@ function applyItem(person:Person, item:StoreItem) {
         updateColumnCount("dev");
       } 
       
-      if (person.selfStarterLevel == 0) {
-        person.selfStarterLevel++;
+      if (person.initiativeLevel == 0) {
+        person.initiativeLevel++;
         game.HasInitiativeLevel++;
         //TODO: grab initiative item from all items collection
-        let ss:StoreItem = {id:nextId(),name:'⭐ Initiative Training ⭐', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.selfstart, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false};
+        let ss:StoreItem = {id:nextId(),name:'⭐ Initiative Training ⭐', price:500, icon:"🚀", skillneeded:"any", busy:false, code:ItemCode.initiative, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false};
         message += `, and ${person.name} ${person.avatar} has initiative now!`;
         person.has['i'+ss.id] = ss;
       } else {
@@ -1156,14 +1192,14 @@ function applyItem(person:Person, item:StoreItem) {
       person.has['i'+item.id] = item;
       drawMessage(message);
       break;
-    case ItemCode.selfstart:
+    case ItemCode.initiative:
       game.HasInitiativeLevel++;
-      person.selfStarterLevel++;
-      if (person.selfStarterLevel == 1) {
+      person.initiativeLevel++;
+      if (person.initiativeLevel == 1) {
         person.has['i'+item.id] = item;
         drawMessage(`${person.name} ${person.avatar} has initiative now!`);
       } else {
-        drawMessage(`${person.name} ${person.avatar} has ⭐more⭐ initiative (level ${person.selfStarterLevel}).`);
+        drawMessage(`${person.name} ${person.avatar} has ⭐more⭐ initiative (level ${person.initiativeLevel}).`);
       }
       
       if (person.busy == false) {
@@ -1263,16 +1299,16 @@ function usingFinishedBusyPhase(person:Person, item:StoreItem) {
 function personFree(person:Person):void {
   log(`${person.name} ${person.avatar} is now free`);
   updatePossible();
-  trySelfStart(person);
+  tryInitiate(person);
 }
 
-function trySelfStart(person:Person):void {
-  if (person.selfStarterLevel > 0) {
+function tryInitiate(person:Person):void {
+  if (person.initiativeLevel > 0) {
     // the brain instead of the 💤 is because we're a self starter and we're **awake**
     person.summary = "🧠";
     //How many elevenths of an 18 second delay, do we have to wait before polling the board?
     //with self starter level 1, we wait ten/elevenths of 18 seconds... i.e. 16.4 seconds.
-    let delay = (person.selfStartDelay / 11)  * (11 - Math.min(10, person.selfStarterLevel));
+    let delay = (person.initiativeDelay / 11)  * (11 - Math.min(10, person.initiativeLevel));
     // if they have a dog, we wait only half that time!
     if (personHas(person, ItemCode.dog)) delay = delay / 2;
     log(`Will check board in ${delay}`);
@@ -1280,9 +1316,9 @@ function trySelfStart(person:Person):void {
     person.triggerTime = triggerTime;
     if (game.SelectedDoer == ('p' + person.id)) {
       //can't self start while selected... try to try again in a little bit...
-      setTimeout(function() { trySelfStart(person);}, 1000);
+      setTimeout(function() { tryInitiate(person);}, 1000);
     } else {
-      setTimeout(function() { selfStart(person, triggerTime);}, delay);
+      setTimeout(function() { initiate(person, triggerTime);}, delay);
     }
   } else {
     person.summary = "💤";
@@ -1301,7 +1337,7 @@ function columnName(skill:string):string{
   }
 }
 
-function selfStart(person:Person, triggerTime:Date){
+function initiate(person:Person, triggerTime:Date){
   //Now I will go and see if there are any cards on the board that I believe are worthy of my attention.
   //TODO:
   if (person.triggerTime != triggerTime) {
@@ -1311,7 +1347,7 @@ function selfStart(person:Person, triggerTime:Date){
 
   if (game.SelectedDoer == ('p' + person.id)) {
     //can't self start while selected... try to try again in a little bit...
-    setTimeout(function() { trySelfStart(person);}, 1000);
+    setTimeout(function() { tryInitiate(person);}, 1000);
     return;
   }
 
@@ -1384,7 +1420,7 @@ function selfStart(person:Person, triggerTime:Date){
   // If they did not find anything to do in the above scanning of the board, then person.busy will be false and we will
   // schedule another check of the board.
   if (!person.busy) {
-    trySelfStart(person);
+    tryInitiate(person);
   }
 }
 
@@ -1650,32 +1686,16 @@ function ElaborateProject(project: Story, person: Person): Story[] {
   
   // Deal out starting cards worth 1 point each.
   for(let i = 0; i<numCards; i++) {
-    let summary = getTask();
-    let newCard:Story = { 
-        id: nextId(), 
-        pointPrice:project.pointPrice, 
-        points: 1, // points are corrected in next section.
-        status:"story", 
-        skillneeded:"dev", 
-        summary: summary,
-        logo:project.logo,
-        projectId: 'r' + project.id,
-        person: null,
-        icon: null,
-        busy: false,
-        hasBug: false,
-        hasSpecBug: false,
-        customerFoundBug: null,
-        reworkLevel:0,
-        startingTime:project.startingTime,
-        maxAge:project.maxAge
-      };
+    let newCard = new Story("story", "dev", getTask(), project);
 
+    newCard.points = 1; // points are corrected in next section.
     game.Stories['r' + newCard.id] = newCard;
     newCards.push(newCard);
+
     //Add this new card to the list of stories for that project.
     game.Projects['r' + project.id].stories.push('r' + newCard.id);
   }
+
   //okay we've given a point to each card.
   remainingPointsToAllocate -= numCards;
 
@@ -1688,7 +1708,6 @@ function ElaborateProject(project: Story, person: Person): Story[] {
 
   for (let cardId of game.Projects['r' + project.id].stories) {
     let hasSpecBug = false;
-    //jalert(cardId);
     let card = game.Stories[cardId];
     //chance of adding a bug relates to effectiveness of ba, and size of story. (and whether or not they have... a cat)
     if (determineIfAddingSkillBug(person, card, "ba")) {
@@ -1837,12 +1856,12 @@ function bankStory(storyId: string) {
   if ((game.Level > 1 && story.hasBug) || (game.Level > 2 && story.hasSpecBug)) {
     //remove from board
     removeStory(storyId);
-    drawMessage(`Oops! The customer found a bug 🐞 in story '${story.summary}'`);
+    drawMessage(`Oops! The customer found a bug 😡 in story '${story.summary}'`);
     story.customerFoundBug = true;
     //HALVE the amount this card is worth! (hope the customer doesn't find ANOTHER bug in this one......)
     story.pointPrice = story.pointPrice / 2;
     story.person = null;
-    story.icon = "👿";
+    story.icon = "😡";
     story.skillneeded = "ba"; //goes all the way back to the BA column.
     story.reworkLevel += 1;
     drawStory(storyId, game.Stories, true); //at the top.
@@ -2128,6 +2147,22 @@ function incrementMoney(amount: number):void {
   drawMoney(game.Money);
 }
 
+function visitPrivacy() {
+  $id('startscreen').classList.add('hidden');
+  $id('privacy').classList.remove('hidden');
+  $id('message').classList.add('hidden');
+  $id('aboutLink').classList.add('hidden');
+  $id('helpLink').classList.add('hidden');
+}
+
+function leavePrivacy() {
+  $id('privacy').classList.add('hidden');
+  $id('startscreen').classList.remove('hidden');
+  $id('message').classList.remove('hidden');
+  $id('aboutLink').classList.remove('hidden');
+  $id('helpLink').classList.remove('hidden');
+}
+
 function visitStore() {
   DeSelectDoerAndReceiver();
   removeClass('.visitStore', 'hint');
@@ -2169,7 +2204,7 @@ function drawStore() {
 }
 
 function getStoreItemHtml(item:StoreItem) {
-return  `<div class='storeItem-catalog ${item.enabled? 'item-enabled' : 'item-disabled'}' id='storeitem-${item.id}'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div><span class='storeIcon'>${item.icon}</span> <span class='item-name'>${item.name}</span><span class='describe' onclick='describe(${item.id});' title='more information'>❓</span></div>`;
+return  `<div class='storeItem-catalog ${item.enabled? 'item-enabled' : 'item-disabled'}' id='storeitem-${item.id}'><div onclick='purchase(${item.id});' class='button' id='store-button-${item.id}'>💲${item.price}</div><span class='storeIcon'>${item.icon}</span> <span class='describe' onclick='describe(${item.id});' title='more information'>❓</span><span class='item-name'>${item.name}</span></div>`;
 }
 
 function leaveStore() {
@@ -2246,8 +2281,8 @@ function jalert(obj:any){
 
 function log(message:string){
   if (debugOutput) {
-    //let m = htmlToElement(`<div>${message}</div>`);
-    //$id('debug').appendChild(m);
+    let m = htmlToElement(`<div>${message}</div>`);
+    $id('debug').appendChild(m);
   }
 
   console.log(message);
