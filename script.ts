@@ -423,6 +423,7 @@ class Story {
       this.startingTime = project.startingTime;
       this.maxAge = project.maxAge;
       this.pointPrice = project.pointPrice;
+      this.logo = project.logo;
     }
 
   }

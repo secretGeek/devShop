@@ -257,6 +257,7 @@ var Story = /** @class */ (function () {
             this.startingTime = project.startingTime;
             this.maxAge = project.maxAge;
             this.pointPrice = project.pointPrice;
+            this.logo = project.logo;
         }
     }
     Story.prototype.init = function () {
