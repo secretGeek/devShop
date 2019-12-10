@@ -5,6 +5,7 @@
 // Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
 // Definitely
 // [ ] headphone "LEVEL"
+// [ ] items worth 1000000 should be written 1M
 // [x] refactor selfstart to initiative
 // [ ] Microdose lsd in store: shadertoy.com effects -- or other animated bg effects. 
 // [ ] seasonal mods: st patricks day whiskey/green beer. halloween products 🎃 🦇. xmas items 🎄 🎅. thanksgiving turkey 🦃 valentines 💟; 
@@ -54,12 +55,13 @@
 // fire people?
 // limited people?
 // 
+// "Overcooked" is a multiplayer time management game originally on the sony playstation network.
 var testMode = false; //true;
 var storeFeatureFlag = true; //testMode;
 //let timeBarFeatureFlag = false;
 var timePenaltyFeatureFlag = true;
 var debugOutput = false;
-var game;
+var game = null;
 // basic test modes
 testMode = (testMode || getParameterByName('testmode') == "true");
 var avgDuration = testMode ? 4 : 600; // factor that all work durations are based on, in milliseconds
@@ -1767,6 +1769,56 @@ function leavePrivacy() {
     $id('aboutLink').classList.remove('hidden');
     $id('helpLink').classList.remove('hidden');
 }
+function visitHelp() {
+    if (game == null) {
+        $id('startscreen').classList.add('hidden');
+    }
+    else {
+        $id('store').classList.add('hidden');
+        $id('office').classList.add('hidden');
+    }
+    $id('help').classList.remove('hidden');
+    $id('message').classList.add('hidden');
+    $id('aboutLink').classList.add('hidden');
+    $id('helpLink').classList.add('hidden');
+}
+function visitAbout() {
+    if (game == null) {
+        $id('startscreen').classList.add('hidden');
+    }
+    else {
+        $id('store').classList.add('hidden');
+        $id('office').classList.add('hidden');
+    }
+    $id('about').classList.remove('hidden');
+    $id('message').classList.add('hidden');
+    $id('aboutLink').classList.add('hidden');
+    $id('helpLink').classList.add('hidden');
+}
+function leaveHelp() {
+    if (game == null) {
+        $id('startscreen').classList.remove('hidden');
+    }
+    else {
+        $id('office').classList.remove('hidden');
+    }
+    $id('help').classList.add('hidden');
+    $id('message').classList.remove('hidden');
+    $id('aboutLink').classList.remove('hidden');
+    $id('helpLink').classList.remove('hidden');
+}
+function leaveAbout() {
+    if (game == null) {
+        $id('startscreen').classList.remove('hidden');
+    }
+    else {
+        $id('office').classList.remove('hidden');
+    }
+    $id('about').classList.add('hidden');
+    $id('message').classList.remove('hidden');
+    $id('aboutLink').classList.remove('hidden');
+    $id('helpLink').classList.remove('hidden');
+}
 function visitStore() {
     DeSelectDoerAndReceiver();
     removeClass('.visitStore', 'hint');
@@ -1942,17 +1994,4 @@ function exitloadmenu() {
 function drawLoadScreen() {
     var gamesJson = localStorage.getItem('games');
     var games = JSON.parse(gamesJson);
-}
-function about() {
-    //todo: show about screen
-    $id('startscreen').classList.add('hidden');
-    $id('aboutscreen').classList.remove('hidden');
-}
-function exitabout() {
-    //todo: show about screen
-    $id('aboutscreen').classList.add('hidden');
-    $id('startscreen').classList.remove('hidden');
-}
-function joinemail() {
-    //todo: join mailing list function joinemail
 }

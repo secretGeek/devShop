@@ -7,6 +7,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="manifest" href="site.webmanifest">
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-41788989-5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-41788989-5');
+</script>
+
 <title>DevShop</title>
 </head>
 <style>
@@ -569,7 +579,7 @@ h1 .icon {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-#store, #office, #startscreen, #loadscreen, #aboutscreen {
+#store, #office, #startscreen, #loadscreen,  {
   position:absolute;
   max-height:calc(100vh - 60px);
   height:calc(100vh - 60px);
@@ -667,17 +677,7 @@ h1 .icon {
 <div class='button' id='exitload' onclick='exitloadmenu();' tabindex='0' role='button' >🏠 exit load</div>
 
 </div>
-<div id='aboutscreen' class='hidden'>
 
-
-<h1>ABOUT DevShop</h1>
-
-<p>This about screen will say something about DevShop soon.</p>
-<p>Oh, try <a href='https://NimbleText.com/live/' target='_blank'>NimbleText</a> I guess.</p>
-<div class='button' id='exitload' onclick='exitabout();' tabindex='0' role='button' >🏠 exit about</div>
-
-
-</div>
 
 <div id='startscreen'>
 <style>
@@ -754,14 +754,131 @@ x#startscreen h1:after {
 
 </div>
 
-<div id='privacy' style='clear:left' class='hidden pp'>
+<div id='help' style='clear:left' class='hidden'>
+	<h1>DevShop</h1>
+<div class='pp'>
+	
+	<br />
+	<div id='closeHelp' class='button' onclick='leaveHelp();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+	<br />
+	<br />
+
+<h2 class='twop'>Help 😱</h2>
+
+<p><strong>Getting Started</strong></p>
+<ul>
+<li>click &quot;🌟 start&quot;</li>
+<li>click &quot;🎁 find project ($100)&quot;</li>
+<li>Select on the newly created project in the <code>Inbox</code> column of the kanban board.</li>
+<li>Select the &quot;🤔 Founder&quot;.  (In the animated version this would cause the Founder to walk to the board, grab the card, take it back to their desk, work on it, create a bunch of story cards, and take them back to the board, putting them in the <code>backlog</code> column.)</li>
+<li>Once the story cards are in the <code>backlog</code> column, click a card to select it.</li>
+<li>Select the &quot;🤔 Founder&quot; again. This causes the Founder to begin developing the card. (In the animated version, they would walk over, get the card, take it back to their desk, swear a lot, etc.)</li>
+<li>The story card eventually ends up in the <code>Test</code> column. Now the card needs to be tested.</li>
+<li>The founder is capable of developing, testing, and acting as a BA. They don't do any of these things <em>particularly well...</em></li>
+<li>Select the card in the <code>test</code> column, then select the Founder, so it can be tested.</li>
+<li>If it passes testing it is done... and you make money 💲. (It's possible a bug 🐛 is found during testing... or if the bug is missed by the tester, the customer can find the bug 🐞 once they receive the card.)</li>
+<li>when the project is completed you get a completion bonus 💲.</li>
+<li>And you can begin another project...</li>
+</ul>
+<p>Repeat this until you have enough money to buy a dev or a tester or a ba.</p>
+<p><strong>Features include:</strong></p>
+<ul>
+<li>upskilling people 📕 📗</li>
+<li>training people to increase their efficiency</li>
+<li>giving them 'initiative' so they can sometimes grab cards for themselves.</li>
+<li>☕ coffee and donuts 🍩</li>
+<li>🐶 dogs and cats 😸</li>
+<li>inflation. (i.e. things will cost more and be higher stakes as the game progresses.)</li>
+<li>(People will get faster as you increase their skills, but jobs will be bigger... thus creating a steady state, a hedonic treadmill, a red queen's race 👑.)</li>
+</ul>
+
+<div id='closeHelp2' class='button' onclick='leaveHelp();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+
+</div><!-- .pp -->
+</div>
+
+<div id='about' style='clear:left' class='hidden'>
+	<h1>DevShop</h1>
+
+	<br />
+	<div id='closeAbout' class='button' onclick='leaveAbout();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+	<br />
+	<br />
+<div class='pp'>
+
+<h2 class='twop'>About 🌆</h2>
+
+
+<p><strong>Lessons! Everybody loves 'Lessons'</strong></p>
+<p>If you consider DevShop as a tutorial on Kanban or Lean, there are some lessons you can learn by playing this game. These include the following:</p>
+<ul>
+<li>If work took no time to complete, you would only need 1 worker.</li>
+<li>The earlier in the process a bug is found and fixed, the cheaper it is to rectify.</li>
+<li>Bugs should be removed before they get to the customer.</li>
+<li>Work should flow left to right.</li>
+<li>You need higher proportions of workers for steps that take longer (e.g. development in this game)</li>
+<li>The smaller the stories the better. They are less likely to have bugs, and faster to work with.</li>
+<li>Multi-skilled workers are helpful for alleviating bottlenecks.</li>
+<li>In a system where bugs and irregular work happen, bottlenecks can appear anywhere.</li>
+<li>Throughput is a more useful measure than idle time.</li>
+<li>Good teams are self-organizing, and this requires <em>initiative</em>.</li>
+<li>A newbie thinks &quot;I wish I could hire a manager to assign the tasks automatically&quot; -- a wise person thinks &quot;I wish the workers had enough initiative to select the tasks for themselves.&quot;</li>
+<li>The system needs to have some slack in it, or there will be no way to respond to bottlenecks.</li>
+<li>A founder, in the early days, needs to be able to do <em>anything</em>. Later employees can be increasingly specialised.</li>
+<li>To state the above more generally: in a small company, or when work is volatile or sporadic, generalists are very valuable (even if their skill levels are not very high). In a larger company, or when work is more predictable, certain specialists are very valuable (and busy).</li>
+<li>Resource levels need to be appropriately balanced.</li>
+<li>Given a choice between doing something well or doing it quickly, it's better to do it well. It saves time soon enough.</li>
+<li>People can only work on one thing at a time. If they worked on more than one thing at a time, it would decrease throughput. Multi-tasking is a waste of time. (But multi-skilling is not!)</li>
+<li>A functioning and growing business can afford to pay a <em>lot</em> for good coffee ☕.</li>
+</ul>
+<h2 class='twop' id="non-lessons">Non-lessons</h2>
+<p>There are many features of the real world, and of workplaces, that are not modelled in this game.</p>
+<blockquote>
+<p>&quot;All models are wrong, some models are useful.&quot;</p>
+</blockquote>
+<p>In the real world:</p>
+<ul>
+<li>not all bugs are so easily dealt with: a single bug can do <em>unlimited</em> damage. That's a vital feature of real bugs, but isn't modelled in the game.</li>
+<li>workers are not machines. They have good days and bad days, they have real lives. All of this is abstracted away.</li>
+<li>customers don't pay immediately, sometimes they don't pay at all, <em>even when you've done good work</em>. Life isn't fair like that.</li>
+<li>you have to pay workers after you hire them. Recurring paychecks aren't modelled in the game because they're not the problem I'm trying to demonstrate. But this isn't a sufficient answer to use in the real world.</li>
+<li>skill levels are not a simple ladder, &quot;dev skill == 7&quot;. They would be better modelled as a bifurcating directed acyclic graph, where every node represents a different atom of skill or knowledge. But there's no emoji for that currently.</li>
+<li>before you hire a person, you don't accurately know their skill level. Often you don't know afterward either.</li>
+<li>training takes time and it doesn't have a consistent outcome.</li>
+<li>sometimes workers leave.</li>
+<li>projects never really finish. If they went well there will be ongoing support and changes, indefinitely. If they went badly, the lawsuits can also drag on.</li>
+<li>a situation where &quot;any developer can develop any card&quot; is not achievable. But you can take steps to move in that direction.</li>
+<li>procurement of goods in the enterprise is not as simple as clicking a &quot;buy&quot; button.</li>
+<li>workers spend non-zero amounts of their time in meetings, not shown in this game.</li>
+<li>some related practices I find useful are Daily Standups, Retrospectives, Project Pre-Mortems and Code-reviews. There was no way to integrate these into the game without disturbing the flow.</li>
+<li>context-switching takes time and effort.</li>
+<li>some projects are not worth doing at all.</li>
+<li>some bugs are not worth fixing at all.</li>
+<li>some bugs are not bugs.</li>
+</ul>
+<p>Regarding the risk of skilled employees leaving, I love this:</p>
+<blockquote>
+<p>&quot;What if we train them and they leave? <br />
+What if we don't train them and they stay?&quot;</p>
+</blockquote>
+
+	<div id='closeAbout2' class='button' onclick='leaveAbout();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+
+</div><!-- .pp -->
+</div>
+
+
+
+
+<div id='privacy' style='clear:left' class='hidden'>
+
 <h1>DevShop</h1>
 
 <br />
 <div id='closePrivacy' class='button' onclick='leavePrivacy();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 <br />
 <br />
-
+<div class='pp'>
 <h2 class='twop'>Privacy Policy 🔏</h2>
 
 <h3>(Well isn't this fun.)</h3>
@@ -817,10 +934,9 @@ omit this                </span>NimbleText.com&quot;)</p>
 
 
 
-
-
-
   <div id='closePrivacy' class='button' onclick='leavePrivacy();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+
+</div> <!-- .pp -->
 </div>
 <div id='office' style='clear:left' class='hidden'>
 <h1>DevShop</h1>
@@ -886,8 +1002,9 @@ omit this                </span>NimbleText.com&quot;)</p>
 </div>
 <span id='message'>Press '🌟 start' to begin.</span>
 <span id='storeMessage' class='hidden'>⭐ Welcome to the DevStore ⭐</span>
-<a id='aboutLink' href='about.html' target='_blank' style='float:left;left:0'>about</a>
-<a id='helpLink' href='https://github.com/secretGeek/devShop#walkthrough' target='_blank'>help</a>
+
+<a id='aboutLink' href='#about' onclick='visitAbout();return false;' style='float:left;left:0'>about</a>
+<a id='helpLink' href='#help' onclick='visitHelp();return false'>help</a>
 <div id='debug' class='hidden' style='clear:both'></div>
 </body>
 <script src='script.js?3' type="text/javascript"></script>
