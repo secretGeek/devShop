@@ -1,5 +1,10 @@
 {
     "compilerOptions": {
-        "strict":false
+        "strict":true,
+		"plugins": [
+		  {
+			"name": "typescript-tslint-plugin"
+		  }
+		]
     }
 }

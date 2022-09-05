@@ -1,27 +1,107 @@
 # TODO
 
-[ ] person emojis -- emoji skin tone modifiers would be good see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
+## Ranked
 
-//TODO: Some items can only be purchased if you have the necessary target.
-  // e.g. advanced developer training requires a dedicated developer (not just the founder)
+- [ ] add class 'hint' to find project button at start... and when first project is completed... 
+	- consider: hint could add a yellow arrow pointing right (via a "::after")
+- [x] Wrong color scrollbar on entire screen in dark mode.
+- [x] BUG! In the shop - scroll down but message isn't pinned to bottom.
 
-[ ] BUY button ....
-	[x] hides main "screen"
-	[x] new screen has:
-			<< leave shop
+
+
+## Unranked
+
+### From script.ts
+
+// Definitely
+
+ [ ] Place limit on all columns
+ [ ] Starting limit should be the value of a new project / 2
+ [ ] height of buttons at top must be consistent. Table layout maybe?
+ [ ] sorting workers
+ [ ] ?? ? requires a notification modal. 😡
+   modal: Some projects are time critical. You get a bonus for completing them early. Notice the green bar on their right edge: that's the count down.
+   ? also could show a modal near the start "So much rework needed... visit the store to upskill your team members"
+ [ ] populate load screen
+ [ ] about screen (content)
+ [ ] join mailing list functionality joinemail
+ [ ] privacy policy content -- mailing list, google analytics
+ [ ] How to exit the game, and when/how to save.
+  ?  Your high scores?
+  ?  Time Challenge
+ [ ] add google analytics
+ [ ] size on ipad: too wide. why?
+ [x] 🐛Words wrap in store
+ [ ] 🐛Icons and help icon are not vertically centered in store (other content is not either)
+ [ ] Multi-skilled person choosing task to do could be based on:
+        total number of points in a column divided by number of people with that skill.
+        Worst ratio? Do that next. In case of tie-break, go with right most column.
+        No -- if any are worse than the threshold -- do the worst.
+        if all are better than the threshold, choose from the right.
+ [ ] show (but disabled) buy dev / buy tester button when first starting
+ [ ] keybinding -- letters to people
+ [ ] keybinding -- multiple presses of a number will cycle through the cards in that column
+ [no] Consider: have a slow loop that checks if any one with selfStart who is not selected or busy has a triggerTime that's stale by > 2* maxtriggertime and if so call 'trySelfStart'
+ [ ] more technical names for tasks
+ [ ] add to store:
+  - Games console 🕹
+  - Deluxe Games console 🎮
+  - Desk A/C ❄
+  - pingpong table 🏓
+  - cityscape at dusk 🌆
+
+ [ ] front page:
+ -> Start
+ -> (later: Resume  -- saved games)
+ -> About -> link to wiki that describes each item in the store.
+ -> Mailing List [________: Join ] __privacy policy__
+ -> game itself needs a way to exit then.
+ fire people?
+ limited people?
+
+ "Overcooked" is a multiplayer time management game originally on the sony playstation network.
+
+
+ [ ] Microdose lsd in store: shadertoy.com effects -- or other animated bg effects.
+ [ ] seasonal mods: 
+  [ ] st patricks day whiskey/green beer.
+  [ ] halloween products 🎃 🦇.
+  [ ] xmas items 🎄 🎅. thanksgiving turkey 🦃
+  [ ] valentines 💟;
+  [ ] wear it purple
+  
+ [ ] chaos monkey 🐒
+
+stats button lower right 📈 : each person's skills and description. point per minute described for every minute of the game (excluded minutes with 0 points)
+[ ] achievement when a thing is done for the first time?
+
+
+
+
+- [ ] Person emojis -- emoji skin tone modifiers 
+	- see https://emojipedia.org/modifiers/ -- i TRIED + ("🤔" + "\u200B" + "🏾") and ("🤔" + "&zwj;" +"🏾"); no luck yet -- and same without the zwj at all... no luck!
+
+- [ ]  Some items can only be purchased if you have the necessary target.
+	- // e.g. advanced developer training requires a dedicated developer (not just the founder)
+
+- [ ] BUY button ....
+	- [x] hides main "screen"
+	- [x] new screen has:
+			`<< leave shop`
 			
-			THings to purchase (potentially scrollable)
-			(An array of objects... )
-				- courses
-				- skills
-				- items:
-					- coffee machine
-					- new chair
-					- pot plant
-					- monitor upgrade
-					- desk fridge
-					- software courses
-				(Items are only shown if at least one of your people is eligible for that item)
+				THings to purchase (potentially scrollable)
+				(An array of objects... )
+					- courses
+					- skills
+					- items:
+						- coffee machine
+						- new chair
+						- pot plant
+						- monitor upgrade
+						- desk fridge
+						- software courses
+					(Items are only shown if at least one of your people is eligible for that item)
+					
 				[ ] more are added as level increases. 
 				[ ] costs of a thing go up by a percentage each time a thing is purchased
 	TRAIN >>
@@ -72,6 +152,10 @@
 		- Artworks 🌄
 		- another games console 🎮
 
+
+- [ ] PROJECT! BIG PROJECT! PROJECT HERE! Webview 2 based embedded browser app with save/load
+
+
 [ ] Training button... buy dev training... buy tester training... buy BA training...
 		- when you buy a training course, anyone can grab it... potentially
 		- able to give new skills to existing workers.
@@ -80,6 +164,22 @@
 				observation. (when completing a task, looks for another task of the same type.)
 				pro-active. while idle, independently decides to look for a task they can do.
 				courage.
+
+It should say and show what it is they now do...
+	SPECIFIC and real technical lessons
+
+
+Learns to write SQL "SELECT" queries
+Learns to write SQL JOINS queries
+Learns to write SQL insert and update queries
+
+... The person's SKILL COUNT goes up.
+
+
+Learns to write CRUD SQL queries - create, read, update, delete.
+
+Learns 
+
 
 Thomas ideas:
 
@@ -155,17 +255,40 @@ No: rename to 'tinykanban'
 
 
 # DEFER
-stats button lower right 📈 : each person's skills and description. point per minute described for every minute of the game (excluded minutes with 0 points)
+
+
+[ ] defer: Once limits are enabled: - detect + and - (plus and minus) keys and use them to alter limits... (this would only work if the limits were only on one columns)
+ 
+
+
 
 show scores and levels in hexadecimal????
 
-[ ] achievement when a thing is done for the first time?
 
 
 store game state in local storage
 
 
+[ ] graphics version
+	- original idea was to build a graphical version with little characters moving around an initially bare office which becomes slowly ever more populated with people and things.
+	- the pixel art at 
+	
+		https://workadventu.re/getting-started
+		
+	...is certainly very similar to what I'd pictured.
+	
+	![workadventure](workadventure_gettingstarted.png) -- see https://workadventu.re/getting-started
+
+
+
 ## Defer/Maybe
+
+
+[ ] Employee of the day
+[ ] More celebration/reward when cards are paid
+[ ] More celebrating when projects are finished
+[ ] More celebrating when upgrading
+[ ] Celebrating could be done via some css animations
 
 
 [ ] Training should have a time cost (? increases at higher levels of training)
@@ -214,7 +337,17 @@ no: are observations now chained with self-start? seems too extreme. REMOVING ob
 
 # DONE
 
+1:42 AM Saturday, 3 September 2022
 
+ [x] headphone "LEVEL"
+ [x] items worth 1000000 should be written 1M
+ [x] refactor selfstart to initiative
+
+ [x] size of +/- on iphone
+
+
+
+=== OLDER ===
 
 [x] limit should be placed on the next column not the current column
 [x] limit should show points/max points and not show number of cards at all
@@ -386,5 +519,4 @@ Answered/resolved (in a different topic)
    after a certain amount of time.... (is it a turn based game or a time-based game?)
      some things about it are time based... delays for example
    whenever levelling up... whenever a story is finished? whenever an action occurs
-
 

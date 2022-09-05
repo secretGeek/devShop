@@ -1,1 +1,4 @@
 tsc script.ts
+code .
+n index.html
+todo: n todo.md # todo
