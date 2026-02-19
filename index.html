@@ -62,21 +62,19 @@
 </div>
 
 <div id='help' style='clear:left' class='hidden'>
-	<h1>DevShop</h1>
+<h1>DevShop</h1>
 <div class='pp'>
-	
-	<br />
-	<div id='closeHelp' class='button' onclick='leaveHelp();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
-	<br />
-	<br />
-
+<br />
+<div id='closeHelp' class='button' onclick='leaveHelp();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<br />
+<br />
 <h2 class='twop'>Help 😱</h2>
 
 <p><strong>Getting Started</strong></p>
 <ul>
-<li>click &quot;🌟 start&quot;</li>
-<li>click &quot;🎁 find project ($100)&quot;</li>
-<li>Select on the newly created project in the <code>Inbox</code> column of the kanban board.</li>
+<li>click &quot;🌟 start&quot;.</li>
+<li>click &quot;🎁 find project ($100)&quot;.</li>
+<li>Select the newly created project in the <code>Inbox</code> column of the kanban board.</li>
 <li>Select the &quot;🤔 Founder&quot;.  (In the animated version this would cause the Founder to walk to the board, grab the card, take it back to their desk, work on it, create a bunch of story cards, and take them back to the board, putting them in the <code>backlog</code> column.)</li>
 <li>Once the story cards are in the <code>backlog</code> column, click a card to select it.</li>
 <li>Select the &quot;🤔 Founder&quot; again. This causes the Founder to begin developing the card. (In the animated version, they would walk over, get the card, take it back to their desk, swear a lot, etc.)</li>
@@ -90,12 +88,12 @@
 <p>Repeat this until you have enough money to buy a dev or a tester or a ba.</p>
 <p><strong>Features include:</strong></p>
 <ul>
-<li>upskilling people 📕 📗</li>
-<li>training people to increase their efficiency</li>
-<li>giving them 'initiative' so they can sometimes grab cards for themselves.</li>
+<li>Upskilling people 📕 📗</li>
+<li>Training people to increase their efficiency</li>
+<li>Giving them 'initiative' so they can sometimes grab cards for themselves.</li>
 <li>☕ coffee and donuts 🍩</li>
 <li>🐶 dogs and cats 😸</li>
-<li>inflation. (i.e. things will cost more and be higher stakes as the game progresses.)</li>
+<li>Inflation. (i.e. things will cost more and be higher stakes as the game progresses.)</li>
 <li>(People will get faster as you increase their skills, but jobs will be bigger... thus creating a steady state, a hedonic treadmill, a red queen's race 👑.)</li>
 </ul>
 
@@ -105,16 +103,13 @@
 </div>
 
 <div id='about' style='clear:left' class='hidden'>
-	<h1>DevShop</h1>
-
-	<br />
-	<div id='closeAbout' class='button' onclick='leaveAbout();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
-	<br />
-	<br />
+<h1>DevShop</h1>
 <div class='pp'>
-
+<br />
+<div id='closeAbout' class='button' onclick='leaveAbout();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<br />
+<br />
 <h2 class='twop'>About 🌆</h2>
-
 
 <p><strong>Lessons! Everybody loves 'Lessons'</strong></p>
 <p>If you consider DevShop as a tutorial on Kanban or Lean, there are some lessons you can learn by playing this game. These include the following:</p>
@@ -253,6 +248,10 @@ omit this                </span>NimbleText.com&quot;)</p>
   <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");' tabindex='0' role='button'><span class='icon'>💻</span>hire dev (💲300)</div>
   <div id='gettest' class='button getPerson hidden test' onclick='getNewPerson("test");' tabindex='0' role='button'><span class='icon'>🔬</span>hire tester (💲300)</div>
   <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");' tabindex='0' role='button'><span class='icon'>🗣</span>hire BA (💲300)</div>
+
+  <div class='button visitHire hidden' onclick='newHires()' tabindex='0' role='button'><span class='icon'>🤼</span>new hires</div>
+
+
   <div class='button visitStore hidden' onclick='visitStore();' tabindex='0' role='button'><span class='icon'>🛍</span>visit store</div>
 </div>
   <table id='kanbanboard'>
@@ -304,8 +303,16 @@ omit this                </span>NimbleText.com&quot;)</p>
   <div id='closeStore' class='button' onclick='leaveStore();' tabindex='0' role='button'><span class='icon'>🏢</span> leave store</div>
   <div id='items'>ITEMS for SALE</div>
 </div>
+
+<div id='hire' class='hidden'>
+<h1>New Hires<span class='icon'>🤼</span></h1>
+  <div id='closeHire' class='button' onclick='leaveHire();' tabindex='0' role='button'><span class='icon'>🤼</span> exit store</div>
+  <div id='people'>People for HIRE</div>
+</div>
+
 <span id='message'>Press '<span class='emojicon'>🌟</span> start' to begin.</span>
 <span id='storeMessage' class='hidden'>⭐ Welcome to the DevStore ⭐</span>
+<span id='hireMessage' class='hidden'>⭐ Welcome to Hiring ⭐</span>
 
 <a id='aboutLink' href='#about' onclick='visitAbout();return false;' style='float:left;left:0'>about</a>
 <a id='helpLink' href='#help' onclick='visitHelp();return false'>help</a>

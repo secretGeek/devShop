@@ -32,6 +32,13 @@ if (debugOutput) {
     $id("debug").classList.remove("hidden");
     log("debug mode detected");
 }
+var HireCode;
+(function (HireCode) {
+    HireCode[HireCode["dev"] = 1] = "dev";
+    HireCode[HireCode["test"] = 2] = "test";
+    HireCode[HireCode["ba"] = 3] = "ba";
+    HireCode[HireCode["sales"] = 4] = "sales";
+})(HireCode || (HireCode = {}));
 var ItemCode;
 (function (ItemCode) {
     ItemCode[ItemCode["cat"] = 1] = "cat";
@@ -84,7 +91,7 @@ function getAllLevelItems() {
                 code: ItemCode.donut,
                 activeDuration: 30,
                 description: "A sugary fix will speed you up... but not for long.",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 10,
@@ -96,7 +103,7 @@ function getAllLevelItems() {
                 code: ItemCode.coffee,
                 activeDuration: 60,
                 description: "A cup of joe will speed up any worker …if only for a little while.",
-                enabled: false
+                enabled: false,
             },
             //{id:14,name:'Initiative Training', price:5, icon:"🚀", skillNeeded:"any", busy:false, code:ItemCode.initiative, activeDuration:0, description: 'When you\'re idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!', enabled:false},
         ],
@@ -112,7 +119,7 @@ function getAllLevelItems() {
                 code: ItemCode.upskillDev,
                 activeDuration: 0,
                 description: "Already a developer? This advanced training course will reduce the number of bugs you create.",
-                enabled: false
+                enabled: false,
             },
         ],
         l4: [
@@ -126,7 +133,7 @@ function getAllLevelItems() {
                 code: ItemCode.upskillTest,
                 activeDuration: 0,
                 description: "Already a tester? Be a better tester!",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 80,
@@ -138,7 +145,7 @@ function getAllLevelItems() {
                 code: ItemCode.pizza,
                 activeDuration: 180,
                 description: "Food can trap your workers in the office by giving them no reason to leave.",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 100,
@@ -150,7 +157,7 @@ function getAllLevelItems() {
                 code: ItemCode.initiative,
                 activeDuration: 0,
                 description: "When you're idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!",
-                enabled: false
+                enabled: false,
             },
         ],
         l5: [
@@ -164,7 +171,7 @@ function getAllLevelItems() {
                 code: ItemCode.upskillBA,
                 activeDuration: 0,
                 description: "Improves your Business Analysis Skills, for faster better work!",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 110,
@@ -176,7 +183,7 @@ function getAllLevelItems() {
                 code: ItemCode.banana,
                 activeDuration: 50,
                 description: "This healthy snack gives a short-lived energy boost",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 130,
@@ -188,7 +195,7 @@ function getAllLevelItems() {
                 code: ItemCode.cupcake,
                 activeDuration: 25,
                 description: "A cupcake to enjoy. Increase motivation, but not for long.",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 140,
@@ -200,7 +207,7 @@ function getAllLevelItems() {
                 code: ItemCode.keyboard,
                 activeDuration: 0,
                 description: "This mechanical keyboard upgrade will boost your speed at every task.",
-                enabled: false
+                enabled: false,
             },
         ],
         l6: [
@@ -214,7 +221,7 @@ function getAllLevelItems() {
                 code: ItemCode.seat,
                 activeDuration: 0,
                 description: "A comfortable seat upgrade makes any worker more efficient.",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 155,
@@ -226,7 +233,7 @@ function getAllLevelItems() {
                 code: ItemCode.headphones,
                 activeDuration: 0,
                 description: "With better headphones a person's focus is greatly improved!",
-                enabled: false
+                enabled: false,
             },
         ],
         l7: [
@@ -240,7 +247,7 @@ function getAllLevelItems() {
                 code: ItemCode.dog,
                 activeDuration: 200,
                 description: "Bring joy and efficiency to the workplace. Care for a dog and double your speed",
-                enabled: false
+                enabled: false,
             },
         ],
         l8: [
@@ -254,7 +261,7 @@ function getAllLevelItems() {
                 code: ItemCode.toast,
                 activeDuration: 35,
                 description: "It's a piece of toast. How much could it be?",
-                enabled: false
+                enabled: false,
             },
         ],
         l9: [
@@ -268,7 +275,7 @@ function getAllLevelItems() {
                 code: ItemCode.cat,
                 activeDuration: 200,
                 description: "This friendly feline will vastly improve the quality of one person's work at a time.",
-                enabled: false
+                enabled: false,
             },
             {
                 id: 177,
@@ -280,7 +287,7 @@ function getAllLevelItems() {
                 code: ItemCode.buybot,
                 activeDuration: 0,
                 description: "A robot at your desk! The buy-bot buys new projects for you (unless the backlog is over its limit)",
-                enabled: false
+                enabled: false,
             },
         ],
         l10: [
@@ -294,7 +301,7 @@ function getAllLevelItems() {
                 code: ItemCode.coffeemachine,
                 activeDuration: 0,
                 description: "A coffee machine at your desk, your performance will be irreparably improved.",
-                enabled: false
+                enabled: false,
             },
         ],
         l11: [
@@ -308,7 +315,7 @@ function getAllLevelItems() {
                 code: ItemCode.poster,
                 activeDuration: 0,
                 description: "Enhance your cubicle and improve your concentration.",
-                enabled: false
+                enabled: false,
             },
         ],
         l12: [
@@ -322,7 +329,7 @@ function getAllLevelItems() {
                 code: ItemCode.deskplant,
                 activeDuration: 0,
                 description: "Beautiful desk plant improves the workplace and decreases your error rate.",
-                enabled: false
+                enabled: false,
             },
         ],
         l13: [
@@ -336,7 +343,7 @@ function getAllLevelItems() {
                 code: ItemCode.donutmachine,
                 activeDuration: 0,
                 description: "It is possibly unwise to have a donut machine at your desk. Sugar is a hell of a drug.",
-                enabled: false
+                enabled: false,
             },
         ],
         l14: [],
@@ -351,7 +358,7 @@ function getAllLevelItems() {
                 code: ItemCode.statue2,
                 activeDuration: 0,
                 description: "Mystical statue improves your workplace.",
-                enabled: false
+                enabled: false,
             },
         ],
         l16: [],
@@ -366,7 +373,7 @@ function getAllLevelItems() {
                 code: ItemCode.cactus,
                 activeDuration: 0,
                 description: "A desk cactus has been scientifically proven to have no impact on your productivity at all. But it's cool.",
-                enabled: false
+                enabled: false,
             },
         ],
         l18: [
@@ -380,7 +387,7 @@ function getAllLevelItems() {
                 code: ItemCode.statue,
                 activeDuration: 0,
                 description: "Can this statue fill your workplace with wonder, joy and hard work?",
-                enabled: false
+                enabled: false,
             },
         ],
         l19: [],
@@ -396,7 +403,7 @@ function getAllLevelItems() {
                 code: ItemCode.crystalball,
                 activeDuration: 0,
                 description: "This crystal ball does not tell the future, but it's a nice desk ornament.",
-                enabled: false
+                enabled: false,
             },
         ],
         l100: [
@@ -410,9 +417,9 @@ function getAllLevelItems() {
                 code: ItemCode.cookie,
                 activeDuration: 20,
                 description: "It's a cookie",
-                enabled: false
+                enabled: false,
             },
-        ]
+        ],
     };
     return allItems;
 }
@@ -420,7 +427,7 @@ function getAllPeopleTypes() {
     return {
         dev: { skill: "dev", price: 120, icon: "💻", title: "dev" },
         test: { skill: "test", price: 150, icon: "🔬", title: "tester" },
-        ba: { skill: "ba", price: 250, icon: "🗣", title: "business analyst" }
+        ba: { skill: "ba", price: 250, icon: "🗣", title: "business analyst" },
     };
 }
 // REMINDER....
@@ -523,7 +530,7 @@ function initGameState() {
     var allSkills = {
         dev: { level: 1 },
         test: { level: 1 },
-        ba: { level: 1 }
+        ba: { level: 1 },
     };
     var player = {
         id: nextId(),
@@ -540,7 +547,7 @@ function initGameState() {
         headphoneLevel: 0,
         initiativeDelay: game.DefaultInitiativeDelay,
         triggerTime: null,
-        buyBotLevel: 0
+        buyBotLevel: 0,
     };
     game.People["p" + player.id] = player;
     incrementXP(0);
@@ -558,13 +565,13 @@ function drawRoom() {
 }
 function drawButtons() {
     var getLead = $id("getLead");
-    getLead.innerHTML = "\uD83C\uDF81 find project (\uD83D\uDCB2" + game.LeadPrice + ")";
+    getLead.innerHTML = "\uD83C\uDF81 find project (\uD83D\uDCB2".concat(game.LeadPrice, ")");
     for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {
         var _b = _a[_i], key = _b[0], value = _b[1];
-        var d = $id("get" + value.skill);
+        var d = $id("get".concat(value.skill));
         if (d != undefined) {
-            d.innerHTML = "<span class='icon'>" + value.icon + "</span> hire " + value.title + " (\uD83D\uDCB2" + value.price + ")";
-            d.setAttribute("onclick", "getNewPerson(\"" + value.skill + "\");");
+            d.innerHTML = "<span class='icon'>".concat(value.icon, "</span> hire ").concat(value.title, " (\uD83D\uDCB2").concat(value.price, ")");
+            d.setAttribute("onclick", "getNewPerson(\"".concat(value.skill, "\");"));
         }
     }
 }
@@ -629,9 +636,9 @@ function drawStory(key, stories, top) {
     if (story.icon != undefined) {
         avatar = "<span class='avatar'>" + story.icon + "</span>";
     }
-    var logo = "<span class='logo'>" + story.logo + "</span>";
+    var logo = "<span class='logo'>".concat(story.logo, "</span>");
     if (debugOutput) {
-        logo += "<span class='secrets'>" + (story.hasBug ? "🐛" : "") + (story.hasSpecBug ? "💥" : "") + "</span>";
+        logo += "<span class='secrets'>".concat(story.hasBug ? "🐛" : "").concat(story.hasSpecBug ? "💥" : "", "</span>");
     }
     if (story.busy) {
         busy = " busy";
@@ -645,9 +652,9 @@ function drawStory(key, stories, top) {
     }
     var points = "<span class='points'>" + story.points + "</span>";
     // if the story is done, don't add a click handler.
-    var handler = story.skillNeeded == "done" ? "" : "onclick='clickReceiver(\"" + key + "\");'";
+    var handler = story.skillNeeded == "done" ? "" : "onclick='clickReceiver(\"".concat(key, "\");'");
     var timebar = story.maxAge > 0 ? generateTimebarHtml(story) : "";
-    var shtml = "<span class='story receiver " + story.skillNeeded + busy + selected + "' id='" + key + "' " + handler + "><span class='story-detail'>" + logo + " " + story.summary + "</span>" + avatar + points + timebar + "</span>";
+    var shtml = "<span class='story receiver ".concat(story.skillNeeded).concat(busy).concat(selected, "' id='").concat(key, "' ").concat(handler, "><span class='story-detail'>").concat(logo, " ").concat(story.summary, "</span>").concat(avatar).concat(points).concat(timebar, "</span>");
     if (s != null) {
         s.outerHTML = shtml;
     }
@@ -697,13 +704,13 @@ function updateColumnCount(column) {
         }
         var cardCount = $("#" + column + " .inner .story").length;
         if (limit != null && limit != -1) {
-            target[0].innerHTML = "<span class='up' onclick='updateColumnLimit(\"" + column + "\",1);'>\u2795</span>" + points + "/" + limit + "\uD83D\uDCCD<span class='dn' onclick='updateColumnLimit(\"" + column + "\",-1);'>\u2796</span>";
+            target[0].innerHTML = "<span class='up' onclick='updateColumnLimit(\"".concat(column, "\",1);'>\u2795</span>").concat(points, "/").concat(limit, "\uD83D\uDCCD<span class='dn' onclick='updateColumnLimit(\"").concat(column, "\",-1);'>\u2796</span>");
             target[0].classList.add("limited");
-            target[0].setAttribute("title", cardCount + " stories worth " + points + " points, with a soft limit of " + limit + " points.");
+            target[0].setAttribute("title", "".concat(cardCount, " stories worth ").concat(points, " points, with a soft limit of ").concat(limit, " points."));
         }
         else {
-            target[0].innerHTML = points + "\uD83D\uDCCD";
-            target[0].setAttribute("title", cardCount + " stories worth " + points + " points");
+            target[0].innerHTML = "".concat(points, "\uD83D\uDCCD");
+            target[0].setAttribute("title", "".concat(cardCount, " stories worth ").concat(points, " points"));
         }
         target[0].setAttribute("data-count", "" + cardCount);
         // consider: check the number of people who have this skill.
@@ -738,7 +745,7 @@ function drawTimebars(stories) {
 function drawInboxItem(key, item) {
     var el = $id("kanbanboard");
     var s = el.querySelector("#" + key);
-    var shtml = "<span class='storeItem receiver " + item.skillNeeded + "' id='" + key + "' onclick=\"clickReceiver('" + key + "');\"><span class='storeitem-icon'>" + item.icon + "</span> " + item.name + "</span>";
+    var shtml = "<span class='storeItem receiver ".concat(item.skillNeeded, "' id='").concat(key, "' onclick=\"clickReceiver('").concat(key, "');\"><span class='storeitem-icon'>").concat(item.icon, "</span> ").concat(item.name, "</span>");
     if (s != null) {
         s.outerHTML = shtml;
     }
@@ -805,18 +812,18 @@ function getItemsHtml(person) {
         var item = person.has[itemKey];
         var levelAttribute = "";
         if (item.code == ItemCode.seat)
-            levelAttribute = " data-level='" + (person.seatLevel > 9 ? "∞" : person.seatLevel) + "'";
+            levelAttribute = " data-level='".concat(person.seatLevel > 9 ? "∞" : person.seatLevel, "'");
         if (item.code == ItemCode.initiative)
-            levelAttribute = " data-level='" + (person.initiativeLevel > 9 ? "∞" : person.initiativeLevel) + "'";
+            levelAttribute = " data-level='".concat(person.initiativeLevel > 9 ? "∞" : person.initiativeLevel, "'");
         if (item.code == ItemCode.keyboard)
-            levelAttribute = " data-level='" + (person.keyboardLevel > 9 ? "∞" : person.keyboardLevel) + "'";
+            levelAttribute = " data-level='".concat(person.keyboardLevel > 9 ? "∞" : person.keyboardLevel, "'");
         if (item.code == ItemCode.headphones)
-            levelAttribute = " data-level='" + (person.headphoneLevel > 9 ? "∞" : person.headphoneLevel) + "'";
-        result += "<span class='icon'" + levelAttribute + ">" + item.icon + "</span>";
+            levelAttribute = " data-level='".concat(person.headphoneLevel > 9 ? "∞" : person.headphoneLevel, "'");
+        result += "<span class='icon'".concat(levelAttribute, ">").concat(item.icon, "</span>");
     }
     if (result === "")
         return result;
-    return "<div class='itemList'>" + result + "</div>";
+    return "<div class='itemList'>".concat(result, "</div>");
 }
 function getSkillsDiv(skills) {
     var result = "";
@@ -825,13 +832,13 @@ function getSkillsDiv(skills) {
         var s1 = "";
         switch (key) {
             case "dev":
-                s1 = "<span class='skill dev dev-" + value.level + "' data-level='" + (value.level > 9 ? "∞" : value.level) + "' title='developer'>\uD83D\uDCBB</span>";
+                s1 = "<span class='skill dev dev-".concat(value.level, "' data-level='").concat(value.level > 9 ? "∞" : value.level, "' title='developer'>\uD83D\uDCBB</span>");
                 break;
             case "test":
-                s1 = "<span class='skill test test-" + value.level + "' data-level='" + (value.level > 9 ? "∞" : value.level) + "' title='tester'>\uD83D\uDD2C</span>";
+                s1 = "<span class='skill test test-".concat(value.level, "' data-level='").concat(value.level > 9 ? "∞" : value.level, "' title='tester'>\uD83D\uDD2C</span>");
                 break;
             case "ba":
-                s1 = "<span class='skill ba ba-" + value.level + "' data-level='" + (value.level > 9 ? "∞" : value.level) + "' title='business analyst'>\uD83D\uDDE3</span>";
+                s1 = "<span class='skill ba ba-".concat(value.level, "' data-level='").concat(value.level > 9 ? "∞" : value.level, "' title='business analyst'>\uD83D\uDDE3</span>");
                 break;
         }
         result += s1;
@@ -922,11 +929,11 @@ function getNewLead() {
     game.LeadPrice = Inflate(game.SmallInflation, game.LeadPrice);
     var roi = (game.ProjectSize * game.PointPrice * 1.5) / game.LeadPrice;
     if (roi < 2 || roi > 4.5) {
-        log("Roi was " + roi + ", from: return = " + Math.floor(game.ProjectSize * game.PointPrice * 1.5) + ", investment = " + game.LeadPrice + "... so it has been adjusted.");
+        log("Roi was ".concat(roi, ", from: return = ").concat(Math.floor(game.ProjectSize * game.PointPrice * 1.5), ", investment = ").concat(game.LeadPrice, "... so it has been adjusted."));
         game.LeadPrice = Math.floor((game.ProjectSize * game.PointPrice * 1.5) / 2.5);
     }
     else {
-        log("Roi is " + roi);
+        log("Roi is ".concat(roi));
     }
     drawButtons();
 }
@@ -938,7 +945,7 @@ function getNewPerson(skill) {
     DeSelectDoerAndReceiver();
     var personType = game.AllPeopleTypes[skill];
     if (game.Money < personType.price) {
-        drawMessage("Cannot afford a new " + personType.title + ".");
+        drawMessage("Cannot afford a new ".concat(personType.title, "."));
         return;
     }
     removeClass(".getPerson." + skill, "hint");
@@ -962,7 +969,7 @@ function getNewPerson(skill) {
         headphoneLevel: 0,
         initiativeDelay: game.DefaultInitiativeDelay,
         triggerTime: null,
-        buyBotLevel: 0
+        buyBotLevel: 0,
     };
     game.People["p" + id] = newEmployee;
     drawPerson("p" + id, game.People);
@@ -971,7 +978,7 @@ function getNewPerson(skill) {
     drawButtons();
 }
 function clickFirstAvailableCard(column) {
-    var columnCards = $("#" + column + " .inner .receiver:not(.busy)");
+    var columnCards = $("#".concat(column, " .inner .receiver:not(.busy)"));
     if (columnCards && columnCards.length > 0) {
         clickReceiver(columnCards[0].id);
     }
@@ -1157,7 +1164,7 @@ function applyItem(person, item) {
         case ItemCode.buybot:
             // this is a very custom item.
             person.buyBotLevel += 1;
-            var message = "The buy-bot " + item.icon + " will buy projects for you, (if the inbox is below the points limit (set with \u2795 and \u2796), and you have spare \uD83D\uDCB2)";
+            var message = "The buy-bot ".concat(item.icon, " will buy projects for you, (if the inbox is below the points limit (set with \u2795 and \u2796), and you have spare \uD83D\uDCB2)");
             game.TimeBarFeatureFlag = true;
             if (game.ColumnLimits["ba"] == -1) {
                 game.ColumnLimits["ba"] = 20;
@@ -1181,9 +1188,9 @@ function applyItem(person, item) {
                     code: ItemCode.initiative,
                     activeDuration: 0,
                     description: "When you're idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!",
-                    enabled: false
+                    enabled: false,
                 };
-                message += ", and " + person.name + " " + person.avatar + " has initiative now!";
+                message += ", and ".concat(person.name, " ").concat(person.avatar, " has initiative now!");
                 person.has["i" + ss.id] = ss;
             }
             else {
@@ -1197,10 +1204,10 @@ function applyItem(person, item) {
             person.initiativeLevel++;
             if (person.initiativeLevel == 1) {
                 person.has["i" + item.id] = item;
-                drawMessage(person.name + " " + person.avatar + " has initiative now!");
+                drawMessage("".concat(person.name, " ").concat(person.avatar, " has initiative now!"));
             }
             else {
-                drawMessage(person.name + " " + person.avatar + " has \u2B50more\u2B50 initiative (level " + person.initiativeLevel + ").");
+                drawMessage("".concat(person.name, " ").concat(person.avatar, " has \u2B50more\u2B50 initiative (level ").concat(person.initiativeLevel, ")."));
             }
             if (person.busy == false) {
                 personFree(person);
@@ -1255,8 +1262,8 @@ function applyItem(person, item) {
             //if (item.code == ItemCode.dog) item.icon = randomItem(dogIcons);
             person.busy = true;
             var animal = item.code == ItemCode.dog ? "dog" : "cat";
-            person.summary = "Tending to " + item.name + " " + item.icon + " (the " + animal + ")";
-            drawMessage(person.name + " " + person.avatar + " has the " + animal + " " + item.name + " " + item.icon);
+            person.summary = "Tending to ".concat(item.name, " ").concat(item.icon, " (the ").concat(animal, ")");
+            drawMessage("".concat(person.name, " ").concat(person.avatar, " has the ").concat(animal, " ").concat(item.name, " ").concat(item.icon));
             setTimeout(function () {
                 usingFinishedBusyPhase(person, item);
             }, game.AnimalTendingDelay);
@@ -1302,7 +1309,7 @@ function usingFinishedBusyPhase(person, item) {
     personFree(person);
 }
 function personFree(person) {
-    log(person.name + " " + person.avatar + " is now free");
+    log("".concat(person.name, " ").concat(person.avatar, " is now free"));
     updatePossible();
     tryInitiate(person);
 }
@@ -1317,7 +1324,7 @@ function tryInitiate(person) {
         // if they have a dog, we wait only half that time!
         if (personHas(person, ItemCode.dog))
             delay = delay / 2;
-        log("Will check board in " + delay);
+        log("Will check board in ".concat(delay));
         var triggerTime_1 = new Date();
         person.triggerTime = triggerTime_1;
         if (game.SelectedDoer == "p" + person.id) {
@@ -1367,7 +1374,7 @@ function initiate(person, triggerTime) {
     log("Self starter is awake...");
     log(person.name + " " + person.avatar + " is busy? " + person.busy);
     if (!person.busy) {
-        log(person.name + " " + person.avatar + " is checking the board now....");
+        log("".concat(person.name, " ").concat(person.avatar, " is checking the board now...."));
         var columns = [];
         if (person.buyBotLevel > 0) {
             // consider sending the bot off to buy a project lead...
@@ -1405,14 +1412,14 @@ function initiate(person, triggerTime) {
             columns.push("ba");
         }
         if (columns.length == 0)
-            log(person.name + " " + person.avatar + " has no skills worth a damn, apparently!");
+            log("".concat(person.name, " ").concat(person.avatar, " has no skills worth a damn, apparently!"));
         // check each column in the order of the array columns.
         for (var _d = 0, columns_1 = columns; _d < columns_1.length; _d++) {
             var column = columns_1[_d];
-            var nextCards = $("#" + column + " .inner .story.receiver:not(.busy)");
+            var nextCards = $("#".concat(column, " .inner .story.receiver:not(.busy)"));
             if (nextCards.length > 0) {
                 var nextCardId = nextCards[0].id;
-                log(person.name + " " + person.avatar + " is doing " + game.Stories[nextCardId].summary);
+                log("".concat(person.name, " ").concat(person.avatar, " is doing ").concat(game.Stories[nextCardId].summary));
                 doIt("p" + person.id, nextCardId);
                 break;
             }
@@ -1687,7 +1694,7 @@ function determineIfAddingSkillBug(person, story, skill) {
         log("Lower likelihood of " + skill + " bugs when you have that 😸!");
         skillPointBugLikelihood = skillPointBugLikelihood / 2;
     }
-    log("A " + skill + " bug is " + Math.floor(skillPointBugLikelihood) + "% likely on each point of this " + story.points + " point card, rework: " + story.reworkLevel + " ");
+    log("A ".concat(skill, " bug is ").concat(Math.floor(skillPointBugLikelihood), "% likely on each point of this ").concat(story.points, " point card, rework: ").concat(story.reworkLevel, " "));
     for (var i = 0; i < story.points; i++) {
         if (Math.floor(Math.random() * 100) < skillPointBugLikelihood) {
             return true;
@@ -1781,7 +1788,7 @@ function doneDev0(storyId) {
     if (determineIfAddingSkillBug(person, story, "dev")) {
         story.hasBug = true;
         // Note the bug may or may not be found later. If tester doesn't find it, the customer *will* find it.
-        log("A bug \uD83D\uDC1B was added to " + story.summary);
+        log("A bug \uD83D\uDC1B was added to ".concat(story.summary));
     }
     removeStory(storyId);
     story.skillNeeded = "test";
@@ -1874,7 +1881,7 @@ function bankStory(storyId) {
         (game.Level > 2 && story.hasSpecBug)) {
         //remove from board
         removeStory(storyId);
-        drawMessage("Oops! The customer found a bug \uD83D\uDE21 in story '" + story.summary + "'");
+        drawMessage("Oops! The customer found a bug \uD83D\uDE21 in story '".concat(story.summary, "'"));
         story.customerFoundBug = true;
         //HALVE the amount this card is worth! (hope the customer doesn't find ANOTHER bug in this one......)
         story.pointPrice = story.pointPrice / 2;
@@ -1886,7 +1893,7 @@ function bankStory(storyId) {
         return;
     }
     var price = Math.floor(story.points * story.pointPrice);
-    var message2 = " for '" + story.summary + "'";
+    var message2 = " for '".concat(story.summary, "'");
     incrementXP(5);
     if (story.customerFoundBug) {
         //(it was halved when it was first found)
@@ -1902,7 +1909,7 @@ function bankStory(storyId) {
         if (project.stories.length == 0) {
             bonus = Math.ceil((project.lead.points * project.lead.pointPrice) / 2);
             if (!game.TimeBarFeatureFlag || project.lead.maxAge == -1) {
-                message2 += " plus \uD83D\uDCB2" + bonus + " for completing " + project.lead.summary + " " + project.lead.logo;
+                message2 += " plus \uD83D\uDCB2".concat(bonus, " for completing ").concat(project.lead.summary, " ").concat(project.lead.logo);
                 incrementXP(10);
             }
             else {
@@ -1910,16 +1917,16 @@ function bankStory(storyId) {
                 var tenths = getTenthsOfTimeElapsed(story);
                 if (tenths < 10) {
                     bonus = Math.ceil(bonus * ((17 - tenths) * 0.1));
-                    message2 += " plus \uD83D\uDCB2" + bonus + " for early completion of " + project.lead.summary + " " + project.lead.logo + "\u2755";
+                    message2 += " plus \uD83D\uDCB2".concat(bonus, " for early completion of ").concat(project.lead.summary, " ").concat(project.lead.logo, "\u2755");
                     incrementXP(10);
                 }
                 else if (timePenaltyFeatureFlag && tenths >= 10) {
                     bonus = Math.ceil(bonus * -0.5);
-                    message2 += "...MINUS penalty \uD83D\uDE2D of \uD83D\uDCB2" + Math.abs(bonus) + "\u2757 for late completion of " + project.lead.summary + " " + project.lead.logo + "\u2755";
+                    message2 += "...MINUS penalty \uD83D\uDE2D of \uD83D\uDCB2".concat(Math.abs(bonus), "\u2757 for late completion of ").concat(project.lead.summary, " ").concat(project.lead.logo, "\u2755");
                     incrementXP(2);
                 }
                 else {
-                    message2 += " and you completed " + project.lead.summary + " " + project.lead.logo + ".";
+                    message2 += " and you completed ".concat(project.lead.summary, " ").concat(project.lead.logo, ".");
                     incrementXP(5);
                 }
             }
@@ -1932,7 +1939,7 @@ function bankStory(storyId) {
     incrementPoints(story.points);
     incrementMoney(price + bonus); // + timeBonus);
     drawMoney(game.Money);
-    drawMessage("Earned \uD83D\uDCB2" + price + message2);
+    drawMessage("Earned \uD83D\uDCB2".concat(price).concat(message2));
     removeStory(storyId);
 }
 /* utility functions */
@@ -1989,6 +1996,10 @@ function drawMessage(message) {
 function drawStoreMessage(message) {
     log("m:" + message);
     $id("storeMessage").innerText = message;
+}
+function drawHireMessage(message) {
+    log("m:" + message);
+    $id("hireMessage").innerText = message;
 }
 function randomItem(list) {
     return list[Math.floor(Math.random() * list.length)];
@@ -7688,6 +7699,7 @@ var taskParts = [
     "progressive",
     "pseudo",
     "pure",
+    "pvp",
     "raster",
     "recursive",
     "remote",
@@ -7752,6 +7764,7 @@ var taskParts2 = [
     "collector",
     "column",
     "combinator",
+    "compiler",
     "component",
     "container",
     "content",
@@ -7806,6 +7819,7 @@ var taskParts2 = [
     "manifest",
     "map-reduce",
     "mesh",
+    "middle-ware",
     "model",
     "module",
     "multiplexor",
@@ -7836,7 +7850,7 @@ var taskParts2 = [
     "robots",
     "sdk",
     "server",
-    "service",
+    "services",
     "sheet",
     "solver",
     "SPA",
@@ -7860,6 +7874,7 @@ var taskParts2 = [
     "vision",
     "vm",
     "vpn",
+    "ware",
     "wiki",
     "XML",
     "Yaml",
@@ -7870,7 +7885,7 @@ function getTask() {
 function LevelUp() {
     game.XP -= game.LevelUpXP;
     game.Level += 1;
-    drawMessage("Level Up! " + game.Level + "\uD83E\uDD51");
+    drawMessage("Level Up! ".concat(game.Level, "\uD83E\uDD51"));
     game.LevelUpXP = Inflate(game.Inflation, game.LevelUpXP);
     game.PointPrice = Inflate(game.Inflation, game.PointPrice);
     game.ProjectSize = Inflate(game.SmallInflation, game.ProjectSize);
@@ -8051,19 +8066,47 @@ function visitStore() {
     $id("message").classList.add("hidden");
     drawStoreMessage("⭐ Welcome to the DevStore ⭐");
 }
+function visitHire() {
+    DeSelectDoerAndReceiver();
+    removeClass(".visitHire", "hint"); // .visitStore
+    $id("aboutLink").classList.add("hidden");
+    $id("helpLink").classList.add("hidden");
+    //change title to 'New Hires' // DevStore'
+    $("h1")[0].innerText = "New Hires";
+    drawHires(); //drawStore();
+    $id("hire").classList.remove("hidden"); // #store
+    $id("hireMessage").classList.remove("hidden"); // #storeMessage
+    $id("office").classList.add("hidden");
+    $id("message").classList.add("hidden");
+    //drawStoreMessage("⭐ Welcome to the DevStore ⭐");
+    drawStoreMessage("⭐ Welcome to the Joy of Hiring ⭐");
+}
 function describe(itemId) {
     var item = game.StoreItems[itemId];
     if (!item.enabled) {
         // TODO: Until level X
         if (item.name.indexOf("OUT OF STOCK") != -1) {
-            drawStoreMessage("Sorry, " + item.name + " " + item.icon + " \uD83D\uDE2D");
+            drawStoreMessage("Sorry, ".concat(item.name, " ").concat(item.icon, " \uD83D\uDE2D"));
         }
         else {
-            drawStoreMessage("\"" + item.name + " " + item.icon + "\" is not available until a higher level");
+            drawStoreMessage("\"".concat(item.name, " ").concat(item.icon, "\" is not available until a higher level"));
         }
         return;
     }
-    drawStoreMessage("\"" + item.name + " " + item.icon + "\" " + item.description);
+    drawStoreMessage("\"".concat(item.name, " ").concat(item.icon, "\" ").concat(item.description));
+}
+function drawHires() {
+    var hireList = $id("hires");
+    // clear store items from #items
+    hireList.innerText = "";
+    // add store items to #items
+    for (var _i = 0, _a = Object.keys(game.toHire); _i < _a.length; _i++) {
+        var key = _a[_i];
+        var item = game.toHire[key];
+        var shtml = getNewHireHtml(item);
+        var newItem = htmlToElement(shtml);
+        hireList.appendChild(newItem);
+    }
 }
 function drawStore() {
     var itemList = $id("items");
@@ -8079,7 +8122,7 @@ function drawStore() {
     }
 }
 function getStoreItemHtml(item) {
-    return "<div class='storeItem-catalog " + (item.enabled ? "item-enabled" : "item-disabled") + "' id='storeitem-" + item.id + "'><div onclick='purchase(" + item.id + ");' class='button' id='store-button-" + item.id + "'>" + formatPrice(item.price) + "</div><span class='storeIcon'>" + item.icon + "</span> <span class='describe' onclick='describe(" + item.id + ");' title='more information'>\u2753</span><span class='item-name'>" + item.name + "</span></div>";
+    return "<div class='storeItem-catalog ".concat(item.enabled ? "item-enabled" : "item-disabled", "' id='storeitem-").concat(item.id, "'><div onclick='purchase(").concat(item.id, ");' class='button' id='store-button-").concat(item.id, "'>").concat(formatPrice(item.price), "</div><span class='storeIcon'>").concat(item.icon, "</span> <span class='describe' onclick='describe(").concat(item.id, ");' title='more information'>\u2753</span><span class='item-name'>").concat(item.name, "</span></div>");
 }
 function formatPrice(price) {
     if (price > 1000000000) {
@@ -8109,16 +8152,16 @@ function purchase(itemId) {
     if (!item.enabled) {
         // TODO: Until level X
         if (item.name.indexOf("OUT OF STOCK") != -1) {
-            drawStoreMessage("Sorry, " + item.name + " " + item.icon + " \uD83D\uDE2D");
+            drawStoreMessage("Sorry, ".concat(item.name, " ").concat(item.icon, " \uD83D\uDE2D"));
         }
         else {
-            drawStoreMessage("\"" + item.name + " " + item.icon + "\" is not available until a higher level");
+            drawStoreMessage("\"".concat(item.name, " ").concat(item.icon, "\" is not available until a higher level"));
         }
         console.log(item);
         return;
     }
     if (game.Money < item.price) {
-        drawStoreMessage("You cannot afford the " + item.name + " " + item.icon + " for \uD83D\uDCB2" + item.price);
+        drawStoreMessage("You cannot afford the ".concat(item.name, " ").concat(item.icon, " for \uD83D\uDCB2").concat(item.price));
         return;
     }
     incrementMoney(item.price * -1);
@@ -8134,7 +8177,7 @@ function purchase(itemId) {
         clone.name = randomItem(catNames);
     }
     game.Items["i" + clone.id] = clone;
-    drawStoreMessage("You bought " + clone.name + " " + clone.icon + " for \uD83D\uDCB2" + clone.price + ". Nice!");
+    drawStoreMessage("You bought ".concat(clone.name, " ").concat(clone.icon, " for \uD83D\uDCB2").concat(clone.price, ". Nice!"));
     // Every time you purchase an item, the price of that item goes up
     // consider: some specific items should have a different inflation curve.
     item.price = Inflate(game.MediumInflation, item.price);
@@ -8144,10 +8187,10 @@ function purchase(itemId) {
         item.enabled = false;
         //refresh the item
         var html = getStoreItemHtml(item);
-        $id("storeitem-" + item.id).outerHTML = html;
+        $id("storeitem-".concat(item.id)).outerHTML = html;
     }
     drawInboxItem("i" + clone.id, clone);
-    $id("store-button-" + itemId).innerText = "\uD83D\uDCB2" + item.price;
+    $id("store-button-" + itemId).innerText = "\uD83D\uDCB2".concat(item.price);
 }
 //never use this ;)
 function jalert(obj) {
@@ -8155,7 +8198,7 @@ function jalert(obj) {
 }
 function log(message) {
     if (debugOutput) {
-        var m = htmlToElement("<div>" + message + "</div>");
+        var m = htmlToElement("<div>".concat(message, "</div>"));
         $id("debug").appendChild(m);
     }
     console.log(message);
@@ -8205,7 +8248,7 @@ function trackIncome() {
     var sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
     //<span id='rate' title='revenue rate'>💲0/min</span>
     //removed: 💲${sixtySecondIncome}/min,
-    $id("rate").innerText = "(" + sixtySecondPoints + "\uD83D\uDCCD/min)";
+    $id("rate").innerText = "(".concat(sixtySecondPoints, "\uD83D\uDCCD/min)");
 }
 /*
 

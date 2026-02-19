@@ -2,6 +2,20 @@
 
 ## Ranked
 
+- [ ] leaveHire()
+		newHires() -- similar to visitStore()...
+	- div .button.visitHire.hidden
+    'icon' 🤼   "new hires"
+	
+	#hire.hidden
+	"New Hires"🤼
+	#closeHire.button =leaveHire() icon=🤼 "exit store"
+    #people    -- list of People for HIRE (if any!)
+	[ ] POPULATe #people -- similar to populating '#items'
+	[ ] Hire a person (and remove from the list)
+</div>
+	
+
 - [ ] add class 'hint' to find project button at start... and when first project is completed... 
 	- consider: hint could add a yellow arrow pointing right (via a "::after")
 - [x] Wrong color scrollbar on entire screen in dark mode.

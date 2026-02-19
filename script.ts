@@ -14,7 +14,7 @@ let storeFeatureFlag = true; //testMode;
 
 let timePenaltyFeatureFlag = true;
 let debugOutput = false;
-let game: Game = null;
+let game: Game|null = null;
 
 // basic test modes and feature flags
 testMode = testMode || getParameterByName("testmode") == "true";                    //?testmode=true
@@ -43,6 +43,13 @@ if (privacy) {
 if (debugOutput) {
   $id("debug").classList.remove("hidden");
   log("debug mode detected");
+}
+
+enum HireCode {
+dev = 1,
+test,
+ba,
+sales,
 }
 
 enum ItemCode {
@@ -563,8 +570,12 @@ class Game {
   AllPeopleTypes: { [id: string]: PersonType }; // the skills
   StoreItems: { [id: string]: StoreItem }; // the items that are currently available in the store.
   Items: { [id: string]: StoreItem }; //all items that have been purchased and added to the game, start with "i"
-  SelectedDoer!: string; //id of selected person
-  SelectedReceiver!: string; //id of selected story
+  SelectedDoer: string | null; //id of selected person
+  SelectedReceiver: string | null; //id of selected story
+  
+  toHire: { [id: string]: HireItem }; // the items that are currently available in the store.
+  
+
   DefaultInitiativeDelay: number;
   AnimalTendingDelay: number; // how long does it take to settle an animal down at your desk. (Can this involve the following emoji? 💩)
   MaxAge: number;
@@ -599,7 +610,7 @@ interface Person {
   busy: boolean;
   initiativeLevel: number;
   initiativeDelay: number; //how long they wait between polling the board (shorter numbers are faster)
-  triggerTime: Date;
+  triggerTime: Date | null;
   seatLevel: number; //how good is your seat?
   keyboardLevel: number; //how good is your keyboard?
   headphoneLevel: number; //how good are your headphones?
@@ -617,7 +628,7 @@ class Story {
     status: string,
     skillNeeded: string,
     summary: string,
-    project: Story
+    project: Story | null
   ) {
     this.init();
     this.status = status;
@@ -648,7 +659,7 @@ class Story {
     this.startingTime = new Date();
     this.maxAge = -1;
   }
-  person: string;
+  person: string | null;
   id: number;
   skillNeeded: string;
   //column: string;
@@ -657,12 +668,12 @@ class Story {
   summary: string;
   points: number;
   logo: string; //logo from the project.
-  icon: string; //icon from the person.
+  icon: string | null; //icon from the person.
   hasBug: boolean;
   hasSpecBug: boolean;
-  customerFoundBug: boolean;
+  customerFoundBug: boolean | null;
   reworkLevel: number; // when a card is being reworked due to a found bug or spec bug, it is rework. (And is less time than the original work).
-  projectId: string; //contains 'r'
+  projectId: string | null; //contains 'r'
   pointPrice: number;
   startingTime: Date;
   maxAge: number; //how many seconds before this job is considered kaput. `-1` means "no max age"
@@ -680,6 +691,24 @@ interface StoreItem {
   activeDuration: number; //how long does the item act on the person? (0 for indefinitely)
   enabled: boolean;
 }
+
+
+interface HireItem {
+  id: number;
+  name: string;
+  price: number;
+  icon: string;
+  skill: string;
+  busy: boolean; // this is only here to fulfill the IReceiver interface
+  code: HireCode; //'code' is a short, readable, ID, such as 'dog' used in switch statement somewhere for all the deep logic/capabilities of StoreItems... as they can ultimately do anything.
+  description: string;
+  activeDuration: number; //how long does the item act on the person? (0 for indefinitely)
+  enabled: boolean;
+}
+
+
+
+
 
 class Project {
   constructor(lead: Story) {
@@ -2431,6 +2460,11 @@ function drawMessage(message: string) {
 function drawStoreMessage(message: string) {
   log("m:" + message);
   $id("storeMessage").innerText = message;
+}
+
+function drawHireMessage(message: string) {
+  log("m:" + message);
+  $id("hireMessage").innerText = message;
 }
 
 function randomItem(list: any[]) {
@@ -8293,7 +8327,7 @@ let taskParts2 = [
   "robots",
   "sdk",
   "server",
-  "service",
+  "services",
   "sheet",
   "solver",
   "SPA",
@@ -8532,6 +8566,26 @@ function visitStore() {
   drawStoreMessage("⭐ Welcome to the DevStore ⭐");
 }
 
+function visitHire() { //  visitStore 
+  DeSelectDoerAndReceiver();
+  removeClass(".visitHire", "hint"); // .visitStore
+
+  $id("aboutLink").classList.add("hidden");
+  $id("helpLink").classList.add("hidden");
+
+  //change title to 'New Hires' // DevStore'
+  $("h1")[0].innerText = "New Hires";
+  
+  drawHires();	//drawStore();
+  $id("hire").classList.remove("hidden");  // #store
+  $id("hireMessage").classList.remove("hidden"); // #storeMessage
+  $id("office").classList.add("hidden");
+  $id("message").classList.add("hidden");
+  //drawStoreMessage("⭐ Welcome to the DevStore ⭐");
+  drawStoreMessage("⭐ Welcome to the Joy of Hiring ⭐");
+}
+
+
 function describe(itemId: number) {
   let item: StoreItem = game.StoreItems[itemId];
   if (!item.enabled) {
@@ -8547,6 +8601,22 @@ function describe(itemId: number) {
   }
   drawStoreMessage(`"${item.name} ${item.icon}" ${item.description}`);
 }
+
+
+function drawHires() {
+  let hireList = $id("hires");
+  // clear store items from #items
+  hireList.innerText = "";
+  // add store items to #items
+  for (let key of Object.keys(game.toHire)) {
+    let item = game.toHire[key];
+    let shtml = getNewHireHtml(item); //getStoreItemHtml
+    let newItem = htmlToElement(shtml);
+    hireList.appendChild(newItem);
+  }
+}
+
+
 function drawStore() {
   let itemList = $id("items");
   // clear store items from #items
@@ -8559,6 +8629,23 @@ function drawStore() {
     itemList.appendChild(newItem);
   }
 }
+
+function getNewHireHtml(item: StoreItem) {
+  return `<div class='storeItem-catalog ${
+    item.enabled ? "item-enabled" : "item-disabled"
+  }' id='storeitem-${item.id}'><div onclick='purchase(${
+    item.id
+  });' class='button' id='hire-button-${item.id}'>${formatPrice(
+    item.price
+  )}</div><span class='hireIcon'>${
+    item.icon
+  }</span> <span class='describe' onclick='describe(${
+    item.id
+  });' title='more information'>❓</span><span class='item-name'>${
+    item.name
+  }</span></div>`;
+}
+
 
 function getStoreItemHtml(item: StoreItem) {
   return `<div class='storeItem-catalog ${
