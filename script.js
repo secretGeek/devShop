@@ -10,7 +10,7 @@ var storeFeatureFlag = true; //testMode;
 //let timeBarFeatureFlag = false;
 var timePenaltyFeatureFlag = true;
 var debugOutput = false;
-var game = null;
+var game = undefined;
 // basic test modes and feature flags
 testMode = testMode || getParameterByName("testmode") == "true"; //?testmode=true
 // testMode -> all items immediately available in store. Opportunity to change all speeds/defaults.
@@ -49,29 +49,29 @@ var ItemCode;
     ItemCode[ItemCode["initiative"] = 6] = "initiative";
     ItemCode[ItemCode["seat"] = 7] = "seat";
     ItemCode[ItemCode["coffee"] = 8] = "coffee";
-    ItemCode[ItemCode["coffeemachine"] = 9] = "coffeemachine";
-    ItemCode[ItemCode["donutmachine"] = 10] = "donutmachine";
+    ItemCode[ItemCode["coffeeMachine"] = 9] = "coffeeMachine";
+    ItemCode[ItemCode["donutMachine"] = 10] = "donutMachine";
     ItemCode[ItemCode["cupcake"] = 11] = "cupcake";
     ItemCode[ItemCode["donut"] = 12] = "donut";
     ItemCode[ItemCode["pizza"] = 13] = "pizza";
     ItemCode[ItemCode["banana"] = 14] = "banana";
     ItemCode[ItemCode["toast"] = 15] = "toast";
     ItemCode[ItemCode["keyboard"] = 16] = "keyboard";
-    ItemCode[ItemCode["x_bafortest"] = 17] = "x_bafortest";
-    ItemCode[ItemCode["x_bafordev"] = 18] = "x_bafordev";
-    ItemCode[ItemCode["x_testforba"] = 19] = "x_testforba";
-    ItemCode[ItemCode["x_testfordev"] = 20] = "x_testfordev";
-    ItemCode[ItemCode["x_devforba"] = 21] = "x_devforba";
-    ItemCode[ItemCode["x_devfortest"] = 22] = "x_devfortest";
+    ItemCode[ItemCode["x_baForTest"] = 17] = "x_baForTest";
+    ItemCode[ItemCode["x_baForDev"] = 18] = "x_baForDev";
+    ItemCode[ItemCode["x_testForBA"] = 19] = "x_testForBA";
+    ItemCode[ItemCode["x_testForDev"] = 20] = "x_testForDev";
+    ItemCode[ItemCode["x_devForBA"] = 21] = "x_devForBA";
+    ItemCode[ItemCode["x_devForTest"] = 22] = "x_devForTest";
     ItemCode[ItemCode["poster"] = 23] = "poster";
-    ItemCode[ItemCode["crystalball"] = 24] = "crystalball";
+    ItemCode[ItemCode["crystalBall"] = 24] = "crystalBall";
     ItemCode[ItemCode["statue"] = 25] = "statue";
     ItemCode[ItemCode["statue2"] = 26] = "statue2";
     ItemCode[ItemCode["cookie"] = 27] = "cookie";
     ItemCode[ItemCode["headphones"] = 28] = "headphones";
-    ItemCode[ItemCode["deskplant"] = 29] = "deskplant";
+    ItemCode[ItemCode["deskPlant"] = 29] = "deskPlant";
     ItemCode[ItemCode["cactus"] = 30] = "cactus";
-    ItemCode[ItemCode["buybot"] = 31] = "buybot";
+    ItemCode[ItemCode["buyBot"] = 31] = "buyBot";
 })(ItemCode || (ItemCode = {}));
 function getAllLevelItems() {
     //These are the items that become available in the store at each level.
@@ -284,7 +284,7 @@ function getAllLevelItems() {
                 icon: "🤖",
                 skillNeeded: "any",
                 busy: false,
-                code: ItemCode.buybot,
+                code: ItemCode.buyBot,
                 activeDuration: 0,
                 description: "A robot at your desk! The buy-bot buys new projects for you (unless the backlog is over its limit)",
                 enabled: false,
@@ -298,7 +298,7 @@ function getAllLevelItems() {
                 icon: "⛽",
                 skillNeeded: "any",
                 busy: false,
-                code: ItemCode.coffeemachine,
+                code: ItemCode.coffeeMachine,
                 activeDuration: 0,
                 description: "A coffee machine at your desk, your performance will be irreparably improved.",
                 enabled: false,
@@ -326,7 +326,7 @@ function getAllLevelItems() {
                 icon: "🌳",
                 skillNeeded: "any",
                 busy: false,
-                code: ItemCode.deskplant,
+                code: ItemCode.deskPlant,
                 activeDuration: 0,
                 description: "Beautiful desk plant improves the workplace and decreases your error rate.",
                 enabled: false,
@@ -340,7 +340,7 @@ function getAllLevelItems() {
                 icon: "🏭",
                 skillNeeded: "any",
                 busy: false,
-                code: ItemCode.donutmachine,
+                code: ItemCode.donutMachine,
                 activeDuration: 0,
                 description: "It is possibly unwise to have a donut machine at your desk. Sugar is a hell of a drug.",
                 enabled: false,
@@ -400,7 +400,7 @@ function getAllLevelItems() {
                 icon: "🔮",
                 skillNeeded: "any",
                 busy: false,
-                code: ItemCode.crystalball,
+                code: ItemCode.crystalBall,
                 activeDuration: 0,
                 description: "This crystal ball does not tell the future, but it's a nice desk ornament.",
                 enabled: false,
@@ -482,6 +482,7 @@ var Game = /** @class */ (function () {
         this.TimeBarChance = 0; // % chance of project being Time sensitive (having a max age)
         this.HasInitiativeLevel = 0;
         this.FirstTimeSensitiveProject = false;
+        this.toHire = {};
     }
     return Game;
 }());
@@ -504,7 +505,7 @@ var Story = /** @class */ (function () {
         this.points = game.ProjectSize;
         this.pointPrice = game.PointPrice;
         this.logo = getLogo();
-        this.person = null;
+        this.person = undefined;
         this.busy = false;
         this.icon = null;
         this.hasBug = false;
@@ -1008,6 +1009,8 @@ document.onkeypress = function (e) {
     }
 };
 function isPossible(story) {
+    if (!game)
+        return false;
     if (story.busy)
         return false;
     if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
@@ -1168,7 +1171,7 @@ function useIt(doId, item) {
 }
 function applyItem(person, item) {
     switch (item.code) {
-        case ItemCode.buybot:
+        case ItemCode.buyBot:
             // this is a very custom item.
             person.buyBotLevel += 1;
             var message = "The buy-bot ".concat(item.icon, " will buy projects for you, (if the inbox is below the points limit (set with \u2795 and \u2796), and you have spare \uD83D\uDCB2)");
@@ -1284,18 +1287,18 @@ function applyItem(person, item) {
         case ItemCode.banana:
         case ItemCode.toast:
         case ItemCode.coffee:
-        case ItemCode.coffeemachine:
+        case ItemCode.coffeeMachine:
         case ItemCode.cupcake:
         case ItemCode.donut:
-        case ItemCode.donutmachine:
+        case ItemCode.donutMachine:
         case ItemCode.pizza:
-        case ItemCode.crystalball:
+        case ItemCode.crystalBall:
         case ItemCode.poster:
         case ItemCode.statue:
         case ItemCode.statue2:
         case ItemCode.cookie:
         case ItemCode.cactus:
-        case ItemCode.deskplant:
+        case ItemCode.deskPlant:
             person.has["i" + item.id] = item;
             if (item.activeDuration > 0) {
                 setTimeout(function () {
@@ -1515,7 +1518,7 @@ function getEfficiency(person, skill) {
         level++;
     if (personHas(person, ItemCode.donut))
         level++;
-    if (personHas(person, ItemCode.donutmachine))
+    if (personHas(person, ItemCode.donutMachine))
         level++;
     if (personHas(person, ItemCode.pizza))
         level++;
@@ -1523,13 +1526,13 @@ function getEfficiency(person, skill) {
         level++;
     if (personHas(person, ItemCode.keyboard))
         level++;
-    if (personHas(person, ItemCode.deskplant))
+    if (personHas(person, ItemCode.deskPlant))
         level++;
     if (personHas(person, ItemCode.cookie))
         level++;
     //coffee givestwice the power!!
     if (personHas(person, ItemCode.coffee) ||
-        personHas(person, ItemCode.coffeemachine))
+        personHas(person, ItemCode.coffeeMachine))
         level = level + 2;
     switch (level) {
         case 0:
@@ -8203,7 +8206,7 @@ function purchase(itemId) {
     // consider: some specific items should have a different inflation curve.
     item.price = Inflate(game.MediumInflation, item.price);
     // todo: make this a feature of the store, rather than a special case of the buybot.
-    if (item.code == ItemCode.buybot) {
+    if (item.code == ItemCode.buyBot) {
         item.name = item.name + " OUT OF STOCK";
         item.enabled = false;
         //refresh the item

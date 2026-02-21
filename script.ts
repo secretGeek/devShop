@@ -7,14 +7,13 @@
 // the implications of accepting PRs on it prior to that.
 // Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
 
-
 let testMode = false; //true;
 let storeFeatureFlag = true; //testMode;
 //let timeBarFeatureFlag = false;
 
 let timePenaltyFeatureFlag = true;
 let debugOutput = false;
-let game: Game|null = null;
+let game: Game|undefined = undefined;
 
 // basic test modes and feature flags
 testMode = testMode || getParameterByName("testmode") == "true";                    //?testmode=true
@@ -30,7 +29,6 @@ let avgDuration = testMode ? 4 : 600; // factor that all work durations are base
 let startingMoney = testMode ? 100 : 100;
 let defaultCompletionTime = testMode ? 10 : 100; //how long have you got to complete a project, in seconds?
 
-
 let hashLocation = window.location.hash.substring(1);
 
 privacy = privacy || hashLocation == "privacy";
@@ -38,7 +36,6 @@ privacy = privacy || hashLocation == "privacy";
 if (privacy) {
   visitPrivacy();
 }
-
 
 if (debugOutput) {
   $id("debug").classList.remove("hidden");
@@ -61,29 +58,29 @@ enum ItemCode {
   initiative,
   seat,
   coffee,
-  coffeemachine,
-  donutmachine,
+  coffeeMachine,
+  donutMachine,
   cupcake,
   donut,
   pizza,
   banana,
   toast,
   keyboard,
-  x_bafortest, //TODO: defer cross skilling items
-  x_bafordev, //TODO: defer cross skilling items
-  x_testforba, //TODO: defer cross skilling items
-  x_testfordev, //TODO: defer cross skilling items
-  x_devforba, //TODO: defer cross skilling items
-  x_devfortest, //TODO: defer cross skilling items
+  x_baForTest, //TODO: defer cross skilling items
+  x_baForDev, //TODO: defer cross skilling items
+  x_testForBA, //TODO: defer cross skilling items
+  x_testForDev, //TODO: defer cross skilling items
+  x_devForBA, //TODO: defer cross skilling items
+  x_devForTest, //TODO: defer cross skilling items
   poster,
-  crystalball,
+  crystalBall,
   statue,
   statue2,
   cookie,
   headphones,
-  deskplant,
+  deskPlant,
   cactus,
-  buybot,
+  buyBot,
 }
 
 function getAllLevelItems(): { [id: string]: StoreItem[] } {
@@ -308,7 +305,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[] } {
         icon: "🤖",
         skillNeeded: "any",
         busy: false,
-        code: ItemCode.buybot,
+        code: ItemCode.buyBot,
         activeDuration: 0,
         description:
           "A robot at your desk! The buy-bot buys new projects for you (unless the backlog is over its limit)",
@@ -323,7 +320,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[] } {
         icon: "⛽",
         skillNeeded: "any",
         busy: false,
-        code: ItemCode.coffeemachine,
+        code: ItemCode.coffeeMachine,
         activeDuration: 0,
         description:
           "A coffee machine at your desk, your performance will be irreparably improved.",
@@ -352,7 +349,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[] } {
         icon: "🌳",
         skillNeeded: "any",
         busy: false,
-        code: ItemCode.deskplant,
+        code: ItemCode.deskPlant,
         activeDuration: 0,
         description:
           "Beautiful desk plant improves the workplace and decreases your error rate.",
@@ -367,7 +364,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[] } {
         icon: "🏭",
         skillNeeded: "any",
         busy: false,
-        code: ItemCode.donutmachine,
+        code: ItemCode.donutMachine,
         activeDuration: 0,
         description:
           "It is possibly unwise to have a donut machine at your desk. Sugar is a hell of a drug.",
@@ -430,7 +427,7 @@ function getAllLevelItems(): { [id: string]: StoreItem[] } {
         icon: "🔮",
         skillNeeded: "any",
         busy: false,
-        code: ItemCode.crystalball,
+        code: ItemCode.crystalBall,
         activeDuration: 0,
         description:
           "This crystal ball does not tell the future, but it's a nice desk ornament.",
@@ -541,6 +538,7 @@ class Game {
     this.TimeBarChance = 0; // % chance of project being Time sensitive (having a max age)
     this.HasInitiativeLevel = 0;
     this.FirstTimeSensitiveProject = false;
+    this.toHire = {};
   }
   //Initially there are no limits shown or enforced.
   Money: number;
@@ -648,7 +646,7 @@ class Story {
     this.points = game.ProjectSize;
     this.pointPrice = game.PointPrice;
     this.logo = getLogo();
-    this.person = null;
+    this.person = undefined;
     this.busy = false;
     this.icon = null;
     this.hasBug = false;
@@ -659,7 +657,7 @@ class Story {
     this.startingTime = new Date();
     this.maxAge = -1;
   }
-  person: string | null;
+  person: string | undefined;
   id: number;
   skillNeeded: string;
   //column: string;
@@ -1288,6 +1286,7 @@ document.onkeypress = function (e): void {
 };
 
 function isPossible(story: Story): boolean {
+  if (!game) return false;
   if (story.busy) return false;
   if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
     if (story.skillNeeded == "any") return true;
@@ -1481,7 +1480,7 @@ function useIt(doId: string, item: StoreItem) {
 
 function applyItem(person: Person, item: StoreItem) {
   switch (item.code) {
-    case ItemCode.buybot:
+    case ItemCode.buyBot:
       // this is a very custom item.
       person.buyBotLevel += 1;
       let message = `The buy-bot ${item.icon} will buy projects for you, (if the inbox is below the points limit (set with ➕ and ➖), and you have spare 💲)`;
@@ -1602,18 +1601,18 @@ function applyItem(person: Person, item: StoreItem) {
     case ItemCode.banana:
     case ItemCode.toast:
     case ItemCode.coffee:
-    case ItemCode.coffeemachine:
+    case ItemCode.coffeeMachine:
     case ItemCode.cupcake:
     case ItemCode.donut:
-    case ItemCode.donutmachine:
+    case ItemCode.donutMachine:
     case ItemCode.pizza:
-    case ItemCode.crystalball:
+    case ItemCode.crystalBall:
     case ItemCode.poster:
     case ItemCode.statue:
     case ItemCode.statue2:
     case ItemCode.cookie:
     case ItemCode.cactus:
-    case ItemCode.deskplant:
+    case ItemCode.deskPlant:
       person.has["i" + item.id] = item;
       if (item.activeDuration > 0) {
         setTimeout(function () {
@@ -1869,16 +1868,16 @@ function getEfficiency(person: Person, skill: string): number {
   level += person.headphoneLevel;
   if (personHas(person, ItemCode.cupcake)) level++;
   if (personHas(person, ItemCode.donut)) level++;
-  if (personHas(person, ItemCode.donutmachine)) level++;
+  if (personHas(person, ItemCode.donutMachine)) level++;
   if (personHas(person, ItemCode.pizza)) level++;
   if (personHas(person, ItemCode.banana)) level++;
   if (personHas(person, ItemCode.keyboard)) level++;
-  if (personHas(person, ItemCode.deskplant)) level++;
+  if (personHas(person, ItemCode.deskPlant)) level++;
   if (personHas(person, ItemCode.cookie)) level++;
   //coffee givestwice the power!!
   if (
     personHas(person, ItemCode.coffee) ||
-    personHas(person, ItemCode.coffeemachine)
+    personHas(person, ItemCode.coffeeMachine)
   )
     level = level + 2;
 
@@ -8750,7 +8749,7 @@ function purchase(itemId: number): void {
   item.price = Inflate(game.MediumInflation, item.price);
 
   // todo: make this a feature of the store, rather than a special case of the buybot.
-  if (item.code == ItemCode.buybot) {
+  if (item.code == ItemCode.buyBot) {
     item.name = item.name + " OUT OF STOCK";
     item.enabled = false;
     //refresh the item
