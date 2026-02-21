@@ -569,14 +569,14 @@ function drawButtons() {
     for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {
         var _b = _a[_i], key = _b[0], value = _b[1];
         var d = $id("get".concat(value.skill));
-        if (d != undefined) {
+        if (d != null) {
             d.innerHTML = "<span class='icon'>".concat(value.icon, "</span> hire ").concat(value.title, " (\uD83D\uDCB2").concat(value.price, ")");
             d.setAttribute("onclick", "getNewPerson(\"".concat(value.skill, "\");"));
         }
     }
 }
 function drawMoney(money) {
-    var s = document.getElementById("money");
+    var s = $id("money");
     if (money < 0) {
         s.classList.add("negative");
     }
@@ -586,7 +586,7 @@ function drawMoney(money) {
     s.innerText = "💲" + money;
 }
 function drawXP(xp, levelUpXP, level) {
-    var s = document.getElementById("xp");
+    var s = $id("xp");
     if (xp < 0) {
         s.classList.add("negative");
     }
@@ -594,41 +594,45 @@ function drawXP(xp, levelUpXP, level) {
         s.classList.remove("negative");
     }
     s.innerText = "" + xp + "/" + levelUpXP + "🥓";
-    var s2 = document.getElementById("level");
+    var s2 = $id("level");
     s2.innerText = "" + level + "🥑";
 }
 function removeStory(key) {
-    var el = document.getElementById("kanbanboard");
-    var s = el.querySelector("#" + key);
-    var column = s.parentNode.parentNode.id;
-    s.parentNode.removeChild(s);
-    updateColumnCount(column);
+    var _a, _b, _c;
+    var el = $id("kanbanboard");
+    var s = el === null || el === void 0 ? void 0 : el.querySelector("#" + key);
+    if (!s)
+        return;
+    var column = (_b = (_a = s.parentNode) === null || _a === void 0 ? void 0 : _a.parentNode) === null || _b === void 0 ? void 0 : _b.id;
+    (_c = s.parentNode) === null || _c === void 0 ? void 0 : _c.removeChild(s);
+    if (column)
+        updateColumnCount(column);
 }
 function drawTimebar(target, key, story) {
     ///stories: { [x: string]: Story; }, top: boolean):void {
-    if (target != null) {
-        var percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
-        var bg = "red";
-        if (percent >= 40) {
-            bg = "green";
-        }
-        else if (percent > 10) {
-            bg = "orange";
-        }
-        if (percent <= 0 && timePenaltyFeatureFlag) {
-            bg = "red"; //The timebar becomes full height red if there will be a time penalty paid.
-            percent = 100; //full-height red bad. TODO: fix color blindness issue though.
-            //consider: would be good to change another aspect to highlight "overdue"
-        }
-        target.style.height = "" + percent + "%";
-        target.style.minHeight = "" + percent + "%";
-        target.style.maxHeight = "" + percent + "%";
-        log("percent " + percent);
-        target.style.backgroundColor = bg;
+    if (!target)
+        return;
+    var percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
+    var bg = "red";
+    if (percent >= 40) {
+        bg = "green";
     }
+    else if (percent > 10) {
+        bg = "orange";
+    }
+    if (percent <= 0 && timePenaltyFeatureFlag) {
+        bg = "red"; //The timebar becomes full height red if there will be a time penalty paid.
+        percent = 100; //full-height red bad. TODO: fix color blindness issue though.
+        //consider: would be good to change another aspect to highlight "overdue"
+    }
+    target.style.height = "" + percent + "%";
+    target.style.minHeight = "" + percent + "%";
+    target.style.maxHeight = "" + percent + "%";
+    log("percent " + percent);
+    target.style.backgroundColor = bg;
 }
 function drawStory(key, stories, top) {
-    var el = document.getElementById("kanbanboard");
+    var el = $id("kanbanboard");
     var s = el.querySelector("#" + key);
     var avatar = "";
     var busy = "";
@@ -733,11 +737,11 @@ function drawStories(stories) {
     }
 }
 function drawTimebars(stories) {
-    var el = document.getElementById("kanbanboard");
     for (var key in stories) {
         // only applies to stories that *have* a max age (-1 means, none)
         if (stories[key].maxAge != -1) {
-            var target = el.querySelector("#" + key + " .time-bars .elapsed");
+            var el = $id("kanbanboard");
+            var target = el === null || el === void 0 ? void 0 : el.querySelector("#" + key + " .time-bars .elapsed");
             drawTimebar(target, key, stories[key]);
         }
     }
@@ -751,13 +755,15 @@ function drawInboxItem(key, item) {
     }
     else {
         var column = el.querySelector("td#ba .inner");
+        if (!column)
+            return;
         var newInboxItem = htmlToElement(shtml);
         // put it at the top of the inbox column (the 'ba' column)
         column.insertBefore(newInboxItem, column.firstChild);
     }
 }
 function drawPerson(key, people) {
-    var el = document.getElementById("people");
+    var el = $id("people");
     var p = el.querySelector("#" + key);
     //if the person is listed in #id already then update it.
     var newPerson = true;
@@ -853,8 +859,9 @@ function drawPeople(people) {
 function go() {
     initGameState();
     drawRoom();
-    $id("start").classList.remove("pulse"); //hide 'start' button's pulse effect.
-    $id("start").classList.add("hidden"); //hide 'start' button
+    var startEl = $id("start");
+    startEl.classList.remove("pulse"); //hide 'start' button's pulse effect.
+    startEl.classList.add("hidden"); //hide 'start' button
     //removeClass('#office', 'hidden');
     $id("startscreen").classList.add("hidden");
     $id("office").classList.remove("hidden");
@@ -1947,13 +1954,24 @@ function htmlToElement(html) {
     var template = document.createElement("template");
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
-    return template.content.firstChild;
+    var first = template.content.firstElementChild;
+    if (!first)
+        throw new Error("htmlToElement: no element created");
+    return first;
 }
 function $(selector) {
-    return document.querySelectorAll(selector);
+    return Array.from(document.querySelectorAll(selector));
 }
-function $id(id) {
+function $xid(id) {
     return document.getElementById(id);
+}
+// Return an element that must exist. Throws if not found to help silence
+// widespread non-null assertions where the element is required.
+function $id(id) {
+    var el = document.getElementById(id);
+    if (!el)
+        throw new Error("Required element #".concat(id, " not found"));
+    return el;
 }
 function isEmpty(obj) {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
@@ -8103,7 +8121,7 @@ function drawHires() {
     for (var _i = 0, _a = Object.keys(game.toHire); _i < _a.length; _i++) {
         var key = _a[_i];
         var item = game.toHire[key];
-        var shtml = getNewHireHtml(item);
+        var shtml = getNewHireHtml(item); //getStoreItemHtml
         var newItem = htmlToElement(shtml);
         hireList.appendChild(newItem);
     }
@@ -8120,6 +8138,9 @@ function drawStore() {
         var newItem = htmlToElement(shtml);
         itemList.appendChild(newItem);
     }
+}
+function getNewHireHtml(item) {
+    return "<div class='storeItem-catalog ".concat(item.enabled ? "item-enabled" : "item-disabled", "' id='storeitem-").concat(item.id, "'><div onclick='purchase(").concat(item.id, ");' class='button' id='hire-button-").concat(item.id, "'>").concat(formatPrice(item.price), "</div><span class='hireIcon'>").concat(item.icon, "</span> <span class='describe' onclick='describe(").concat(item.id, ");' title='more information'>\u2753</span><span class='item-name'>").concat(item.name, "</span></div>");
 }
 function getStoreItemHtml(item) {
     return "<div class='storeItem-catalog ".concat(item.enabled ? "item-enabled" : "item-disabled", "' id='storeitem-").concat(item.id, "'><div onclick='purchase(").concat(item.id, ");' class='button' id='store-button-").concat(item.id, "'>").concat(formatPrice(item.price), "</div><span class='storeIcon'>").concat(item.icon, "</span> <span class='describe' onclick='describe(").concat(item.id, ");' title='more information'>\u2753</span><span class='item-name'>").concat(item.name, "</span></div>");

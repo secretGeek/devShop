@@ -762,12 +762,12 @@ function drawRoom(): void {
 }
 
 function drawButtons(): void {
-  let getLead = $id("getLead");
+  const getLead = $id<HTMLElement>("getLead");
   getLead.innerHTML = `🎁 find project (💲${game.LeadPrice})`;
 
   for (let [key, value] of Object.entries(game.AllPeopleTypes)) {
-    let d = $id(`get${value.skill}`);
-    if (d != undefined) {
+    const d = $id(`get${value.skill}`);
+    if (d != null) {
       d.innerHTML = `<span class='icon'>${value.icon}</span> hire ${value.title} (💲${value.price})`;
       d.setAttribute("onclick", `getNewPerson("${value.skill}");`);
     }
@@ -775,7 +775,7 @@ function drawButtons(): void {
 }
 
 function drawMoney(money: number): void {
-  let s = document.getElementById("money");
+  const s = $id<HTMLElement>("money");
   if (money < 0) {
     s.classList.add("negative");
   } else {
@@ -785,7 +785,7 @@ function drawMoney(money: number): void {
 }
 
 function drawXP(xp: number, levelUpXP: number, level: number): void {
-  let s = document.getElementById("xp");
+  const s = $id<HTMLElement>("xp");
   if (xp < 0) {
     s.classList.add("negative");
   } else {
@@ -794,22 +794,23 @@ function drawXP(xp: number, levelUpXP: number, level: number): void {
 
   s.innerText = "" + xp + "/" + levelUpXP + "🥓";
 
-  let s2 = document.getElementById("level");
+  const s2 = $id<HTMLElement>("level");
   s2.innerText = "" + level + "🥑";
 }
 
 function removeStory(key: string): void {
-  const el = document.getElementById("kanbanboard");
-  let s = el.querySelector("#" + key);
+  const el = $id("kanbanboard");
+  const s = el?.querySelector("#" + key) as HTMLElement | null;
+  if (!s) return;
 
-  let column = (s.parentNode.parentNode as HTMLElement).id;
-  s.parentNode.removeChild(s);
-  updateColumnCount(column);
+  const column = (s.parentNode?.parentNode as HTMLElement | null)?.id;
+  s.parentNode?.removeChild(s);
+  if (column) updateColumnCount(column);
 }
 
 function drawTimebar(target: HTMLSpanElement, key: string, story: Story): void {
   ///stories: { [x: string]: Story; }, top: boolean):void {
-  if (target != null) {
+  if (!target) return;
     let percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
     let bg = "red";
     if (percent >= 40) {
@@ -829,7 +830,6 @@ function drawTimebar(target: HTMLSpanElement, key: string, story: Story): void {
 
     log("percent " + percent);
     target.style.backgroundColor = bg;
-  }
 }
 
 function drawStory(
@@ -837,7 +837,7 @@ function drawStory(
   stories: { [x: string]: Story },
   top: boolean
 ): void {
-  const el = document.getElementById("kanbanboard");
+  const el = $id<HTMLElement>("kanbanboard");
   let s = el.querySelector("#" + key);
   let avatar = "";
   let busy = "";
@@ -884,9 +884,7 @@ function drawStory(
   }
 
   if (game.TimeBarFeatureFlag && story.maxAge != -1) {
-    let target = el.querySelector(
-      "#" + key + " .time-bars .elapsed"
-    ) as HTMLSpanElement;
+    const target = el.querySelector("#" + key + " .time-bars .elapsed") as HTMLSpanElement | null;
     drawTimebar(target, key, story);
   }
 
@@ -966,37 +964,35 @@ function drawStories(stories: { [id: string]: Story }): void {
 }
 
 function drawTimebars(stories: { [id: string]: Story }): void {
-  const el = document.getElementById("kanbanboard");
-
   for (const key in stories) {
     // only applies to stories that *have* a max age (-1 means, none)
     if (stories[key].maxAge != -1) {
-      let target = el.querySelector(
-        "#" + key + " .time-bars .elapsed"
-      ) as HTMLSpanElement;
+      const el = $id("kanbanboard");
+      const target = el?.querySelector("#" + key + " .time-bars .elapsed") as HTMLSpanElement | null;
       drawTimebar(target, key, stories[key]);
     }
   }
 }
 
 function drawInboxItem(key: string, item: StoreItem): void {
-  let el = $id("kanbanboard");
-  let s = el.querySelector("#" + key);
+  const el = $id<HTMLElement>("kanbanboard");
+  const s = el.querySelector("#" + key);
 
-  let shtml = `<span class='storeItem receiver ${item.skillNeeded}' id='${key}' onclick="clickReceiver(\'${key}\');"><span class='storeitem-icon'>${item.icon}</span> ${item.name}</span>`;
+  const shtml = `<span class='storeItem receiver ${item.skillNeeded}' id='${key}' onclick="clickReceiver(\'${key}\');"><span class='storeitem-icon'>${item.icon}</span> ${item.name}</span>`;
   if (s != null) {
     s.outerHTML = shtml;
   } else {
-    let column = el.querySelector("td#ba .inner");
-    let newInboxItem = htmlToElement(shtml);
+    const column = el.querySelector("td#ba .inner");
+    if (!column) return;
+    const newInboxItem = htmlToElement(shtml);
     // put it at the top of the inbox column (the 'ba' column)
     column.insertBefore(newInboxItem, column.firstChild);
   }
 }
 
 function drawPerson(key: string, people: { [x: string]: Person }): void {
-  let el = document.getElementById("people");
-  let p = el.querySelector("#" + key);
+  const el = $id<HTMLElement>("people");
+  const p = el.querySelector("#" + key);
   //if the person is listed in #id already then update it.
   let newPerson = true;
   if (p != null) {
@@ -1112,8 +1108,9 @@ function drawPeople(people: { [id: string]: Person }): void {
 function go(): void {
   initGameState();
   drawRoom();
-  $id("start").classList.remove("pulse"); //hide 'start' button's pulse effect.
-  $id("start").classList.add("hidden"); //hide 'start' button
+  const startEl = $id<HTMLElement>("start");
+  startEl.classList.remove("pulse"); //hide 'start' button's pulse effect.
+  startEl.classList.add("hidden"); //hide 'start' button
 
   //removeClass('#office', 'hidden');
   $id("startscreen").classList.add("hidden");
@@ -2403,18 +2400,29 @@ function bankStory(storyId: string) {
 
 /* utility functions */
 function htmlToElement(html: string): HTMLElement {
-  let template = document.createElement("template");
+  const template = document.createElement("template");
   html = html.trim(); // Never return a text node of whitespace as the result
   template.innerHTML = html;
-  return <HTMLElement>template.content.firstChild;
+  const first = template.content.firstElementChild;
+  if (!first) throw new Error("htmlToElement: no element created");
+  return first as HTMLElement;
 }
 
 function $(selector: string): HTMLElement[] {
-  return <any>document.querySelectorAll(selector);
+  return Array.from(document.querySelectorAll(selector) as NodeListOf<HTMLElement>);
 }
 
-function $id(id: string): HTMLElement {
+function $xid(id: string): HTMLElement | null {
   return document.getElementById(id);
+}
+
+
+// Return an element that must exist. Throws if not found to help silence
+// widespread non-null assertions where the element is required.
+function $id<T extends HTMLElement>(id: string): T {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Required element #${id} not found`);
+  return el as T;
 }
 
 function isEmpty(obj: { constructor?: any }) {
@@ -2454,17 +2462,17 @@ function getParameterByName(name: string) {
 
 function drawMessage(message: string) {
   log("m:" + message);
-  $id("message").innerText = message;
+  $id<HTMLElement>("message").innerText = message;
 }
 
 function drawStoreMessage(message: string) {
   log("m:" + message);
-  $id("storeMessage").innerText = message;
+  $id<HTMLElement>("storeMessage").innerText = message;
 }
 
 function drawHireMessage(message: string) {
   log("m:" + message);
-  $id("hireMessage").innerText = message;
+  $id<HTMLElement>("hireMessage").innerText = message;
 }
 
 function randomItem(list: any[]) {
@@ -8630,7 +8638,7 @@ function drawStore() {
   }
 }
 
-function getNewHireHtml(item: StoreItem) {
+function getNewHireHtml(item: HireItem) {
   return `<div class='storeItem-catalog ${
     item.enabled ? "item-enabled" : "item-disabled"
   }' id='storeitem-${item.id}'><div onclick='purchase(${
