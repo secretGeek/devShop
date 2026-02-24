@@ -633,7 +633,7 @@ class Story {
     this.points = game.ProjectSize | 6;
     this.pointPrice = game.PointPrice | 25;
     this.logo = getLogo();
-    this.person = undefined;
+    this.person = null;
     this.busy = false;
     this.icon = null;
     this.hasBug = false;
@@ -671,7 +671,7 @@ class Story {
     // this.startingTime = new Date();
     // this.maxAge = -1;
   }
-  person!: string | undefined;
+  person!: string | null;
   id!: number;
   skillNeeded!: string;
   //column: string;
@@ -681,8 +681,8 @@ class Story {
   points!: number;
   logo!: string; //logo from the project.
   icon!: string | null; //icon from the person.
-  hasBug!: boolean;
-  hasSpecBug!: boolean;
+  hasBug!: boolean | null;
+  hasSpecBug!: boolean | null;
   customerFoundBug!: boolean | null;
   reworkLevel!: number; // when a card is being reworked due to a found bug or spec bug, it is rework. (And is less time than the original work).
   projectId!: string | null; //contains 'r'
@@ -1254,7 +1254,8 @@ function getNewPerson(skill: string): void {
   incrementMoney(personType.price * -1);
   incrementXP(10);
   let id = nextId();
-  let skillo = {};
+  //let skillo = {};
+  let skillo: { [id: string]: SkillDetail } = {};
   skillo[skill] = { level: 1 };
   let newEmployee: Person = {
     id: id,
@@ -1374,7 +1375,7 @@ function deselectDoer(): void {
 }
 
 function selectDoer(): void {
-  $id(game.SelectedDoer).classList.add("selected");
+  $id(game.SelectedDoer!).classList.add("selected");
   updatePossible();
 }
 
@@ -1425,7 +1426,7 @@ function deselectReceiver(): void {
 }
 
 function selectReceiver() {
-  $id(game.SelectedReceiver).classList.add("selected");
+  $id(game.SelectedReceiver!).classList.add("selected");
   updatePossible();
 }
 
@@ -1483,8 +1484,8 @@ function tryDo(doId: string, receiverId: string, viaDoer: boolean) {
   }
 
   //doer will now do the receiver thing.
-  $id(game.SelectedReceiver).classList.remove("selected");
-  $id(game.SelectedDoer).classList.remove("selected");
+  $id(game.SelectedReceiver!).classList.remove("selected");
+  $id(game.SelectedDoer!).classList.remove("selected");
   removeAllClass("possible");
   game.SelectedReceiver = null;
   game.SelectedDoer = null;
@@ -1706,6 +1707,8 @@ function columnName(skill: string): string {
       return "test";
     case "done":
       return "done";
+    default:
+      return "inbox";
   }
 }
 
@@ -1941,7 +1944,7 @@ function getDuration(person: Person, story: Story): number {
     story.points *
     avgDuration *
     (1.0 / getEfficiency(person, story.skillNeeded)) *
-    getTaskFactor(story.skillNeeded);
+    getTaskFactor(story.skillNeeded)!;
 
   // All rework is faster. This is a little over-simplified, but it will do.
   // rework also has a lower chance of introducing fresh bugs (that is covered elsewhere)
@@ -2002,7 +2005,7 @@ function getTaskFactor(skill: string) {
 function done(receiveId: string) {
   let story = game.Stories[receiveId];
   story.busy = false;
-  let person = game.People[story.person];
+  let person = game.People[story.person!];
   person.busy = false;
   person.XP += 1;
   incrementXP(1);
@@ -2014,7 +2017,7 @@ function done(receiveId: string) {
       story.logo +
       "."
   );
-  $id("p" + game.People[story.person].id).classList.remove("busy");
+  $id("p" + game.People[story.person!].id).classList.remove("busy");
 
   let skillNeeded = story.skillNeeded;
 
@@ -2049,7 +2052,7 @@ function doneBa(storyId: string) {
   //okay -- we've done the ba work on it.
   //now we add a bunch of cards to the backlog.
   let oldStory = game.Stories[storyId];
-  let person = game.People[oldStory.person];
+  let person = game.People[oldStory.person!];
 
   if (oldStory.status == "story") {
     oldStory.person = null;
@@ -2176,7 +2179,7 @@ function ElaborateProject(project: Story, person: Person): Story[] {
 function doneDev(storyId: string) {
   //okay -- it's done being in the backlog
   //either add it to dev -- or send it back to be clarified (if you find a spec bug)
-  let person = game.People[game.Stories[storyId].person];
+  let person = game.People[game.Stories[storyId].person!];
   let story = game.Stories[storyId];
 
   // no spec bugs can be found until level 3.
@@ -2216,14 +2219,14 @@ function doneDev(storyId: string) {
 
   removeStory(storyId);
   story.skillNeeded = "dev0";
-  doIt(story.person, storyId);
+  doIt(story.person!, storyId);
 }
 
 function doneDev0(storyId: string) {
   //okay -- development is done
   //Add it to test
   let story = game.Stories[storyId];
-  let person = game.People[story.person];
+  let person = game.People[story.person!];
 
   //chance of adding a bug relates to effectiveness of ba, and size of story. (and whether or not they have... a cat)
   if (determineIfAddingSkillBug(person, story, "dev")) {
@@ -2247,11 +2250,11 @@ function doneTest(storyId: string) {
   //okay -- test is done
   removeStory(storyId);
   let story = game.Stories[storyId];
-  let person = game.People[story.person];
+  let person = game.People[story.person!];
   person.busy = false;
   person.summary = "💤";
   drawPerson("p" + person.id, game.People);
-  let tester = game.People[story.person];
+  let tester = game.People[story.person!];
 
   //no bugs can be found until level 2.
   if (game.Level > 1 && story.hasBug) {
@@ -2366,7 +2369,7 @@ function bankStory(storyId: string) {
     message2 += " (reduced as customer found that bug)";
   }
 
-  let projectId = game.Stories[storyId].projectId;
+  let projectId = game.Stories[storyId].projectId!;
   //remove the story from the project it belongs to.
   let project = game.Projects[projectId];
   let bonus = 0;
@@ -8876,6 +8879,6 @@ function exitloadmenu(): void {
 }
 
 function drawLoadScreen(): void {
-  let gamesJson = localStorage.getItem("games");
+  let gamesJson = localStorage.getItem("games")!;
   let games = JSON.parse(gamesJson);
 }

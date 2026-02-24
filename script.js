@@ -462,7 +462,7 @@ var Game = /** @class */ (function () {
                 this.StoreItems[this.AllLevelItems[k][x].id] = this.AllLevelItems[k][x];
             }
         }
-        //this.StoreItems =  getAllLevelitems().each()
+        //this.StoreItems =  getAllLevelItems().each()
         this.AllPeopleTypes = getAllPeopleTypes();
         this.Items = {};
         this.SelectedDoer = null;
@@ -493,7 +493,7 @@ var Story = /** @class */ (function () {
         this.points = game.ProjectSize | 6;
         this.pointPrice = game.PointPrice | 25;
         this.logo = getLogo();
-        this.person = undefined;
+        this.person = null;
         this.busy = false;
         this.icon = null;
         this.hasBug = false;
@@ -534,7 +534,7 @@ var Story = /** @class */ (function () {
 }());
 var Project = /** @class */ (function () {
     function Project(lead) {
-        this.stories = []; //storyid's of the subsequent stories created by the BA (start with 'r')
+        this.stories = []; //storyId's of the subsequent stories created by the BA (start with 'r')
         this.lead = lead;
         this.stories = [];
     }
@@ -738,7 +738,7 @@ function updateColumnCount(column) {
         target[0].setAttribute("data-count", "" + cardCount);
         // consider: check the number of people who have this skill.
         //If the count > (#people) make the color yellowish;
-        //if the count > (#people * 2 + 2) make the color redish;
+        //if the count > (#people * 2 + 2) make the color red(ish);
     }
 }
 function updateColumnLimit(column, delta) {
@@ -982,6 +982,7 @@ function getNewPerson(skill) {
     incrementMoney(personType.price * -1);
     incrementXP(10);
     var id = nextId();
+    //let skillo = {};
     var skillo = {};
     skillo[skill] = { level: 1 };
     var newEmployee = {
@@ -1388,6 +1389,8 @@ function columnName(skill) {
             return "test";
         case "done":
             return "done";
+        default:
+            return "inbox";
     }
 }
 function initiate(person, triggerTime) {
@@ -1433,7 +1436,7 @@ function initiate(person, triggerTime) {
                 }
             }
         }
-        // we prioritise self-starting from the back of the board.
+        // we prioritize self-starting from the back of the board.
         if (person.skills["test"] && person.skills["test"].level > 0) {
             columns.push("test");
         }
@@ -1552,7 +1555,7 @@ function getEfficiency(person, skill) {
         level++;
     if (personHas(person, ItemCode.cookie))
         level++;
-    //coffee givestwice the power!!
+    //coffee gives twice the power!!
     if (personHas(person, ItemCode.coffee) ||
         personHas(person, ItemCode.coffeeMachine))
         level = level + 2;
