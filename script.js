@@ -10,7 +10,7 @@ var storeFeatureFlag = true; //testMode;
 //let timeBarFeatureFlag = false;
 var timePenaltyFeatureFlag = true;
 var debugOutput = false;
-var game = undefined;
+var game;
 // basic test modes and feature flags
 testMode = testMode || getParameterByName("testmode") == "true"; //?testmode=true
 // testMode -> all items immediately available in store. Opportunity to change all speeds/defaults.
@@ -488,7 +488,21 @@ var Game = /** @class */ (function () {
 }());
 var Story = /** @class */ (function () {
     function Story(status, skillNeeded, summary, project) {
-        this.init();
+        //this.init();
+        this.id = nextId();
+        this.points = game.ProjectSize | 6;
+        this.pointPrice = game.PointPrice | 25;
+        this.logo = getLogo();
+        this.person = undefined;
+        this.busy = false;
+        this.icon = null;
+        this.hasBug = false;
+        this.hasSpecBug = false;
+        this.customerFoundBug = null;
+        this.projectId = null;
+        this.reworkLevel = 0;
+        this.startingTime = new Date();
+        this.maxAge = -1;
         this.status = status;
         this.skillNeeded = skillNeeded;
         this.summary = summary;
@@ -501,20 +515,20 @@ var Story = /** @class */ (function () {
         }
     }
     Story.prototype.init = function () {
-        this.id = nextId();
-        this.points = game.ProjectSize;
-        this.pointPrice = game.PointPrice;
-        this.logo = getLogo();
-        this.person = undefined;
-        this.busy = false;
-        this.icon = null;
-        this.hasBug = false;
-        this.hasSpecBug = false;
-        this.customerFoundBug = null;
-        this.projectId = null;
-        this.reworkLevel = 0;
-        this.startingTime = new Date();
-        this.maxAge = -1;
+        // this.id = nextId();
+        // this.points = game.ProjectSize;
+        // this.pointPrice = game.PointPrice;
+        // this.logo = getLogo();
+        // this.person = undefined;
+        // this.busy = false;
+        // this.icon = null;
+        // this.hasBug = false;
+        // this.hasSpecBug = false;
+        // this.customerFoundBug = null;
+        // this.projectId = null;
+        // this.reworkLevel = 0;
+        // this.startingTime = new Date();
+        // this.maxAge = -1;
     };
     return Story;
 }());
@@ -665,6 +679,8 @@ function drawStory(key, stories, top) {
     }
     else {
         var column = el.querySelector("td#" + story.skillNeeded + " .inner");
+        if (!column)
+            return;
         var newstory = htmlToElement(shtml);
         if (top) {
             column.insertBefore(newstory, column.firstChild);
@@ -675,7 +691,9 @@ function drawStory(key, stories, top) {
     }
     if (game.TimeBarFeatureFlag && story.maxAge != -1) {
         var target = el.querySelector("#" + key + " .time-bars .elapsed");
-        drawTimebar(target, key, story);
+        if (target) {
+            drawTimebar(target, key, story);
+        }
     }
     updateColumnCount(story.skillNeeded);
 }
@@ -743,7 +761,9 @@ function drawTimebars(stories) {
         if (stories[key].maxAge != -1) {
             var el = $id("kanbanboard");
             var target = el === null || el === void 0 ? void 0 : el.querySelector("#" + key + " .time-bars .elapsed");
-            drawTimebar(target, key, stories[key]);
+            if (target) {
+                drawTimebar(target, key, stories[key]);
+            }
         }
     }
 }
@@ -808,7 +828,9 @@ function drawPerson(key, people) {
         el.appendChild(newPersonElement);
     }
     else {
-        p.outerHTML = newPersonElement.outerHTML;
+        if (p != null) {
+            p.outerHTML = newPersonElement.outerHTML;
+        }
     }
 }
 function getItemsHtml(person) {

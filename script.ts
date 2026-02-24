@@ -13,7 +13,7 @@ let storeFeatureFlag = true; //testMode;
 
 let timePenaltyFeatureFlag = true;
 let debugOutput = false;
-let game: Game|undefined = undefined;
+let game!: Game;
 
 // basic test modes and feature flags
 testMode = testMode || getParameterByName("testmode") == "true";                    //?testmode=true
@@ -517,7 +517,7 @@ class Game {
       }
     }
 
-    //this.StoreItems =  getAllLevelitems().each()
+    //this.StoreItems =  getAllLevelItems().each()
 
     this.AllPeopleTypes = getAllPeopleTypes();
     this.Items = {};
@@ -628,7 +628,21 @@ class Story {
     summary: string,
     project: Story | null
   ) {
-    this.init();
+    //this.init();
+       this.id = nextId();
+    this.points = game.ProjectSize | 6;
+    this.pointPrice = game.PointPrice | 25;
+    this.logo = getLogo();
+    this.person = undefined;
+    this.busy = false;
+    this.icon = null;
+    this.hasBug = false;
+    this.hasSpecBug = false;
+    this.customerFoundBug = null;
+    this.projectId = null;
+    this.reworkLevel = 0;
+    this.startingTime = new Date();
+    this.maxAge = -1;
     this.status = status;
     this.skillNeeded = skillNeeded;
     this.summary = summary;
@@ -642,39 +656,39 @@ class Story {
     }
   }
   init() {
-    this.id = nextId();
-    this.points = game.ProjectSize;
-    this.pointPrice = game.PointPrice;
-    this.logo = getLogo();
-    this.person = undefined;
-    this.busy = false;
-    this.icon = null;
-    this.hasBug = false;
-    this.hasSpecBug = false;
-    this.customerFoundBug = null;
-    this.projectId = null;
-    this.reworkLevel = 0;
-    this.startingTime = new Date();
-    this.maxAge = -1;
+    // this.id = nextId();
+    // this.points = game.ProjectSize;
+    // this.pointPrice = game.PointPrice;
+    // this.logo = getLogo();
+    // this.person = undefined;
+    // this.busy = false;
+    // this.icon = null;
+    // this.hasBug = false;
+    // this.hasSpecBug = false;
+    // this.customerFoundBug = null;
+    // this.projectId = null;
+    // this.reworkLevel = 0;
+    // this.startingTime = new Date();
+    // this.maxAge = -1;
   }
-  person: string | undefined;
-  id: number;
-  skillNeeded: string;
+  person!: string | undefined;
+  id!: number;
+  skillNeeded!: string;
   //column: string;
-  status: string;
-  busy: boolean;
-  summary: string;
-  points: number;
-  logo: string; //logo from the project.
-  icon: string | null; //icon from the person.
-  hasBug: boolean;
-  hasSpecBug: boolean;
-  customerFoundBug: boolean | null;
-  reworkLevel: number; // when a card is being reworked due to a found bug or spec bug, it is rework. (And is less time than the original work).
-  projectId: string | null; //contains 'r'
-  pointPrice: number;
-  startingTime: Date;
-  maxAge: number; //how many seconds before this job is considered kaput. `-1` means "no max age"
+  status!: string;
+  busy!: boolean;
+  summary!: string;
+  points!: number;
+  logo!: string; //logo from the project.
+  icon!: string | null; //icon from the person.
+  hasBug!: boolean;
+  hasSpecBug!: boolean;
+  customerFoundBug!: boolean | null;
+  reworkLevel!: number; // when a card is being reworked due to a found bug or spec bug, it is rework. (And is less time than the original work).
+  projectId!: string | null; //contains 'r'
+  pointPrice!: number;
+  startingTime!: Date;
+  maxAge!: number; //how many seconds before this job is considered kaput. `-1` means "no max age"
 }
 
 interface StoreItem {
@@ -714,7 +728,7 @@ class Project {
     this.stories = [];
   }
   lead: Story; // the sales lead that sparked this project
-  stories: string[] = []; //storyid's of the subsequent stories created by the BA (start with 'r')
+  stories: string[] = []; //storyId's of the subsequent stories created by the BA (start with 'r')
 }
 
 function initGameState(): void {
@@ -872,7 +886,8 @@ function drawStory(
   if (s != null) {
     s.outerHTML = shtml;
   } else {
-    let column = el.querySelector("td#" + story.skillNeeded + " .inner");
+    let column = el.querySelector("td#" + story.skillNeeded + " .inner") as HTMLElement;
+    if (!column) return;
     let newstory = htmlToElement(shtml);
     if (top) {
       column.insertBefore(newstory, column.firstChild);
@@ -882,8 +897,10 @@ function drawStory(
   }
 
   if (game.TimeBarFeatureFlag && story.maxAge != -1) {
-    const target = el.querySelector("#" + key + " .time-bars .elapsed") as HTMLSpanElement | null;
-    drawTimebar(target, key, story);
+    const target = el.querySelector("#" + key + " .time-bars .elapsed") as HTMLSpanElement;
+    if (target){
+      drawTimebar(target, key, story);
+    }
   }
 
   updateColumnCount(story.skillNeeded);
@@ -941,7 +958,7 @@ function updateColumnCount(column: string): void {
 
     // consider: check the number of people who have this skill.
     //If the count > (#people) make the color yellowish;
-    //if the count > (#people * 2 + 2) make the color redish;
+    //if the count > (#people * 2 + 2) make the color red(ish);
   }
 }
 
@@ -966,8 +983,10 @@ function drawTimebars(stories: { [id: string]: Story }): void {
     // only applies to stories that *have* a max age (-1 means, none)
     if (stories[key].maxAge != -1) {
       const el = $id("kanbanboard");
-      const target = el?.querySelector("#" + key + " .time-bars .elapsed") as HTMLSpanElement | null;
-      drawTimebar(target, key, stories[key]);
+      const target = el?.querySelector("#" + key + " .time-bars .elapsed") as HTMLSpanElement;
+      if (target) {
+        drawTimebar(target, key, stories[key]);
+      }
     }
   }
 }
@@ -1035,7 +1054,9 @@ function drawPerson(key: string, people: { [x: string]: Person }): void {
   if (newPerson) {
     el.appendChild(newPersonElement);
   } else {
-    p.outerHTML = newPersonElement.outerHTML;
+    if (p != null) {
+      p.outerHTML = newPersonElement.outerHTML;
+    }
   }
 }
 
@@ -1741,7 +1762,7 @@ function initiate(person: Person, triggerTime: Date) {
       }
     }
 
-    // we prioritise self-starting from the back of the board.
+    // we prioritize self-starting from the back of the board.
     if (person.skills["test"] && person.skills["test"].level > 0) {
       columns.push("test");
     }
@@ -1874,7 +1895,7 @@ function getEfficiency(person: Person, skill: string): number {
   if (personHas(person, ItemCode.keyboard)) level++;
   if (personHas(person, ItemCode.deskPlant)) level++;
   if (personHas(person, ItemCode.cookie)) level++;
-  //coffee givestwice the power!!
+  //coffee gives twice the power!!
   if (
     personHas(person, ItemCode.coffee) ||
     personHas(person, ItemCode.coffeeMachine)

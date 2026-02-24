@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "strict":true,
+		"forceConsistentCasingInFileNames": true,
 		"plugins": [
 		  {
 			"name": "typescript-tslint-plugin"
