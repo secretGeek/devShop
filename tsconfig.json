@@ -1,11 +1,14 @@
 {
-    "compilerOptions": {
-        "strict":true,
+	"compilerOptions": {
+		"target": "es2018",
+		"lib": ["es2018","dom"],
+		"strict": true,
 		"forceConsistentCasingInFileNames": true,
+		"moduleResolution": "Bundler",
 		"plugins": [
-		  {
-			"name": "typescript-tslint-plugin"
-		  }
+			{
+				"name": "typescript-tslint-plugin"
+			}
 		]
-    }
+	}
 }

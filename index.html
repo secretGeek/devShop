@@ -36,7 +36,7 @@
 <div id='loadslots'>
 ...slots here
 </div>
-<div class='button' id='exitload' onclick='exitloadmenu();' tabindex='0' role='button' >🏠 exit load</div>
+<div class='button' id='exitload' tabindex='0' role='button' >🏠 exit load</div>
 
 </div>
 
@@ -45,10 +45,10 @@
 
 <h1>DevShop</h1>
 
-<div class='button pulse' id='start' onclick='go();' tabindex='0' role='button' >🌟 start</div>
-<div class='button hidden' id='loadmenu' onclick='loadmenu();' tabindex='0' role='button' >💾 load</div>
-<!--<div class='button' id='about' onclick='about();' tabindex='0' role='button' >🥓 about</div>-->
-<div class='button hidden' id='timechallenge' onclick='timechallenge();' tabindex='0' role='button' >⏳ time challenge</div>
+<div class='button pulse' id='start' tabindex='0' role='button' >🌟 start</div>
+<div class='button hidden' id='loadmenu' tabindex='0' role='button' >💾 load</div>
+<!--<div class='button' id='about' tabindex='0' role='button' >🥓 about</div>-->
+<div class='button hidden' id='timechallenge' tabindex='0' role='button' >⏳ time challenge</div>
 
 <h2 class='twop'>Mailing List</h2>
 <form action="https://secretGeek.us4.list-manage.com/subscribe/post?u=2c8d4a2f270735de4d2cf3845&amp;id=64ebe920c2" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
@@ -56,7 +56,7 @@
 <input type="email" value="" name="EMAIL" class="xemail" id="mce-EMAIL" placeholder="you@example.com" required>
 <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_2c8d4a2f270735de4d2cf3845_64ebe920c2" tabindex="-1" value=""></div>
 <input type="submit" value="💌 join mailing list" name="subscribe" id="mc-embedded-subscribe" class="button joinemail">
-<a href='#privacy' onclick='visitPrivacy();return false;'>privacy policy</a>
+<a href='#privacy' id="privacyLink">privacy policy</a>
 </form>
 
 </div>
@@ -65,7 +65,7 @@
 <h1>DevShop</h1>
 <div class='pp'>
 <br />
-<div id='closeHelp' class='button' onclick='leaveHelp();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<div id='closeHelp' class='button' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 <br />
 <br />
 <h2 class='twop'>Help 😱</h2>
@@ -97,7 +97,7 @@
 <li>(People will get faster as you increase their skills, but jobs will be bigger... thus creating a steady state, a hedonic treadmill, a red queen's race 👑.)</li>
 </ul>
 
-<div id='closeHelp2' class='button' onclick='leaveHelp();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<div id='closeHelp2' class='button' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 
 </div><!-- .pp -->
 </div>
@@ -106,7 +106,7 @@
 <h1>DevShop</h1>
 <div class='pp'>
 <br />
-<div id='closeAbout' class='button' onclick='leaveAbout();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<div id='closeAbout' class='button' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 <br />
 <br />
 <h2 class='twop'>About 🌆</h2>
@@ -164,7 +164,7 @@
 What if we don't train them and they stay?&quot;</p>
 </blockquote>
 
-	<div id='closeAbout2' class='button' onclick='leaveAbout();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+	<div id='closeAbout2' class='button'  tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 
 </div><!-- .pp -->
 </div>
@@ -177,7 +177,7 @@ What if we don't train them and they stay?&quot;</p>
 <h1>DevShop</h1>
 
 <br />
-<div id='closePrivacy' class='button' onclick='leavePrivacy();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+<div id='closePrivacy' class='button' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 <br />
 <br />
 <div class='pp'>
@@ -236,7 +236,7 @@ omit this                </span>NimbleText.com&quot;)</p>
 
 
 
-  <div id='closePrivacy' class='button' onclick='leavePrivacy();' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
+  <div id='closePrivacy2' class='button' tabindex='0' role='button'><span class='icon'>🥓</span> Go Back</div>
 
 </div> <!-- .pp -->
 </div>
@@ -244,15 +244,15 @@ omit this                </span>NimbleText.com&quot;)</p>
 <h1>DevShop</h1>
 
 <div id='buttons'>
-  <div id='getLead' class='button hidden' onclick='getNewLead();' title='Advertise and find a project to do!' tabindex='0' role='button'><span class='icon'>🎁</span> find project (💲100)</div>
-  <div id='getdev' class='button getPerson hidden dev' onclick='getNewPerson("dev");' tabindex='0' role='button'><span class='icon'>💻</span>hire dev (💲300)</div>
-  <div id='gettest' class='button getPerson hidden test' onclick='getNewPerson("test");' tabindex='0' role='button'><span class='icon'>🔬</span>hire tester (💲300)</div>
-  <div id='getba' class='button getPerson hidden ba' onclick='getNewPerson("ba");' tabindex='0' role='button'><span class='icon'>🗣</span>hire BA (💲300)</div>
+  <div id='getLead' class='button hidden' title='Advertise and find a project to do!' tabindex='0' role='button'><span class='icon'>🎁</span> find project (💲100)</div>
+  <div id='getdev' class='button getPerson hidden dev' tabindex='0' role='button'><span class='icon'>💻</span>hire dev (💲300)</div>
+  <div id='gettest' class='button getPerson hidden test' tabindex='0' role='button'><span class='icon'>🔬</span>hire tester (💲300)</div>
+  <div id='getba' class='button getPerson hidden ba' tabindex='0' role='button'><span class='icon'>🗣</span>hire BA (💲300)</div>
 
-  <div class='button visitHire hidden' onclick='newHires()' tabindex='0' role='button'><span class='icon'>🤼</span>new hires</div>
+  <div class='button visitHire hidden' id="newHiresButton" tabindex='0' role='button'><span class='icon'>🤼</span>new hires</div>
 
 
-  <div class='button visitStore hidden' onclick='visitStore();' tabindex='0' role='button'><span class='icon'>🛍</span>visit store</div>
+  <div class='button visitStore hidden' id="visitStore" tabindex='0' role='button'><span class='icon'>🛍</span>visit store</div>
 </div>
   <table id='kanbanboard'>
   <thead>
@@ -300,13 +300,13 @@ omit this                </span>NimbleText.com&quot;)</p>
 
 <div id='store' class='hidden'>
 <h1>DevStore<span class='icon'>🛍</span></h1>
-  <div id='closeStore' class='button' onclick='leaveStore();' tabindex='0' role='button'><span class='icon'>🏢</span> leave store</div>
+  <div id='closeStore' class='button' tabindex='0' role='button'><span class='icon'>🏢</span> leave store</div>
   <div id='items'>ITEMS for SALE</div>
 </div>
 
 <div id='hire' class='hidden'>
 <h1>New Hires<span class='icon'>🤼</span></h1>
-  <div id='closeHire' class='button' onclick='leaveHire();' tabindex='0' role='button'><span class='icon'>🤼</span> exit store</div>
+  <div id='closeHire' class='button' tabindex='0' role='button'><span class='icon'>🤼</span> exit store</div>
   <div id='people'>People for HIRE</div>
 </div>
 
@@ -314,9 +314,10 @@ omit this                </span>NimbleText.com&quot;)</p>
 <span id='storeMessage' class='hidden'>⭐ Welcome to the DevStore ⭐</span>
 <span id='hireMessage' class='hidden'>⭐ Welcome to Hiring ⭐</span>
 
-<a id='aboutLink' href='#about' onclick='visitAbout();return false;' style='float:left;left:0'>about</a>
-<a id='helpLink' href='#help' onclick='visitHelp();return false'>help</a>
+<a id='aboutLink' href='#about' style='float:left;left:0'>about</a>
+<a id='helpLink' href='#help'>help</a>
 <div id='debug' class='hidden' style='clear:both'></div>
 </body>
-<script src='script.js?3' type="text/javascript"></script>
+<!--<script src='names.global.js' type="text/javascript"></script>-->
+<script type='module' src='script.js?3' type="text/javascript"></script>
 </html>

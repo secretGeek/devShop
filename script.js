@@ -5,25 +5,30 @@
 // As described in the readme, I may take this commercial, and haven't thought through 
 // the implications of accepting PRs on it prior to that.
 // Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
-var testMode = false; //true;
-var storeFeatureFlag = true; //testMode;
+let testMode = false; //true;
+let storeFeatureFlag = true; //testMode;
 //let timeBarFeatureFlag = false;
-var timePenaltyFeatureFlag = true;
-var debugOutput = false;
-var game;
+let timePenaltyFeatureFlag = true;
+let debugOutput = false;
+let game;
 // basic test modes and feature flags
 testMode = testMode || getParameterByName("testmode") == "true"; //?testmode=true
 // testMode -> all items immediately available in store. Opportunity to change all speeds/defaults.
 debugOutput = debugOutput || testMode || getParameterByName("debug") == "true"; //?debug=true
-var privacy = getParameterByName("privacy") == "true"; //?privacy=true
+let privacy = getParameterByName("privacy") == "true"; //?privacy=true
 //timeBarFeatureFlag =
 // (timeBarFeatureFlag || getParameterByName('timebarflag') == "true");             //?timebarflag=true
 storeFeatureFlag =
     storeFeatureFlag || getParameterByName("storeflag") == "true"; //?storeflag=true
-var avgDuration = testMode ? 4 : 600; // factor that all work durations are based on, in milliseconds
-var startingMoney = testMode ? 100 : 100;
-var defaultCompletionTime = testMode ? 10 : 100; //how long have you got to complete a project, in seconds?
-var hashLocation = window.location.hash.substring(1);
+let avgDuration = testMode ? 4 : 600; // factor that all work durations are based on, in milliseconds
+let startingMoney = testMode ? 100 : 100;
+let defaultCompletionTime = testMode ? 10 : 100; //how long have you got to complete a project, in seconds?
+// Use a browser-provided global `names` (names.global.js) so the compiled JS
+// does not include CommonJS `require`/`exports` when opened directly in a browser.
+//const names: string[] = ["zAaron2", "zAbbie2", "zAbbott2"];
+import { names } from "./names.js";
+import { catNames, dogNames, catIcons, dogIcons } from "./animals.js";
+let hashLocation = window.location.hash.substring(1);
 privacy = privacy || hashLocation == "privacy";
 if (privacy) {
     visitPrivacy();
@@ -78,7 +83,7 @@ function getAllLevelItems() {
     // Note that skillNeeded includes the special value "any" which means it can be applied to any person.
     // TODO: ?? There could be a 'must not have skill' property... e.g. Beginning Development (only for non-developers)
     //The 'code' property is used in `function useIt` to decide how the card affects the player.
-    var allItems = {
+    let allItems = {
         //Level 2 Items
         l2: [
             {
@@ -436,8 +441,8 @@ function getAllPeopleTypes() {
 // *******************************************************
 // as described in the readme (and above), I may take this commercial, and haven't thought through the implications of accepting PRs on it prior to that.
 // Ordinarily I'd *love* to welcome PR's but for now, no PR's please.
-var Game = /** @class */ (function () {
-    function Game(startingMoney) {
+class Game {
+    constructor(startingMoney) {
         this.Money = startingMoney;
         this.HighestMoney = startingMoney;
         this.Inflation = testMode ? 1.3 : 1.3; // 30 %
@@ -457,8 +462,8 @@ var Game = /** @class */ (function () {
         this.Projects = {};
         this.AllLevelItems = getAllLevelItems();
         this.StoreItems = {};
-        for (var k in this.AllLevelItems) {
-            for (var x in this.AllLevelItems[k]) {
+        for (let k in this.AllLevelItems) {
+            for (let x in this.AllLevelItems[k]) {
                 this.StoreItems[this.AllLevelItems[k][x].id] = this.AllLevelItems[k][x];
             }
         }
@@ -484,10 +489,9 @@ var Game = /** @class */ (function () {
         this.FirstTimeSensitiveProject = false;
         this.toHire = {};
     }
-    return Game;
-}());
-var Story = /** @class */ (function () {
-    function Story(status, skillNeeded, summary, project) {
+}
+class Story {
+    constructor(status, skillNeeded, summary, project) {
         //this.init();
         this.id = nextId();
         this.points = game.ProjectSize | 6;
@@ -514,7 +518,7 @@ var Story = /** @class */ (function () {
             this.logo = project.logo;
         }
     }
-    Story.prototype.init = function () {
+    init() {
         // this.id = nextId();
         // this.points = game.ProjectSize;
         // this.pointPrice = game.PointPrice;
@@ -529,25 +533,23 @@ var Story = /** @class */ (function () {
         // this.reworkLevel = 0;
         // this.startingTime = new Date();
         // this.maxAge = -1;
-    };
-    return Story;
-}());
-var Project = /** @class */ (function () {
-    function Project(lead) {
+    }
+}
+class Project {
+    constructor(lead) {
         this.stories = []; //storyId's of the subsequent stories created by the BA (start with 'r')
         this.lead = lead;
         this.stories = [];
     }
-    return Project;
-}());
+}
 function initGameState() {
     game = new Game(startingMoney);
-    var allSkills = {
+    let allSkills = {
         dev: { level: 1 },
         test: { level: 1 },
         ba: { level: 1 },
     };
-    var player = {
+    let player = {
         id: nextId(),
         skills: allSkills,
         name: "Founder",
@@ -579,19 +581,19 @@ function drawRoom() {
     drawButtons();
 }
 function drawButtons() {
-    var getLead = $id("getLead");
-    getLead.innerHTML = "\uD83C\uDF81 find project (\uD83D\uDCB2".concat(game.LeadPrice, ")");
-    for (var _i = 0, _a = Object.entries(game.AllPeopleTypes); _i < _a.length; _i++) {
-        var _b = _a[_i], key = _b[0], value = _b[1];
-        var d = $id("get".concat(value.skill));
+    const getLead = $id("getLead");
+    getLead.innerHTML = `🎁 find project (💲${game.LeadPrice})`;
+    for (let [key, value] of Object.entries(game.AllPeopleTypes)) {
+        const d = $id(`get${value.skill}`);
         if (d != null) {
-            d.innerHTML = "<span class='icon'>".concat(value.icon, "</span> hire ").concat(value.title, " (\uD83D\uDCB2").concat(value.price, ")");
-            d.setAttribute("onclick", "getNewPerson(\"".concat(value.skill, "\");"));
+            d.innerHTML = `<span class='icon'>${value.icon}</span> hire ${value.title} (💲${value.price})`;
+            //d.setAttribute("onclick", `getNewPerson("${value.skill}");`);
+            d.addEventListener("click", () => getNewPerson(value.skill));
         }
     }
 }
 function drawMoney(money) {
-    var s = $id("money");
+    const s = $id("money");
     if (money < 0) {
         s.classList.add("negative");
     }
@@ -601,7 +603,7 @@ function drawMoney(money) {
     s.innerText = "💲" + money;
 }
 function drawXP(xp, levelUpXP, level) {
-    var s = $id("xp");
+    const s = $id("xp");
     if (xp < 0) {
         s.classList.add("negative");
     }
@@ -609,16 +611,16 @@ function drawXP(xp, levelUpXP, level) {
         s.classList.remove("negative");
     }
     s.innerText = "" + xp + "/" + levelUpXP + "🥓";
-    var s2 = $id("level");
+    const s2 = $id("level");
     s2.innerText = "" + level + "🥑";
 }
 function removeStory(key) {
     var _a, _b, _c;
-    var el = $id("kanbanboard");
-    var s = el === null || el === void 0 ? void 0 : el.querySelector("#" + key);
+    const el = $id("kanbanboard");
+    const s = el === null || el === void 0 ? void 0 : el.querySelector("#" + key);
     if (!s)
         return;
-    var column = (_b = (_a = s.parentNode) === null || _a === void 0 ? void 0 : _a.parentNode) === null || _b === void 0 ? void 0 : _b.id;
+    const column = (_b = (_a = s.parentNode) === null || _a === void 0 ? void 0 : _a.parentNode) === null || _b === void 0 ? void 0 : _b.id;
     (_c = s.parentNode) === null || _c === void 0 ? void 0 : _c.removeChild(s);
     if (column)
         updateColumnCount(column);
@@ -627,8 +629,8 @@ function drawTimebar(target, key, story) {
     ///stories: { [x: string]: Story; }, top: boolean):void {
     if (!target)
         return;
-    var percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
-    var bg = "red";
+    let percent = 100 - Math.min(100, getTenthsOfTimeElapsed(story) * 10);
+    let bg = "red";
     if (percent >= 40) {
         bg = "green";
     }
@@ -647,41 +649,54 @@ function drawTimebar(target, key, story) {
     target.style.backgroundColor = bg;
 }
 function drawStory(key, stories, top) {
-    var el = $id("kanbanboard");
-    var s = el.querySelector("#" + key);
-    var avatar = "";
-    var busy = "";
-    var story = stories[key];
+    const el = $id("kanbanboard");
+    let s = el.querySelector("#" + key);
+    let avatar = "";
+    let busy = "";
+    let story = stories[key];
     if (story.icon != undefined) {
         avatar = "<span class='avatar'>" + story.icon + "</span>";
     }
-    var logo = "<span class='logo'>".concat(story.logo, "</span>");
+    let logo = `<span class='logo'>${story.logo}</span>`;
     if (debugOutput) {
-        logo += "<span class='secrets'>".concat(story.hasBug ? "🐛" : "").concat(story.hasSpecBug ? "💥" : "", "</span>");
+        logo += `<span class='secrets'>${story.hasBug ? "🐛" : ""}${story.hasSpecBug ? "💥" : ""}</span>`;
     }
     if (story.busy) {
         busy = " busy";
     }
-    var selected = "";
+    let selected = "";
     if (game.SelectedReceiver == key) {
         selected = " selected";
     }
     if (isPossible(story)) {
         selected = " possible";
     }
-    var points = "<span class='points'>" + story.points + "</span>";
+    let points = "<span class='points'>" + story.points + "</span>";
     // if the story is done, don't add a click handler.
-    var handler = story.skillNeeded == "done" ? "" : "onclick='clickReceiver(\"".concat(key, "\");'");
-    var timebar = story.maxAge > 0 ? generateTimebarHtml(story) : "";
-    var shtml = "<span class='story receiver ".concat(story.skillNeeded).concat(busy).concat(selected, "' id='").concat(key, "' ").concat(handler, "><span class='story-detail'>").concat(logo, " ").concat(story.summary, "</span>").concat(avatar).concat(points).concat(timebar, "</span>");
+    //let handler =
+    //  story.skillNeeded == "done" ? "" : `onclick='clickReceiver(\"${key}\");'`;
+    let timebar = story.maxAge > 0 ? generateTimebarHtml(story) : "";
+    //let shtml = `<span class='story receiver ${story.skillNeeded}${busy}${selected}' id='${key}' ${handler}><span class='story-detail'>${logo} ${story.summary}</span>${avatar}${points}${timebar}</span>`;
+    let shtml = `<span class='story receiver ${story.skillNeeded}${busy}${selected}' id='${key}'><span class='story-detail'>${logo} ${story.summary}</span>${avatar}${points}${timebar}</span>`;
+    log("game stories: " + Object.keys(game.Stories));
     if (s != null) {
         s.outerHTML = shtml;
+        //s.on
+        if (story.skillNeeded != "done") {
+            log("adding (or re...adding?) click handler to story " + key);
+            s.addEventListener("click", () => clickReceiver(key));
+        }
     }
     else {
-        var column = el.querySelector("td#" + story.skillNeeded + " .inner");
+        let column = el.querySelector("td#" + story.skillNeeded + " .inner");
         if (!column)
             return;
-        var newstory = htmlToElement(shtml);
+        let newstory = htmlToElement(shtml);
+        if (story.skillNeeded != "done") {
+            log("adding click handler to new story " + key);
+            //newstory.addEventListener("click", () => clickReceiver(`"${key}"`));
+            newstory.addEventListener("click", () => clickReceiver(key));
+        }
         if (top) {
             column.insertBefore(newstory, column.firstChild);
         }
@@ -690,7 +705,7 @@ function drawStory(key, stories, top) {
         }
     }
     if (game.TimeBarFeatureFlag && story.maxAge != -1) {
-        var target = el.querySelector("#" + key + " .time-bars .elapsed");
+        const target = el.querySelector("#" + key + " .time-bars .elapsed");
         if (target) {
             drawTimebar(target, key, story);
         }
@@ -707,33 +722,38 @@ function projectAge_s(story) {
     return dateDiff_s(story.startingTime, new Date());
 }
 function getTenthsOfTimeElapsed(story) {
-    var age_s = projectAge_s(story);
+    let age_s = projectAge_s(story);
     //we will draw a total of 5 bars, so tenths are what matters.
-    var maxAge_seconds = story.maxAge;
+    let maxAge_seconds = story.maxAge;
     return Math.floor(age_s / (maxAge_seconds / 10));
 }
 function generateTimebarHtml(story) {
-    return "<div class='time-bars'><span class='elapsed'></span></div>";
+    return `<div class='time-bars'><span class='elapsed'></span></div>`;
 }
 function updateColumnCount(column) {
-    var target = $("#" + column + " .inner .count");
-    var limit = game.ColumnLimits[column];
+    let target = $("#" + column + " .inner .count");
+    let limit = game.ColumnLimits[column];
     if (target && target.length == 1) {
-        var points = 0;
-        for (var _i = 0, _a = $("#" + column + " .inner .story .points"); _i < _a.length; _i++) {
-            var s = _a[_i];
+        let points = 0;
+        for (let s of $("#" + column + " .inner .story .points")) {
             //s.innerText;
             points += Number(s.innerText);
         }
-        var cardCount = $("#" + column + " .inner .story").length;
+        const cardCount = $("#" + column + " .inner .story").length;
         if (limit != null && limit != -1) {
-            target[0].innerHTML = "<span class='up' onclick='updateColumnLimit(\"".concat(column, "\",1);'>\u2795</span>").concat(points, "/").concat(limit, "\uD83D\uDCCD<span class='dn' onclick='updateColumnLimit(\"").concat(column, "\",-1);'>\u2796</span>");
+            let upButtonId = "btnUpColumn" + column;
+            let dnButtonId = "btnDnColumn" + column;
+            target[0].innerHTML = `<span id='${upButtonId}' class='up'>➕</span>${points}/${limit}📍<span id='${dnButtonId}' class='dn'>➖</span>`;
             target[0].classList.add("limited");
-            target[0].setAttribute("title", "".concat(cardCount, " stories worth ").concat(points, " points, with a soft limit of ").concat(limit, " points."));
+            target[0].setAttribute("title", `${cardCount} stories worth ${points} points, with a soft limit of ${limit} points.`);
+            //onclick='updateColumnLimit("${column}",-1);
+            //onclick='updateColumnLimit("${column}",1);
+            $id(upButtonId).addEventListener("click", () => updateColumnLimit(column, +1));
+            $id(dnButtonId).addEventListener("click", () => updateColumnLimit(column, -1));
         }
         else {
-            target[0].innerHTML = "".concat(points, "\uD83D\uDCCD");
-            target[0].setAttribute("title", "".concat(cardCount, " stories worth ").concat(points, " points"));
+            target[0].innerHTML = `${points}📍`;
+            target[0].setAttribute("title", `${cardCount} stories worth ${points} points`);
         }
         target[0].setAttribute("data-count", "" + cardCount);
         // consider: check the number of people who have this skill.
@@ -742,7 +762,7 @@ function updateColumnCount(column) {
     }
 }
 function updateColumnLimit(column, delta) {
-    var value = game.ColumnLimits[column];
+    let value = game.ColumnLimits[column];
     value += delta;
     if (value >= 0) {
         //even limits have limits
@@ -751,16 +771,16 @@ function updateColumnLimit(column, delta) {
     }
 }
 function drawStories(stories) {
-    for (var key in stories) {
+    for (const key in stories) {
         drawStory(key, stories, stories[key].reworkLevel > 0);
     }
 }
 function drawTimebars(stories) {
-    for (var key in stories) {
+    for (const key in stories) {
         // only applies to stories that *have* a max age (-1 means, none)
         if (stories[key].maxAge != -1) {
-            var el = $id("kanbanboard");
-            var target = el === null || el === void 0 ? void 0 : el.querySelector("#" + key + " .time-bars .elapsed");
+            const el = $id("kanbanboard");
+            const target = el === null || el === void 0 ? void 0 : el.querySelector("#" + key + " .time-bars .elapsed");
             if (target) {
                 drawTimebar(target, key, stories[key]);
             }
@@ -768,47 +788,54 @@ function drawTimebars(stories) {
     }
 }
 function drawInboxItem(key, item) {
-    var el = $id("kanbanboard");
-    var s = el.querySelector("#" + key);
-    var shtml = "<span class='storeItem receiver ".concat(item.skillNeeded, "' id='").concat(key, "' onclick=\"clickReceiver('").concat(key, "');\"><span class='storeitem-icon'>").concat(item.icon, "</span> ").concat(item.name, "</span>");
+    const el = $id("kanbanboard");
+    const s = el.querySelector("#" + key);
+    //const shtml = `<span class='storeItem receiver ${item.skillNeeded}' id='${key}' onclick="clickReceiver(\'${key}\');"><span class='storeitem-icon'>${item.icon}</span> ${item.name}</span>`;
+    const shtml = `<span class='storeItem receiver ${item.skillNeeded}' id='${key}'><span class='storeitem-icon'>${item.icon}</span> ${item.name}</span>`;
     if (s != null) {
         s.outerHTML = shtml;
+        if (item.skillNeeded != "done") {
+            log("adding (or re...adding?) click handler to inbox item " + key);
+            s.addEventListener("click", () => clickReceiver(key));
+        }
     }
     else {
-        var column = el.querySelector("td#ba .inner");
+        const column = el.querySelector("td#ba .inner");
         if (!column)
             return;
-        var newInboxItem = htmlToElement(shtml);
+        const newInboxItem = htmlToElement(shtml);
         // put it at the top of the inbox column (the 'ba' column)
+        if (item.skillNeeded != "done") {
+            log("adding click handler to inbox item " + key);
+            newInboxItem.addEventListener("click", () => clickReceiver(key));
+        }
         column.insertBefore(newInboxItem, column.firstChild);
     }
 }
 function drawPerson(key, people) {
-    var el = $id("people");
-    var p = el.querySelector("#" + key);
+    const el = $id("people");
+    const p = el.querySelector("#" + key);
     //if the person is listed in #id already then update it.
-    var newPerson = true;
+    let newPerson = true;
     if (p != null) {
         newPerson = false;
     }
-    var busy = "";
-    var person = people[key];
+    let busy = "";
+    let person = people[key];
     if (person.busy) {
         busy = " busy";
     }
-    var skillsDiv = getSkillsDiv(person.skills);
-    var itemsHtml = getItemsHtml(person);
-    var selected = game.SelectedDoer == "p" + person.id ? " selected" : "";
-    var possible = isPossiblePerson(person) ? " possible" : "";
-    var phtml = "<span class='person doer" +
+    let skillsDiv = getSkillsDiv(person.skills);
+    let itemsHtml = getItemsHtml(person);
+    let selected = game.SelectedDoer == "p" + person.id ? " selected" : "";
+    let possible = isPossiblePerson(person) ? " possible" : "";
+    let phtml = "<span class='person doer" +
         busy +
         selected +
         possible +
         "' id='" +
         key +
-        "' onclick='clickDoer(\"" +
-        key +
-        "\");'><span class='avatar2'>" +
+        "' ><span class='avatar2'>" +
         person.avatar +
         "</span><div class='name'>" +
         person.name +
@@ -819,55 +846,56 @@ function drawPerson(key, people) {
         "<div class='summary'>" +
         person.summary +
         "</div></span>";
-    var newPersonElement = htmlToElement(phtml);
-    for (var _i = 0, _a = Object.keys(person.skills); _i < _a.length; _i++) {
-        var key_1 = _a[_i];
-        newPersonElement.classList.add(key_1);
+    let newPersonElement = htmlToElement(phtml);
+    for (let key of Object.keys(person.skills)) {
+        newPersonElement.classList.add(key);
     }
     if (newPerson) {
         el.appendChild(newPersonElement);
+        newPersonElement.addEventListener("click", () => clickDoer(key));
     }
     else {
         if (p != null) {
             p.outerHTML = newPersonElement.outerHTML;
+            log("re-added clickDoer handler to person " + key);
+            const p2 = el.querySelector("#" + key);
+            p2.addEventListener("click", () => clickDoer(key));
         }
     }
 }
 function getItemsHtml(person) {
     //was: return = Object.keys(items).map(k => items[k].icon).join(" ");
-    var result = "";
-    for (var _i = 0, _a = Object.keys(person.has); _i < _a.length; _i++) {
-        var itemKey = _a[_i];
-        var item = person.has[itemKey];
-        var levelAttribute = "";
+    let result = "";
+    for (const itemKey of Object.keys(person.has)) {
+        let item = person.has[itemKey];
+        let levelAttribute = "";
         if (item.code == ItemCode.seat)
-            levelAttribute = " data-level='".concat(person.seatLevel > 9 ? "∞" : person.seatLevel, "'");
+            levelAttribute = ` data-level='${person.seatLevel > 9 ? "∞" : person.seatLevel}'`;
         if (item.code == ItemCode.initiative)
-            levelAttribute = " data-level='".concat(person.initiativeLevel > 9 ? "∞" : person.initiativeLevel, "'");
+            levelAttribute = ` data-level='${person.initiativeLevel > 9 ? "∞" : person.initiativeLevel}'`;
         if (item.code == ItemCode.keyboard)
-            levelAttribute = " data-level='".concat(person.keyboardLevel > 9 ? "∞" : person.keyboardLevel, "'");
+            levelAttribute = ` data-level='${person.keyboardLevel > 9 ? "∞" : person.keyboardLevel}'`;
         if (item.code == ItemCode.headphones)
-            levelAttribute = " data-level='".concat(person.headphoneLevel > 9 ? "∞" : person.headphoneLevel, "'");
-        result += "<span class='icon'".concat(levelAttribute, ">").concat(item.icon, "</span>");
+            levelAttribute = ` data-level='${person.headphoneLevel > 9 ? "∞" : person.headphoneLevel}'`;
+        result += `<span class='icon'${levelAttribute}>${item.icon}</span>`;
     }
     if (result === "")
         return result;
-    return "<div class='itemList'>".concat(result, "</div>");
+    return `<div class='itemList'>${result}</div>`;
 }
 function getSkillsDiv(skills) {
-    var result = "";
-    for (var _i = 0, _a = Object.entries(skills); _i < _a.length; _i++) {
-        var _b = _a[_i], key = _b[0], value = _b[1];
-        var s1 = "";
+    let result = "";
+    for (let [key, value] of Object.entries(skills)) {
+        let s1 = "";
         switch (key) {
             case "dev":
-                s1 = "<span class='skill dev dev-".concat(value.level, "' data-level='").concat(value.level > 9 ? "∞" : value.level, "' title='developer'>\uD83D\uDCBB</span>");
+                s1 = `<span class='skill dev dev-${value.level}' data-level='${value.level > 9 ? "∞" : value.level}' title='developer'>💻</span>`;
                 break;
             case "test":
-                s1 = "<span class='skill test test-".concat(value.level, "' data-level='").concat(value.level > 9 ? "∞" : value.level, "' title='tester'>\uD83D\uDD2C</span>");
+                s1 = `<span class='skill test test-${value.level}' data-level='${value.level > 9 ? "∞" : value.level}' title='tester'>🔬</span>`;
                 break;
             case "ba":
-                s1 = "<span class='skill ba ba-".concat(value.level, "' data-level='").concat(value.level > 9 ? "∞" : value.level, "' title='business analyst'>\uD83D\uDDE3</span>");
+                s1 = `<span class='skill ba ba-${value.level}' data-level='${value.level > 9 ? "∞" : value.level}' title='business analyst'>🗣</span>`;
                 break;
         }
         result += s1;
@@ -875,14 +903,14 @@ function getSkillsDiv(skills) {
     return "<div class='skills'>" + result + "</div>";
 }
 function drawPeople(people) {
-    for (var key in people) {
+    for (const key in people) {
         drawPerson(key, people);
     }
 }
 function go() {
     initGameState();
     drawRoom();
-    var startEl = $id("start");
+    const startEl = $id("start");
     startEl.classList.remove("pulse"); //hide 'start' button's pulse effect.
     startEl.classList.add("hidden"); //hide 'start' button
     //removeClass('#office', 'hidden');
@@ -903,7 +931,7 @@ function getNewLead() {
     }
     removeClass("#getLead", "hint");
     DeSelectDoerAndReceiver();
-    var price = game.LeadPrice;
+    let price = game.LeadPrice;
     if (game.Money < 0) {
         drawMessage("Will need to go FURTHER into debt to get this lead. 😫");
     }
@@ -913,7 +941,7 @@ function getNewLead() {
     incrementMoney(price * -1);
     incrementXP(5);
     // TODO: story should be created by a constructor on story
-    var newLead = new Story("lead", "ba", projectName(), null);
+    let newLead = new Story("lead", "ba", projectName(), null);
     /*{
         id: nextId(),
         points:game.ProjectSize,
@@ -957,13 +985,13 @@ function getNewLead() {
     game.Stories["r" + newLead.id] = newLead;
     drawStory("r" + newLead.id, game.Stories, false);
     game.LeadPrice = Inflate(game.SmallInflation, game.LeadPrice);
-    var roi = (game.ProjectSize * game.PointPrice * 1.5) / game.LeadPrice;
+    let roi = (game.ProjectSize * game.PointPrice * 1.5) / game.LeadPrice;
     if (roi < 2 || roi > 4.5) {
-        log("Roi was ".concat(roi, ", from: return = ").concat(Math.floor(game.ProjectSize * game.PointPrice * 1.5), ", investment = ").concat(game.LeadPrice, "... so it has been adjusted."));
+        log(`Roi was ${roi}, from: return = ${Math.floor(game.ProjectSize * game.PointPrice * 1.5)}, investment = ${game.LeadPrice}... so it has been adjusted.`);
         game.LeadPrice = Math.floor((game.ProjectSize * game.PointPrice * 1.5) / 2.5);
     }
     else {
-        log("Roi is ".concat(roi));
+        log(`Roi is ${roi}`);
     }
     drawButtons();
 }
@@ -973,19 +1001,19 @@ function DeSelectDoerAndReceiver() {
 }
 function getNewPerson(skill) {
     DeSelectDoerAndReceiver();
-    var personType = game.AllPeopleTypes[skill];
+    let personType = game.AllPeopleTypes[skill];
     if (game.Money < personType.price) {
-        drawMessage("Cannot afford a new ".concat(personType.title, "."));
+        drawMessage(`Cannot afford a new ${personType.title}.`);
         return;
     }
     removeClass(".getPerson." + skill, "hint");
     incrementMoney(personType.price * -1);
     incrementXP(10);
-    var id = nextId();
+    let id = nextId();
     //let skillo = {};
-    var skillo = {};
+    let skillo = {};
     skillo[skill] = { level: 1 };
-    var newEmployee = {
+    let newEmployee = {
         id: id,
         skills: skillo,
         summary: "💤",
@@ -1009,7 +1037,7 @@ function getNewPerson(skill) {
     drawButtons();
 }
 function clickFirstAvailableCard(column) {
-    var columnCards = $("#".concat(column, " .inner .receiver:not(.busy)"));
+    let columnCards = $(`#${column} .inner .receiver:not(.busy)`);
     if (columnCards && columnCards.length > 0) {
         clickReceiver(columnCards[0].id);
     }
@@ -1040,7 +1068,7 @@ function isPossible(story) {
         if (story.skillNeeded == "any")
             return true;
         console.log("skillNeeded", story.skillNeeded);
-        var skills = game.People[game.SelectedDoer].skills;
+        let skills = game.People[game.SelectedDoer].skills;
         console.log(skills);
         if (Object.keys(skills).includes(story.skillNeeded)) {
             return true;
@@ -1053,7 +1081,7 @@ function isPossiblePerson(person) {
     if (person.busy)
         return false;
     if (game.SelectedReceiver != undefined && game.SelectedReceiver != null) {
-        var receiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
+        let receiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
         if (receiver.skillNeeded == "any")
             return true;
         if (Object.keys(person.skills).includes(receiver.skillNeeded))
@@ -1064,17 +1092,16 @@ function isPossiblePerson(person) {
 function updatePossible() {
     if (game.SelectedDoer != undefined && game.SelectedDoer != null) {
         //As a 'doer' -- highlight everything I can do.  (where not busy)
-        var skills = game.People[game.SelectedDoer].skills;
+        let skills = game.People[game.SelectedDoer].skills;
         //for(const skill of game.People[game.SelectedDoer].skills) {
-        for (var _i = 0, _a = Object.keys(skills); _i < _a.length; _i++) {
-            var key = _a[_i];
+        for (let key of Object.keys(skills)) {
             addClass("." + key + ".receiver:not(.busy)", "possible");
         }
         addClass(".any.receiver:not(.busy)", "possible");
     }
     // As a 'receiver' -- highlight everything that can do this (where not busy)
     if (game.SelectedReceiver != undefined && game.SelectedReceiver != null) {
-        var receiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
+        let receiver = game.Stories[game.SelectedReceiver] || game.Items[game.SelectedReceiver];
         if (receiver.skillNeeded == "any") {
             addClass(".doer:not(.busy)", "possible");
         }
@@ -1087,7 +1114,7 @@ function updatePossible() {
 function deselectDoer() {
     if (game.SelectedDoer == undefined || game.SelectedDoer == null)
         return;
-    var doer = $id(game.SelectedDoer);
+    let doer = $id(game.SelectedDoer);
     game.SelectedDoer = null;
     if (doer == undefined)
         return;
@@ -1125,7 +1152,7 @@ function clickDoer(id) {
 function deselectReceiver() {
     if (game.SelectedReceiver == undefined || game.SelectedReceiver == null)
         return;
-    var receiver = $id(game.SelectedReceiver);
+    let receiver = $id(game.SelectedReceiver);
     game.SelectedReceiver = null;
     if (receiver == undefined)
         return;
@@ -1138,7 +1165,9 @@ function selectReceiver() {
     updatePossible();
 }
 function clickReceiver(id) {
-    var clickedReceiver = game.Stories[id] || game.Items[id];
+    console.log("clickReceiver", id);
+    log("game stories: " + Object.keys(game.Stories));
+    let clickedReceiver = game.Stories[id] || game.Items[id];
     if (clickedReceiver.busy == true) {
         log("can't select (or deselect) a busy item. (" + clickedReceiver.icon + ")");
         return;
@@ -1157,8 +1186,8 @@ function clickReceiver(id) {
     }
 }
 function tryDo(doId, receiverId, viaDoer) {
-    var doer = game.People[doId];
-    var receiver = game.Stories[receiverId] || game.Items[receiverId];
+    let doer = game.People[doId];
+    let receiver = game.Stories[receiverId] || game.Items[receiverId];
     if (receiver.skillNeeded != "any" &&
         !Object.keys(doer.skills).includes(receiver.skillNeeded)) {
         if (viaDoer) {
@@ -1187,7 +1216,7 @@ function tryDo(doId, receiverId, viaDoer) {
     doIt(doId, receiverId);
 }
 function useIt(doId, item) {
-    var person = game.People[doId];
+    let person = game.People[doId];
     applyItem(person, item);
     drawPerson("p" + person.id, game.People);
     removeStory("i" + item.id);
@@ -1197,7 +1226,7 @@ function applyItem(person, item) {
         case ItemCode.buyBot:
             // this is a very custom item.
             person.buyBotLevel += 1;
-            var message = "The buy-bot ".concat(item.icon, " will buy projects for you, (if the inbox is below the points limit (set with \u2795 and \u2796), and you have spare \uD83D\uDCB2)");
+            let message = `The buy-bot ${item.icon} will buy projects for you, (if the inbox is below the points limit (set with ➕ and ➖), and you have spare 💲)`;
             game.TimeBarFeatureFlag = true;
             if (game.ColumnLimits["ba"] == -1) {
                 game.ColumnLimits["ba"] = 20;
@@ -1211,7 +1240,7 @@ function applyItem(person, item) {
                 person.initiativeLevel++;
                 game.HasInitiativeLevel++;
                 //TODO: grab initiative item from all items collection
-                var ss = {
+                let ss = {
                     id: nextId(),
                     name: "⭐ Initiative Training ⭐",
                     price: 500,
@@ -1223,7 +1252,7 @@ function applyItem(person, item) {
                     description: "When you're idle, go and check the board to see if there is anything you can do. Purchase multiple times to show initiative sooner!",
                     enabled: false,
                 };
-                message += ", and ".concat(person.name, " ").concat(person.avatar, " has initiative now!");
+                message += `, and ${person.name} ${person.avatar} has initiative now!`;
                 person.has["i" + ss.id] = ss;
             }
             else {
@@ -1237,10 +1266,10 @@ function applyItem(person, item) {
             person.initiativeLevel++;
             if (person.initiativeLevel == 1) {
                 person.has["i" + item.id] = item;
-                drawMessage("".concat(person.name, " ").concat(person.avatar, " has initiative now!"));
+                drawMessage(`${person.name} ${person.avatar} has initiative now!`);
             }
             else {
-                drawMessage("".concat(person.name, " ").concat(person.avatar, " has \u2B50more\u2B50 initiative (level ").concat(person.initiativeLevel, ")."));
+                drawMessage(`${person.name} ${person.avatar} has ⭐more⭐ initiative (level ${person.initiativeLevel}).`);
             }
             if (person.busy == false) {
                 personFree(person);
@@ -1294,9 +1323,9 @@ function applyItem(person, item) {
             //if (item.code == ItemCode.cat) item.icon = randomItem(catIcons);
             //if (item.code == ItemCode.dog) item.icon = randomItem(dogIcons);
             person.busy = true;
-            var animal = item.code == ItemCode.dog ? "dog" : "cat";
-            person.summary = "Tending to ".concat(item.name, " ").concat(item.icon, " (the ").concat(animal, ")");
-            drawMessage("".concat(person.name, " ").concat(person.avatar, " has the ").concat(animal, " ").concat(item.name, " ").concat(item.icon));
+            let animal = item.code == ItemCode.dog ? "dog" : "cat";
+            person.summary = `Tending to ${item.name} ${item.icon} (the ${animal})`;
+            drawMessage(`${person.name} ${person.avatar} has the ${animal} ${item.name} ${item.icon}`);
             setTimeout(function () {
                 usingFinishedBusyPhase(person, item);
             }, game.AnimalTendingDelay);
@@ -1342,7 +1371,7 @@ function usingFinishedBusyPhase(person, item) {
     personFree(person);
 }
 function personFree(person) {
-    log("".concat(person.name, " ").concat(person.avatar, " is now free"));
+    log(`${person.name} ${person.avatar} is now free`);
     updatePossible();
     tryInitiate(person);
 }
@@ -1352,14 +1381,14 @@ function tryInitiate(person) {
         person.summary = "🧠";
         //How many elevenths of an 18 second delay, do we have to wait before polling the board?
         //with self starter level 1, we wait ten/elevenths of 18 seconds... i.e. 16.4 seconds.
-        var delay = (person.initiativeDelay / 11) *
+        let delay = (person.initiativeDelay / 11) *
             (11 - Math.min(10, person.initiativeLevel));
         // if they have a dog, we wait only half that time!
         if (personHas(person, ItemCode.dog))
             delay = delay / 2;
-        log("Will check board in ".concat(delay));
-        var triggerTime_1 = new Date();
-        person.triggerTime = triggerTime_1;
+        log(`Will check board in ${delay}`);
+        let triggerTime = new Date();
+        person.triggerTime = triggerTime;
         if (game.SelectedDoer == "p" + person.id) {
             //can't self start while selected... try to try again in a little bit...
             setTimeout(function () {
@@ -1368,7 +1397,7 @@ function tryInitiate(person) {
         }
         else {
             setTimeout(function () {
-                initiate(person, triggerTime_1);
+                initiate(person, triggerTime);
             }, delay);
         }
     }
@@ -1409,19 +1438,17 @@ function initiate(person, triggerTime) {
     log("Self starter is awake...");
     log(person.name + " " + person.avatar + " is busy? " + person.busy);
     if (!person.busy) {
-        log("".concat(person.name, " ").concat(person.avatar, " is checking the board now...."));
-        var columns = [];
+        log(`${person.name} ${person.avatar} is checking the board now....`);
+        let columns = [];
         if (person.buyBotLevel > 0) {
             // consider sending the bot off to buy a project lead...
             updateColumnCount;
-            var baPoints = 0;
-            var devPoints = 0;
-            for (var _i = 0, _a = $("#ba .inner .story .points"); _i < _a.length; _i++) {
-                var s = _a[_i];
+            let baPoints = 0;
+            let devPoints = 0;
+            for (let s of $("#ba .inner .story .points")) {
                 baPoints += Number(s.innerText);
             }
-            for (var _b = 0, _c = $("#dev .inner .story .points"); _b < _c.length; _b++) {
-                var s = _c[_b];
+            for (let s of $("#dev .inner .story .points")) {
                 //s.innerText;
                 devPoints += Number(s.innerText);
             }
@@ -1430,7 +1457,7 @@ function initiate(person, triggerTime) {
                 //hmmm, ba column isn't full...
                 // and dev column isn't full...
                 if (game.Money > game.LeadPrice) {
-                    var price = game.LeadPrice;
+                    let price = game.LeadPrice;
                     getNewLead();
                     drawMessage("⭐Buybot 🤖 just bought a new project for 💲" + price + "⭐");
                 }
@@ -1447,14 +1474,13 @@ function initiate(person, triggerTime) {
             columns.push("ba");
         }
         if (columns.length == 0)
-            log("".concat(person.name, " ").concat(person.avatar, " has no skills worth a damn, apparently!"));
+            log(`${person.name} ${person.avatar} has no skills worth a damn, apparently!`);
         // check each column in the order of the array columns.
-        for (var _d = 0, columns_1 = columns; _d < columns_1.length; _d++) {
-            var column = columns_1[_d];
-            var nextCards = $("#".concat(column, " .inner .story.receiver:not(.busy)"));
+        for (let column of columns) {
+            let nextCards = $(`#${column} .inner .story.receiver:not(.busy)`);
             if (nextCards.length > 0) {
-                var nextCardId = nextCards[0].id;
-                log("".concat(person.name, " ").concat(person.avatar, " is doing ").concat(game.Stories[nextCardId].summary));
+                let nextCardId = nextCards[0].id;
+                log(`${person.name} ${person.avatar} is doing ${game.Stories[nextCardId].summary}`);
                 doIt("p" + person.id, nextCardId);
                 break;
             }
@@ -1489,9 +1515,9 @@ function usingFinished(person, item) {
     drawPerson("p" + person.id, game.People);
 }
 function doIt(doId, receiverId) {
-    var story = game.Stories[receiverId];
+    let story = game.Stories[receiverId];
     if (story == undefined) {
-        var item = game.Items[receiverId];
+        let item = game.Items[receiverId];
         if (item == undefined) {
             log("Cannot work out what the receiver is!");
             return;
@@ -1499,7 +1525,7 @@ function doIt(doId, receiverId) {
         useIt(doId, item);
         return;
     }
-    var person = game.People[doId];
+    let person = game.People[doId];
     story.busy = true;
     story.icon = person.avatar;
     story.person = doId;
@@ -1508,7 +1534,7 @@ function doIt(doId, receiverId) {
     drawMessage(person.name + " is " + person.summary);
     drawPerson(doId, game.People);
     drawStory(receiverId, game.Stories, story.reworkLevel > 0);
-    var duration = getDuration(person, story);
+    let duration = getDuration(person, story);
     log("Duration: of " +
         story.summary +
         " " +
@@ -1521,16 +1547,16 @@ function doIt(doId, receiverId) {
 }
 function getBuginess(person, skill) {
     // see also function canFindBug
-    var efficiency = getEfficiency(person, skill);
+    let efficiency = getEfficiency(person, skill);
     // efficiency is from 0.3 to 0.999
-    var result = 1 - (0.57 + (efficiency * 3) / 7);
+    let result = 1 - (0.57 + (efficiency * 3) / 7);
     // efficiency = 0.3 gives buginess of 0.3
     // efficiency = 0.999 gives buginess of 0.005
     return result;
 }
 function getEfficiency(person, skill) {
     log("skill:" + skill);
-    var level = 0;
+    let level = 0;
     if (skill == "dev0")
         skill = "dev";
     if (!person.skills[skill])
@@ -1594,7 +1620,7 @@ function getEfficiency(person, skill) {
 }
 // how long will this task take this person?
 function getDuration(person, story) {
-    var duration = story.points *
+    let duration = story.points *
         avgDuration *
         (1.0 / getEfficiency(person, story.skillNeeded)) *
         getTaskFactor(story.skillNeeded);
@@ -1612,7 +1638,7 @@ function getDuration(person, story) {
     return duration;
 }
 function personHas(person, code) {
-    return (Object.keys(person.has).filter(function (k) { return person.has[k].code == code; }).length > 0);
+    return (Object.keys(person.has).filter((k) => person.has[k].code == code).length > 0);
 }
 function getSummary(story) {
     return getTaskVerb(story.skillNeeded) + " '" + story.summary + "'…";
@@ -1644,9 +1670,9 @@ function getTaskFactor(skill) {
     }
 }
 function done(receiveId) {
-    var story = game.Stories[receiveId];
+    let story = game.Stories[receiveId];
     story.busy = false;
-    var person = game.People[story.person];
+    let person = game.People[story.person];
     person.busy = false;
     person.XP += 1;
     incrementXP(1);
@@ -1657,7 +1683,7 @@ function done(receiveId) {
         story.logo +
         ".");
     $id("p" + game.People[story.person].id).classList.remove("busy");
-    var skillNeeded = story.skillNeeded;
+    let skillNeeded = story.skillNeeded;
     switch (skillNeeded) {
         case "ba":
             //okay -- we've done the ba work on it.
@@ -1687,8 +1713,8 @@ function done(receiveId) {
 function doneBa(storyId) {
     //okay -- we've done the ba work on it.
     //now we add a bunch of cards to the backlog.
-    var oldStory = game.Stories[storyId];
-    var person = game.People[oldStory.person];
+    let oldStory = game.Stories[storyId];
+    let person = game.People[oldStory.person];
     if (oldStory.status == "story") {
         oldStory.person = null;
         oldStory.skillNeeded = "dev"; //it goes into backlog, with bug fixed.
@@ -1705,20 +1731,19 @@ function doneBa(storyId) {
     }
     oldStory.status = "done";
     game.Projects[storyId] = new Project(oldStory);
-    var newCards = ElaborateProject(oldStory, person);
+    let newCards = ElaborateProject(oldStory, person);
     person.busy = false;
     person.summary = "💤";
     drawPerson("p" + person.id, game.People);
     // The original lead is removed from the board.
     removeStory(storyId);
     // The new stories are added (to the bottom of the 'backlog' column)
-    for (var _i = 0, newCards_1 = newCards; _i < newCards_1.length; _i++) {
-        var cc = newCards_1[_i];
+    for (const cc of newCards) {
         drawStory("r" + cc.id, game.Stories, false);
     }
 }
 function determineIfAddingSkillBug(person, story, skill) {
-    var skillPointBugLikelihood = 100.0 * getBuginess(person, skill);
+    let skillPointBugLikelihood = 100.0 * getBuginess(person, skill);
     if (story.reworkLevel > 0) {
         // an item being reworked is quicker to work on (handled elsewhere), and has MUCH less chance of new bugs being introduced.
         skillPointBugLikelihood =
@@ -1729,8 +1754,8 @@ function determineIfAddingSkillBug(person, story, skill) {
         log("Lower likelihood of " + skill + " bugs when you have that 😸!");
         skillPointBugLikelihood = skillPointBugLikelihood / 2;
     }
-    log("A ".concat(skill, " bug is ").concat(Math.floor(skillPointBugLikelihood), "% likely on each point of this ").concat(story.points, " point card, rework: ").concat(story.reworkLevel, " "));
-    for (var i = 0; i < story.points; i++) {
+    log(`A ${skill} bug is ${Math.floor(skillPointBugLikelihood)}% likely on each point of this ${story.points} point card, rework: ${story.reworkLevel} `);
+    for (let i = 0; i < story.points; i++) {
         if (Math.floor(Math.random() * 100) < skillPointBugLikelihood) {
             return true;
         }
@@ -1738,7 +1763,7 @@ function determineIfAddingSkillBug(person, story, skill) {
     return false;
 }
 function ElaborateProject(project, person) {
-    var numCards = Math.floor(project.points / 3) + 1;
+    let numCards = Math.floor(project.points / 3) + 1;
     log("Lead: " +
         project.summary +
         " " +
@@ -1746,11 +1771,11 @@ function ElaborateProject(project, person) {
         " has been analyzed. " +
         numCards +
         " stories are being created.");
-    var remainingPointsToAllocate = project.points;
-    var newCards = [];
+    let remainingPointsToAllocate = project.points;
+    let newCards = [];
     // Deal out starting cards worth 1 point each.
-    for (var i = 0; i < numCards; i++) {
-        var newCard = new Story("story", "dev", getTask(), project);
+    for (let i = 0; i < numCards; i++) {
+        let newCard = new Story("story", "dev", getTask(), project);
         newCard.points = 1; // points are corrected in next section.
         game.Stories["r" + newCard.id] = newCard;
         newCards.push(newCard);
@@ -1761,14 +1786,13 @@ function ElaborateProject(project, person) {
     remainingPointsToAllocate -= numCards;
     //randomly allocate remaining points to card.
     while (remainingPointsToAllocate > 0) {
-        var card = randomItem(newCards); //draw a card from the deck
+        let card = randomItem(newCards); //draw a card from the deck
         card.points += 1;
         remainingPointsToAllocate--;
     }
-    for (var _i = 0, _a = game.Projects["r" + project.id].stories; _i < _a.length; _i++) {
-        var cardId = _a[_i];
-        var hasSpecBug = false;
-        var card = game.Stories[cardId];
+    for (let cardId of game.Projects["r" + project.id].stories) {
+        let hasSpecBug = false;
+        let card = game.Stories[cardId];
         //chance of adding a bug relates to effectiveness of ba, and size of story. (and whether or not they have... a cat)
         if (determineIfAddingSkillBug(person, card, "ba")) {
             hasSpecBug = true;
@@ -1781,17 +1805,17 @@ function ElaborateProject(project, person) {
 function doneDev(storyId) {
     //okay -- it's done being in the backlog
     //either add it to dev -- or send it back to be clarified (if you find a spec bug)
-    var person = game.People[game.Stories[storyId].person];
-    var story = game.Stories[storyId];
+    let person = game.People[game.Stories[storyId].person];
+    let story = game.Stories[storyId];
     // no spec bugs can be found until level 3.
     if (game.Level > 2 && story.hasSpecBug) {
-        var percentChanceOfFindingSpecBug = 100.0 * canFindBug(person, "dev");
+        let percentChanceOfFindingSpecBug = 100.0 * canFindBug(person, "dev");
         log("Story " +
             story.summary +
             " has a spec bug 💥, there is a " +
             Math.floor(percentChanceOfFindingSpecBug) +
             "% chance of the developer finding it.");
-        var foundSpecBug = Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug;
+        let foundSpecBug = Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug;
         if (foundSpecBug) {
             person.busy = false;
             person.summary = "💤";
@@ -1817,13 +1841,13 @@ function doneDev(storyId) {
 function doneDev0(storyId) {
     //okay -- development is done
     //Add it to test
-    var story = game.Stories[storyId];
-    var person = game.People[story.person];
+    let story = game.Stories[storyId];
+    let person = game.People[story.person];
     //chance of adding a bug relates to effectiveness of ba, and size of story. (and whether or not they have... a cat)
     if (determineIfAddingSkillBug(person, story, "dev")) {
         story.hasBug = true;
         // Note the bug may or may not be found later. If tester doesn't find it, the customer *will* find it.
-        log("A bug \uD83D\uDC1B was added to ".concat(story.summary));
+        log(`A bug 🐛 was added to ${story.summary}`);
     }
     removeStory(storyId);
     story.skillNeeded = "test";
@@ -1838,21 +1862,21 @@ function doneDev0(storyId) {
 function doneTest(storyId) {
     //okay -- test is done
     removeStory(storyId);
-    var story = game.Stories[storyId];
-    var person = game.People[story.person];
+    let story = game.Stories[storyId];
+    let person = game.People[story.person];
     person.busy = false;
     person.summary = "💤";
     drawPerson("p" + person.id, game.People);
-    var tester = game.People[story.person];
+    let tester = game.People[story.person];
     //no bugs can be found until level 2.
     if (game.Level > 1 && story.hasBug) {
-        var percentChanceOfFindingBug = 100.0 * canFindBug(person, "test");
+        let percentChanceOfFindingBug = 100.0 * canFindBug(person, "test");
         log("Story " +
             story.summary +
             " has a bug, there is a " +
             Math.floor(percentChanceOfFindingBug) +
             "% chance of finding it while testing.");
-        var foundBug = Math.floor(Math.random() * 100) < percentChanceOfFindingBug;
+        let foundBug = Math.floor(Math.random() * 100) < percentChanceOfFindingBug;
         if (foundBug) {
             drawMessage(tester.name + " found a bug 🐛 in story '" + story.summary + "'");
             story.person = null;
@@ -1867,13 +1891,13 @@ function doneTest(storyId) {
     }
     // no spec bugs can be found until level 3.
     if (game.Level > 2 && story.hasSpecBug) {
-        var percentChanceOfFindingSpecBug = 100.0 * canFindBug(tester, "test");
+        let percentChanceOfFindingSpecBug = 100.0 * canFindBug(tester, "test");
         log("Story: " +
             story.summary +
             " has a spec bug 💥, there is a " +
             Math.floor(percentChanceOfFindingSpecBug) +
             "% chance of finding it while testing.");
-        var foundSpecBug = Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug;
+        let foundSpecBug = Math.floor(Math.random() * 100) < percentChanceOfFindingSpecBug;
         if (foundSpecBug) {
             drawMessage(tester.name + " found a spec bug 💥 in story '" + story.summary + "'");
             story.person = null;
@@ -1901,14 +1925,14 @@ function canFindBug(person, skill) {
     // see also `function getBuginess`
     // at level 1 -- efficiency is 0.3
     // at level 10 -- efficiency is 0.99
-    var efficiency = getEfficiency(person, skill);
+    let efficiency = getEfficiency(person, skill);
     // that's good enough, we'll just use the efficiency directly.
     log("Efficiency of " + person.name + " at " + skill + " is " + efficiency);
-    var chanceOfFindingBug = efficiency;
+    let chanceOfFindingBug = efficiency;
     return chanceOfFindingBug;
 }
 function bankStory(storyId) {
-    var story = game.Stories[storyId];
+    let story = game.Stories[storyId];
     // If story has a bug... customer will definitely find it! (it got past testing!)
     //and it will go all the way back to the ba column, even if it wasn't a spec bug!
     // no bugs can be found until level 2, no spec bugs until level 3
@@ -1916,7 +1940,7 @@ function bankStory(storyId) {
         (game.Level > 2 && story.hasSpecBug)) {
         //remove from board
         removeStory(storyId);
-        drawMessage("Oops! The customer found a bug \uD83D\uDE21 in story '".concat(story.summary, "'"));
+        drawMessage(`Oops! The customer found a bug 😡 in story '${story.summary}'`);
         story.customerFoundBug = true;
         //HALVE the amount this card is worth! (hope the customer doesn't find ANOTHER bug in this one......)
         story.pointPrice = story.pointPrice / 2;
@@ -1927,45 +1951,45 @@ function bankStory(storyId) {
         drawStory(storyId, game.Stories, true); //at the top.
         return;
     }
-    var price = Math.floor(story.points * story.pointPrice);
-    var message2 = " for '".concat(story.summary, "'");
+    let price = Math.floor(story.points * story.pointPrice);
+    let message2 = ` for '${story.summary}'`;
     incrementXP(5);
     if (story.customerFoundBug) {
         //(it was halved when it was first found)
         message2 += " (reduced as customer found that bug)";
     }
-    var projectId = game.Stories[storyId].projectId;
+    let projectId = game.Stories[storyId].projectId;
     //remove the story from the project it belongs to.
-    var project = game.Projects[projectId];
-    var bonus = 0;
+    let project = game.Projects[projectId];
+    let bonus = 0;
     if (project.stories.includes(storyId)) {
         project.stories.splice(project.stories.indexOf(storyId), 1);
         //if there are no stories remaining then a project completion bonus is paid.
         if (project.stories.length == 0) {
             bonus = Math.ceil((project.lead.points * project.lead.pointPrice) / 2);
             if (!game.TimeBarFeatureFlag || project.lead.maxAge == -1) {
-                message2 += " plus \uD83D\uDCB2".concat(bonus, " for completing ").concat(project.lead.summary, " ").concat(project.lead.logo);
+                message2 += ` plus 💲${bonus} for completing ${project.lead.summary} ${project.lead.logo}`;
                 incrementXP(10);
             }
             else {
                 //timeBarFeatureFlag ...
-                var tenths = getTenthsOfTimeElapsed(story);
+                let tenths = getTenthsOfTimeElapsed(story);
                 if (tenths < 10) {
                     bonus = Math.ceil(bonus * ((17 - tenths) * 0.1));
-                    message2 += " plus \uD83D\uDCB2".concat(bonus, " for early completion of ").concat(project.lead.summary, " ").concat(project.lead.logo, "\u2755");
+                    message2 += ` plus 💲${bonus} for early completion of ${project.lead.summary} ${project.lead.logo}❕`;
                     incrementXP(10);
                 }
                 else if (timePenaltyFeatureFlag && tenths >= 10) {
                     bonus = Math.ceil(bonus * -0.5);
-                    message2 += "...MINUS penalty \uD83D\uDE2D of \uD83D\uDCB2".concat(Math.abs(bonus), "\u2757 for late completion of ").concat(project.lead.summary, " ").concat(project.lead.logo, "\u2755");
+                    message2 += `...MINUS penalty 😭 of 💲${Math.abs(bonus)}❗ for late completion of ${project.lead.summary} ${project.lead.logo}❕`;
                     incrementXP(2);
                 }
                 else {
-                    message2 += " and you completed ".concat(project.lead.summary, " ").concat(project.lead.logo, ".");
+                    message2 += ` and you completed ${project.lead.summary} ${project.lead.logo}.`;
                     incrementXP(5);
                 }
             }
-            for (var s in project.stories) {
+            for (const s in project.stories) {
                 delete game.Stories[s];
             }
             delete game.Projects[projectId];
@@ -1974,15 +1998,15 @@ function bankStory(storyId) {
     incrementPoints(story.points);
     incrementMoney(price + bonus); // + timeBonus);
     drawMoney(game.Money);
-    drawMessage("Earned \uD83D\uDCB2".concat(price).concat(message2));
+    drawMessage(`Earned 💲${price}${message2}`);
     removeStory(storyId);
 }
 /* utility functions */
 function htmlToElement(html) {
-    var template = document.createElement("template");
+    const template = document.createElement("template");
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
-    var first = template.content.firstElementChild;
+    const first = template.content.firstElementChild;
     if (!first)
         throw new Error("htmlToElement: no element created");
     return first;
@@ -1996,9 +2020,9 @@ function $xid(id) {
 // Return an element that must exist. Throws if not found to help silence
 // widespread non-null assertions where the element is required.
 function $id(id) {
-    var el = document.getElementById(id);
+    const el = document.getElementById(id);
     if (!el)
-        throw new Error("Required element #".concat(id, " not found"));
+        throw new Error(`Required element #${id} not found`);
     return el;
 }
 function isEmpty(obj) {
@@ -2006,29 +2030,26 @@ function isEmpty(obj) {
 }
 //add the class of className to all elements that match the selector
 function addClass(selector, className) {
-    for (var _i = 0, _a = $(selector); _i < _a.length; _i++) {
-        var example = _a[_i];
+    for (const example of $(selector)) {
         example.classList.add(className);
     }
 }
 //remove the class className from all elements that match the selector
 function removeClass(selector, className) {
-    for (var _i = 0, _a = $(selector); _i < _a.length; _i++) {
-        var example = _a[_i];
+    for (const example of $(selector)) {
         example.classList.remove(className);
     }
 }
 // remove the class of className from all elements that have a class of className
 function removeAllClass(className) {
-    for (var _i = 0, _a = $("." + className); _i < _a.length; _i++) {
-        var example = _a[_i];
+    for (const example of $("." + className)) {
         example.classList.remove(className);
     }
 }
 function getParameterByName(name) {
-    var url = window.location.href;
+    let url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
+    let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
     if (!results)
         return null;
     if (!results[2])
@@ -2050,5275 +2071,10 @@ function drawHireMessage(message) {
 function randomItem(list) {
     return list[Math.floor(Math.random() * list.length)];
 }
-// names from https://introcs.cs.princeton.edu/java/data/
-var names = [
-    "Aaron",
-    "Abbie",
-    "Abbott",
-    "Abbra",
-    "Abby",
-    "Abe",
-    "Abel",
-    "Abeni",
-    "Abia",
-    "Abiba",
-    "Abie",
-    "Abigail",
-    "Abner",
-    "Abraham",
-    "Abram",
-    "Abrianna",
-    "Abrienda",
-    "Abril",
-    "Absolom",
-    "Abu",
-    "Acacia",
-    "Ace",
-    "Ada",
-    "Adah",
-    "Adair",
-    "Adalia",
-    "Adam",
-    "Adamina",
-    "Adamma",
-    "Adara",
-    "Addison",
-    "Ade",
-    "Adela",
-    "Adelaide",
-    "Adele",
-    "Adeline",
-    "Adelio",
-    "Adelle",
-    "Adem",
-    "Aden",
-    "Aderes",
-    "Adie",
-    "Adiel",
-    "Adila",
-    "Adina",
-    "Adita",
-    "Adlai",
-    "Adli",
-    "Adolfo",
-    "Adolph",
-    "Adonai",
-    "Adonia",
-    "Adora",
-    "Adrian",
-    "Adriana",
-    "Adriano",
-    "Adrienne",
-    "Ady",
-    "Aelan",
-    "Affrica",
-    "Afra",
-    "Afric",
-    "Africa",
-    "Afton",
-    "Agamemnon",
-    "Agatha",
-    "Aggie",
-    "Agnes",
-    "Ah Cy",
-    "Ahava",
-    "Ai",
-    "Aida",
-    "Aidan",
-    "Aiko",
-    "Aileen",
-    "Ailis",
-    "Ailish",
-    "Aimee",
-    "Aine",
-    "Ainsley",
-    "Aisling",
-    "Aislinn",
-    "Aizza",
-    "Aja",
-    "Ajani",
-    "Ajay",
-    "Akili",
-    "Akuji",
-    "Al",
-    "Alair",
-    "Alake",
-    "Alan",
-    "Alana",
-    "Alanna",
-    "Alastair",
-    "Alaura",
-    "Alban",
-    "Albany",
-    "Albert",
-    "Alberta",
-    "Alberto",
-    "Albin",
-    "Albina",
-    "Alda",
-    "Aldan",
-    "Alden",
-    "Aldon",
-    "Aldona",
-    "Alec",
-    "Alejandro",
-    "Alem",
-    "Alena",
-    "Aleta",
-    "Aletha",
-    "Alethea",
-    "Aletta",
-    "Alex",
-    "Alexa",
-    "Alexander",
-    "Alexandra",
-    "Alexandria",
-    "Alexia",
-    "Alexis",
-    "Alfonso",
-    "Alfred",
-    "Algeron",
-    "Ali",
-    "Alia",
-    "Alice",
-    "Alicia",
-    "Alijah",
-    "Alika",
-    "Alima",
-    "Alina",
-    "Alisha",
-    "Alison",
-    "Alissa",
-    "Alize",
-    "Alka",
-    "Allegra",
-    "Allen",
-    "Allene",
-    "Allie",
-    "Allison",
-    "Allyson",
-    "Alma",
-    "Almeda",
-    "Alohilani",
-    "Alphonse",
-    "Alsatia",
-    "Althea",
-    "Alva",
-    "Alvin",
-    "Alyn",
-    "Alyson",
-    "Alyssa",
-    "Amadeus",
-    "Amador",
-    "Amalia",
-    "Amalie",
-    "Aman",
-    "Amana",
-    "Amanda",
-    "Amandla",
-    "Amara",
-    "Amaranta",
-    "Amarante",
-    "Amaranth",
-    "Amaris",
-    "Amaryllis",
-    "Amaya",
-    "Amber",
-    "Ambrose",
-    "Amelia",
-    "Amena",
-    "Ami",
-    "Amiel",
-    "Amina",
-    "Amir",
-    "Amiri",
-    "Amity",
-    "Amma",
-    "Amorina",
-    "Amos",
-    "Amy",
-    "An",
-    "Ana",
-    "Anais",
-    "Analiese",
-    "Analise",
-    "Anana",
-    "Anando",
-    "Anastasia",
-    "Anatola",
-    "Anatole",
-    "Ande",
-    "Andra",
-    "Andralyn",
-    "Andre",
-    "Andrea",
-    "Andreas",
-    "Andres",
-    "Andrew",
-    "Andy",
-    "Anemone",
-    "Anevay",
-    "Angel",
-    "Angela",
-    "Angelica",
-    "Angelina",
-    "Angelo",
-    "Angie",
-    "Angus",
-    "Ani",
-    "Anika",
-    "Anila",
-    "Anisa",
-    "Anita",
-    "Anitra",
-    "Anja",
-    "Anlon",
-    "Ann",
-    "Anna",
-    "Annalise",
-    "Annamika",
-    "Anne",
-    "Anneke",
-    "Annette",
-    "Annice",
-    "Annick",
-    "Annis",
-    "Annissa",
-    "Annora",
-    "Anthea",
-    "Anthony",
-    "Antionette",
-    "Antoinette",
-    "Antonia",
-    "Antonie",
-    "Antony",
-    "Anwar",
-    "Anya",
-    "Aoko",
-    "Aolani",
-    "Aphrodite",
-    "Apollo",
-    "Appollo",
-    "Apria",
-    "April",
-    "Arabela",
-    "Arabella",
-    "Aram",
-    "Aran",
-    "Archibald",
-    "Archie",
-    "Aren",
-    "Aretha",
-    "Argus",
-    "Ari",
-    "Aria",
-    "Ariana",
-    "Ariel",
-    "Ariella",
-    "Arielle",
-    "Arien",
-    "Arissa",
-    "Arista",
-    "Ariza",
-    "Arlen",
-    "Arlene",
-    "Arlo",
-    "Arlynda",
-    "Armand",
-    "Armande",
-    "Armando",
-    "Armina",
-    "Arnaud",
-    "Arne",
-    "Arnie",
-    "Arnold",
-    "Aron",
-    "Art",
-    "Artemis",
-    "Arthur",
-    "Artie",
-    "Arty",
-    "Arvid",
-    "Arvin",
-    "Asa",
-    "Asabi",
-    "Asalie",
-    "Asasia",
-    "Ash",
-    "Asha",
-    "Ashby",
-    "Ashley",
-    "Ashling",
-    "Ashlyn",
-    "Ashton",
-    "Ashtyn",
-    "Asis",
-    "Asli",
-    "Asnee",
-    "Asta",
-    "Asthore",
-    "Astin",
-    "Astra",
-    "Astrid",
-    "Atalo",
-    "Athalia",
-    "Athena",
-    "Atira",
-    "Auberta",
-    "Aubrey",
-    "Aubrianna",
-    "Audi",
-    "Audra",
-    "Audrey",
-    "August",
-    "Augustin",
-    "Augustus",
-    "Aulii",
-    "Aure",
-    "Aurelia",
-    "Aurora",
-    "Aurorette",
-    "Austin",
-    "Autumn",
-    "Ava",
-    "Avalon",
-    "Avel",
-    "Aveline",
-    "Avery",
-    "Avi",
-    "Avis",
-    "Aviv",
-    "Aviva",
-    "Avongara",
-    "Axel",
-    "Axelle",
-    "Aya",
-    "Ayame",
-    "Ayanna",
-    "Ayla",
-    "Ayoka",
-    "Aysha",
-    "Azana",
-    "Aziza",
-    "Azize",
-    "Azra",
-    "Azriel",
-    "Azuka",
-    "Azura",
-    "Baba",
-    "Babette",
-    "Bahari",
-    "Bailey",
-    "Baird",
-    "Bairn",
-    "Bakula",
-    "Ballard",
-    "Balthasar",
-    "Bambi",
-    "Banji",
-    "Barake",
-    "Barb",
-    "Barbara",
-    "Barbie",
-    "Barclay",
-    "Barke",
-    "Barnabas",
-    "Barnard",
-    "Barney",
-    "Barny",
-    "Barr",
-    "Barran",
-    "Barretta",
-    "Barry",
-    "Bart",
-    "Barth",
-    "Bartholemew",
-    "Barton",
-    "Baruch",
-    "Bary",
-    "Bash",
-    "Basil",
-    "Bast",
-    "Bastien",
-    "Baxter",
-    "Bayard",
-    "Bayen",
-    "Baylee",
-    "Bayo",
-    "Bea",
-    "Beata",
-    "Beate",
-    "Beatrice",
-    "Beatriz",
-    "Beau",
-    "Beauregard",
-    "Bebe",
-    "Bebhin",
-    "Becca",
-    "Beck",
-    "Becka",
-    "Becky",
-    "Bel",
-    "Bela",
-    "Belay",
-    "Belden",
-    "Belinda",
-    "Belita",
-    "Bell",
-    "Bella",
-    "Belle",
-    "Bellini",
-    "Ben",
-    "Bena",
-    "Benard",
-    "Benedict",
-    "Benen",
-    "Benita",
-    "Benjamin",
-    "Benjy",
-    "Bennett",
-    "Benny",
-    "Benson",
-    "Berdine",
-    "Berke",
-    "Bern",
-    "Bernadette",
-    "Bernadine",
-    "Bernard",
-    "Berne",
-    "Bernice",
-    "Bernie",
-    "Berny",
-    "Bert",
-    "Bertha",
-    "Bertille",
-    "Beryl",
-    "Bess",
-    "Bessie",
-    "Beth",
-    "Bethan",
-    "Bethany",
-    "Betsy",
-    "Bette",
-    "Betty",
-    "Beulah",
-    "Bevan",
-    "Beverly",
-    "Bevis",
-    "Beyla",
-    "Biana",
-    "Bianca",
-    "Bibiane",
-    "Bidelia",
-    "Bikita",
-    "Bilen",
-    "Bill",
-    "Billy",
-    "Bin",
-    "Bina",
-    "Bing",
-    "Bingham",
-    "Birch",
-    "Bisbee",
-    "Bishop",
-    "Biton",
-    "Bjorn",
-    "Blade",
-    "Blaine",
-    "Blair",
-    "Blake",
-    "Blanche",
-    "Blaze",
-    "Blenda",
-    "Blinda",
-    "Bliss",
-    "Blithe",
-    "Blodwyn",
-    "Blossom",
-    "Blum",
-    "Bluma",
-    "Blythe",
-    "Bo",
-    "Boaz",
-    "Bob",
-    "Bona",
-    "Bonaventure",
-    "Bond",
-    "Bonita",
-    "Bonnie",
-    "Bono",
-    "Boone",
-    "Boris",
-    "Bowen",
-    "Bowie",
-    "Boyd",
-    "Bracha",
-    "Brad",
-    "Braden",
-    "Bradford",
-    "Bradley",
-    "Braeden",
-    "Braima",
-    "Bran",
-    "Brand",
-    "Brandee",
-    "Brandie",
-    "Brandon",
-    "Brant",
-    "Braxton",
-    "Brayden",
-    "Brazil",
-    "Breanna",
-    "Breckin",
-    "Brede",
-    "Bree",
-    "Brein",
-    "Brend",
-    "Brenda",
-    "Brendan",
-    "Brenna",
-    "Brennan",
-    "Brent",
-    "Brett",
-    "Brewster",
-    "Brian",
-    "Briana",
-    "Brianna",
-    "Brianne",
-    "Briar",
-    "Brice",
-    "Brick",
-    "Bridget",
-    "Bridgit",
-    "Brielle",
-    "Brier",
-    "Brigham",
-    "Brighton",
-    "Brigit",
-    "Brigitte",
-    "Brilane",
-    "Brilliant",
-    "Brina",
-    "Brinly",
-    "Brit",
-    "Brita",
-    "Britain",
-    "Britannia",
-    "Britany",
-    "Brittania",
-    "Brittany",
-    "Brittnee",
-    "Brock",
-    "Brody",
-    "Brone",
-    "Bronson",
-    "Bronwen",
-    "Brooke",
-    "Brooklyn",
-    "Brooks",
-    "Bruce",
-    "Bruno",
-    "Bryan",
-    "Bryanne",
-    "Bryant",
-    "Bryce",
-    "Brygid",
-    "Brynn",
-    "Bryony",
-    "Bryton",
-    "Buck",
-    "Bud",
-    "Buddy",
-    "Buffy",
-    "Bunny",
-    "Burdette",
-    "Burke",
-    "Burt",
-    "Burton",
-    "Butterfly",
-    "Buzz",
-    "Byrd",
-    "Byron",
-    "Cade",
-    "Cadee",
-    "Cadence",
-    "Cady",
-    "Cael",
-    "Caelan",
-    "Caesar",
-    "Cai",
-    "Cailean",
-    "Caimile",
-    "Cain",
-    "Caine",
-    "Cairbre",
-    "Cairo",
-    "Cais",
-    "Caitlin",
-    "Caitlyn",
-    "Cal",
-    "Cala",
-    "Calais",
-    "Calandra",
-    "Calantha",
-    "Calder",
-    "Cale",
-    "Caleb",
-    "Caley",
-    "Calhoun",
-    "Calix",
-    "Calixte",
-    "Calla",
-    "Callia",
-    "Calliope",
-    "Callista",
-    "Callum",
-    "Calvin",
-    "Calvine",
-    "Cam",
-    "Camdyn",
-    "Cameron",
-    "Camilla",
-    "Camille",
-    "Camlin",
-    "Cana",
-    "Candace",
-    "Candice",
-    "Candida",
-    "Candide",
-    "Candie",
-    "Candy",
-    "Cara",
-    "Caralee",
-    "Caresse",
-    "Carha",
-    "Carina",
-    "Carl",
-    "Carla",
-    "Carleton",
-    "Carlisle",
-    "Carlos",
-    "Carlota",
-    "Carlotta",
-    "Carlton",
-    "Carly",
-    "Carmel",
-    "Carmela",
-    "Carmelita",
-    "Carmen",
-    "Carmine",
-    "Carol",
-    "Carolena",
-    "Caroline",
-    "Carolyn",
-    "Caron",
-    "Carr",
-    "Carrick",
-    "Carrie",
-    "Carrieann",
-    "Carson",
-    "Carsyn",
-    "Carter",
-    "Carver",
-    "Cary",
-    "Casey",
-    "Cashlin",
-    "Casimir",
-    "Casondra",
-    "Caspar",
-    "Casper",
-    "Cassandra",
-    "Cassia",
-    "Cassidy",
-    "Cassius",
-    "Catherine",
-    "Cathy",
-    "Catrin",
-    "Cayla",
-    "Ceana",
-    "Cearo",
-    "Cece",
-    "Cecil",
-    "Cecile",
-    "Cecilia",
-    "Cecily",
-    "Cedric",
-    "Celeste",
-    "Celestyn",
-    "Celia",
-    "Celina",
-    "Celine",
-    "Cerise",
-    "Cesar",
-    "Chad",
-    "Chaela",
-    "Chaeli",
-    "Chailyn",
-    "Chaim",
-    "Chalsie",
-    "Chana",
-    "Chance",
-    "Chancellor",
-    "Chandler",
-    "Chandra",
-    "Channon",
-    "Chantal",
-    "Chantel",
-    "Charis",
-    "Charisse",
-    "Charity",
-    "Charla",
-    "Charlee",
-    "Charleigh",
-    "Charlene",
-    "Charles",
-    "Charlot",
-    "Charlotte",
-    "Charmaine",
-    "Charo",
-    "Chars",
-    "Chas",
-    "Chase",
-    "Chastity",
-    "Chauncey",
-    "Chava",
-    "Chavi",
-    "Chaylse",
-    "Cheche",
-    "Chelsa",
-    "Chelsea",
-    "Chelsi",
-    "Chelsia",
-    "Chen",
-    "Cheney",
-    "Chenoa",
-    "Cher",
-    "Cheri",
-    "Cherie",
-    "Cherlin",
-    "Cherry",
-    "Cheryl",
-    "Chesna",
-    "Chester",
-    "Chet",
-    "Cheyenne",
-    "Cheyne",
-    "Chezarina",
-    "Chhaya",
-    "Chick",
-    "Chico",
-    "Chill",
-    "Chilton",
-    "Chimelu",
-    "China",
-    "Chip",
-    "Chipo",
-    "Chloe",
-    "Chloris",
-    "Chris",
-    "Chrissy",
-    "Christa",
-    "Christian",
-    "Christiana",
-    "Christina",
-    "Christine",
-    "Christopher",
-    "Christy",
-    "Chuck",
-    "Chumani",
-    "Chun",
-    "Chyna",
-    "Chynna",
-    "Cian",
-    "Cianna",
-    "Ciara",
-    "Cicely",
-    "Cicero",
-    "Cicily",
-    "Cid",
-    "Ciel",
-    "Cindy",
-    "Cira",
-    "Cirila",
-    "Ciro",
-    "Cirocco",
-    "Cissy",
-    "Claire",
-    "Clara",
-    "Claral",
-    "Clare",
-    "Clarence",
-    "Clarissa",
-    "Clark",
-    "Clarke",
-    "Claude",
-    "Claudia",
-    "Clay",
-    "Clayland",
-    "Clayton",
-    "Clea",
-    "Cleantha",
-    "Cleatus",
-    "Cleavant",
-    "Cleave",
-    "Cleavon",
-    "Clem",
-    "Clemens",
-    "Clement",
-    "Clementine",
-    "Cleo",
-    "Cleta",
-    "Cleveland",
-    "Cliff",
-    "Clifford",
-    "Clifton",
-    "Clint",
-    "Clinton",
-    "Clio",
-    "Clitus",
-    "Clive",
-    "Clodia",
-    "Cloris",
-    "Clove",
-    "Clover",
-    "Cocheta",
-    "Cody",
-    "Cole",
-    "Colette",
-    "Coligny",
-    "Colin",
-    "Colista",
-    "Colleen",
-    "Collice",
-    "Collin",
-    "Colm",
-    "Colman",
-    "Colton",
-    "Columbia",
-    "Comfort",
-    "Conan",
-    "Conlan",
-    "Conley",
-    "Conner",
-    "Connie",
-    "Connley",
-    "Connor",
-    "Conor",
-    "Conrad",
-    "Constance",
-    "Constantine",
-    "Consuela",
-    "Consuelo",
-    "Content",
-    "Conway",
-    "Conyers",
-    "Cooper",
-    "Cora",
-    "Coral",
-    "Coralia",
-    "Coralie",
-    "Corbin",
-    "Corby",
-    "Cordelia",
-    "Corentine",
-    "Corey",
-    "Corin",
-    "Corina",
-    "Corine",
-    "Corinna",
-    "Corinne",
-    "Corliss",
-    "Cornelia",
-    "Cornelius",
-    "Cornell",
-    "Cort",
-    "Cory",
-    "Cosette",
-    "Cosima",
-    "Cosmo",
-    "Coty",
-    "Courtney",
-    "Coy",
-    "Coye",
-    "Craig",
-    "Creighton",
-    "Creola",
-    "Crescent",
-    "Crete",
-    "Crevan",
-    "Crispin",
-    "Cristy",
-    "Crystal",
-    "Cullen",
-    "Curry",
-    "Curt",
-    "Curtis",
-    "Cuthbert",
-    "Cutler",
-    "Cutter",
-    "Cy",
-    "Cybele",
-    "Cybil",
-    "Cybill",
-    "Cyd",
-    "Cyma",
-    "Cyndi",
-    "Cynthia",
-    "Cyrah",
-    "Cyril",
-    "Cyrus",
-    "D'lorah",
-    "Da-xia",
-    "Dacey",
-    "Dafydd",
-    "Dagan",
-    "Dagmar",
-    "Dahlia",
-    "Daisy",
-    "Dakota",
-    "Dale",
-    "Dalia",
-    "Dalila",
-    "Dalit",
-    "Dallas",
-    "Dallin",
-    "Dalton",
-    "Dalva",
-    "Damian",
-    "Damita",
-    "Damon",
-    "Dan",
-    "Dana",
-    "Danae",
-    "Dane",
-    "Dani",
-    "Danica",
-    "Daniel",
-    "Daniela",
-    "Danielle",
-    "Danika",
-    "Danil",
-    "Danniell",
-    "Danny",
-    "Dante",
-    "Danton",
-    "Danyl",
-    "Daphne",
-    "Dara",
-    "Daray",
-    "Darby",
-    "Darcy",
-    "Dard",
-    "Daria",
-    "Darian",
-    "Darin",
-    "Dario",
-    "Darla",
-    "Darlene",
-    "Darnell",
-    "Darrell",
-    "Darren",
-    "Darrin",
-    "Darrion",
-    "Darrius",
-    "Darryl",
-    "Darshan",
-    "Darwin",
-    "Daryl",
-    "Dasan",
-    "Dasha",
-    "Davan",
-    "Dave",
-    "David",
-    "Davida",
-    "Davin",
-    "Davina",
-    "Davis",
-    "Davu",
-    "Dawn",
-    "Dayton",
-    "Dea",
-    "Dean",
-    "Deandra",
-    "Deanna",
-    "Deanne",
-    "Debbie",
-    "Debby",
-    "Deborah",
-    "Debra",
-    "Deidra",
-    "Deiondre",
-    "Deirdra",
-    "Deiter",
-    "Dejah",
-    "Deka",
-    "Del",
-    "Delaine",
-    "Delaney",
-    "Delbert",
-    "Delfina",
-    "Delia",
-    "Delila",
-    "Delilah",
-    "Deliz",
-    "Della",
-    "Delores",
-    "Delphine",
-    "Delta",
-    "Delu",
-    "Dembe",
-    "Demetria",
-    "Demetrius",
-    "Demi",
-    "Demitrius",
-    "Dempster",
-    "Den'e",
-    "Dena",
-    "Denali",
-    "Denis",
-    "Denise",
-    "Denna",
-    "Dennis",
-    "Denver",
-    "Deo",
-    "Deon",
-    "Derby",
-    "Derek",
-    "Derex",
-    "Derica",
-    "Dermot",
-    "Derora",
-    "Derrick",
-    "Derron",
-    "Derry",
-    "Des",
-    "Desana",
-    "Desdemona",
-    "Desi",
-    "Desiderio",
-    "Desiree",
-    "Desmond",
-    "Dessa",
-    "Destiny",
-    "Deva",
-    "Devaki",
-    "Devi",
-    "Devin",
-    "Devon",
-    "Devorah",
-    "Devorit",
-    "Dewey",
-    "Dewitt",
-    "Dexter",
-    "Dextra",
-    "Diallo",
-    "Diana",
-    "Diane",
-    "Dianne",
-    "Diantha",
-    "Dianthe",
-    "Diata",
-    "Dick",
-    "Didier",
-    "Didrika",
-    "Diego",
-    "Dillan",
-    "Dillian",
-    "Dillon",
-    "Dina",
-    "Dinah",
-    "Dino",
-    "Dion",
-    "Dionne",
-    "Dionysius",
-    "Dionysus",
-    "Dior",
-    "Dirk",
-    "Dixie",
-    "Dixon",
-    "Dmitri",
-    "Doane",
-    "Doctor",
-    "Doda",
-    "Doi",
-    "Dolly",
-    "Dolores",
-    "Dolph",
-    "Dom",
-    "Domani",
-    "Dominic",
-    "Dominick",
-    "Dominique",
-    "Dominy",
-    "Don",
-    "Donagh",
-    "Donahi",
-    "Donal",
-    "Donald",
-    "Donat",
-    "Donelle",
-    "Donna",
-    "Donnel",
-    "Donnica",
-    "Donny",
-    "Donovan",
-    "Dora",
-    "Dorcas",
-    "Dore",
-    "Dori",
-    "Doria",
-    "Dorian",
-    "Dorie",
-    "Dorinda",
-    "Doris",
-    "Dorit",
-    "Dorothea",
-    "Dorothy",
-    "Dorset",
-    "Dorsey",
-    "Dory",
-    "Dot",
-    "Dotty",
-    "Doug",
-    "Dougal",
-    "Douglas",
-    "Douglass",
-    "Doyle",
-    "Doyt",
-    "Drake",
-    "Dreama",
-    "Drew",
-    "Dru",
-    "Duane",
-    "Duc",
-    "Dudley",
-    "Duena",
-    "Duff",
-    "Dugan",
-    "Duka",
-    "Duke",
-    "Dulce",
-    "Dulcea",
-    "Dulcina",
-    "Dulcinea",
-    "Dumi",
-    "Duncan",
-    "Dunixi",
-    "Dunja",
-    "Dunn",
-    "Dunne",
-    "Duscha",
-    "Dustin",
-    "Dusty",
-    "Dwayne",
-    "Dwight",
-    "Dyan",
-    "Dyani",
-    "Dyanne",
-    "Dylan",
-    "Dyllis",
-    "Dyre",
-    "Dysis",
-    "Eadoin",
-    "Eamon",
-    "Earl",
-    "Earlene",
-    "Earnest",
-    "Easter",
-    "Eavan",
-    "Ebony",
-    "Echo",
-    "Ed",
-    "Edalene",
-    "Edaline",
-    "Edana",
-    "Edda",
-    "Eddie",
-    "Eddy",
-    "Edeline",
-    "Eden",
-    "Edena",
-    "Edgar",
-    "Edie",
-    "Edison",
-    "Edita",
-    "Edith",
-    "Edmund",
-    "Edna",
-    "Edric",
-    "Edward",
-    "Edwardo",
-    "Edwin",
-    "Edwina",
-    "Edythe",
-    "Effie",
-    "Efrat",
-    "Efrem",
-    "Egan",
-    "Eileen",
-    "Eilis",
-    "Eitan",
-    "Ela",
-    "Elaine",
-    "Elan",
-    "Elana",
-    "Elani",
-    "Elata",
-    "Elda",
-    "Elden",
-    "Eldon",
-    "Eldora",
-    "Eleanor",
-    "Electra",
-    "Elena",
-    "Elephteria",
-    "Elgin",
-    "Eli",
-    "Elia",
-    "Elias",
-    "Elie",
-    "Elijah",
-    "Elin",
-    "Eliora",
-    "Eliot",
-    "Elise",
-    "Elisha",
-    "Elita",
-    "Eliza",
-    "Elizabeth",
-    "Eljah",
-    "Elkan",
-    "Elke",
-    "Ella",
-    "Ellard",
-    "Elle",
-    "Ellema",
-    "Ellen",
-    "Ellery",
-    "Ellie",
-    "Elliot",
-    "Elliott",
-    "Ellis",
-    "Elmo",
-    "Eloise",
-    "Elsa",
-    "Elsie",
-    "Elspeth",
-    "Elton",
-    "Elu",
-    "Elvin",
-    "Elvina",
-    "Elvira",
-    "Elvis",
-    "Ely",
-    "Elysia",
-    "Emanuel",
-    "Emanuele",
-    "Emele",
-    "Emene",
-    "Emera",
-    "Emerald",
-    "Emery",
-    "Emil",
-    "Emilia",
-    "Emilie",
-    "Emilio",
-    "Emily",
-    "Emma",
-    "Emmanuel",
-    "Emmet",
-    "Emmett",
-    "Emmly",
-    "Enid",
-    "Ennis",
-    "Enos",
-    "Enrico",
-    "Eolande",
-    "Ephraim",
-    "Epifanio",
-    "Er",
-    "Erasmus",
-    "Eri",
-    "Eric",
-    "Erica",
-    "Erik",
-    "Erika",
-    "Erimentha",
-    "Erin",
-    "Eris",
-    "Erland",
-    "Erma",
-    "Erme",
-    "Ermin",
-    "Erna",
-    "Ernest",
-    "Ernie",
-    "Erno",
-    "Eron",
-    "Eros",
-    "Errin",
-    "Errol",
-    "Erv",
-    "Ervin",
-    "Erwin",
-    "Eryk",
-    "Esben",
-    "Eshe",
-    "Esma",
-    "Esmerelda",
-    "Esteban",
-    "Estelle",
-    "Ester",
-    "Esther",
-    "Estralita",
-    "Etan",
-    "Etana",
-    "Eternity",
-    "Ethan",
-    "Ethel",
-    "Ethelda",
-    "Etta",
-    "Eudora",
-    "Eugene",
-    "Eulalia",
-    "Eulalie",
-    "Eupemia",
-    "Euphemia",
-    "Euridice",
-    "Eva",
-    "Evan",
-    "Evane",
-    "Evangeline",
-    "Evania",
-    "Eve",
-    "Evelia",
-    "Evelien",
-    "Evelyn",
-    "Everett",
-    "Evette",
-    "Evie",
-    "Evita",
-    "Evonne",
-    "Ewa",
-    "Eyal",
-    "Eydie",
-    "Ezekiel",
-    "Ezra",
-    "Fabian",
-    "Fabienne",
-    "Fabiola",
-    "Fabrizio",
-    "Fabunni",
-    "Fairfax",
-    "Fairly",
-    "Faith",
-    "Fala",
-    "Fale",
-    "Fallon",
-    "Fanchon",
-    "Farica",
-    "Faris",
-    "Farley",
-    "Farrah",
-    "Farrell",
-    "Fatima",
-    "Fausta",
-    "Faustine",
-    "Favian",
-    "Fawn",
-    "Fay",
-    "Faye",
-    "Faylinn",
-    "Fedora",
-    "Feivel",
-    "Feleti",
-    "Felicia",
-    "Felicity",
-    "Felimy",
-    "Felix",
-    "Fell",
-    "Felton",
-    "Fennella",
-    "Feoras",
-    "Ferdinand",
-    "Fergal",
-    "Fergus",
-    "Ferguson",
-    "Fern",
-    "Fernando",
-    "Ferris",
-    "Ferrol",
-    "Fiachra",
-    "Fico",
-    "Fidel",
-    "Fidelia",
-    "Fidelio",
-    "Fidella",
-    "Field",
-    "Filbert",
-    "Filia",
-    "Filipina",
-    "Fineen",
-    "Finley",
-    "Finn",
-    "Finna",
-    "Finola",
-    "Fiona",
-    "Fionan",
-    "Fionn",
-    "Fionnula",
-    "Fiorenza",
-    "Fisk",
-    "Fisseha",
-    "Flan",
-    "Flannery",
-    "Flavian",
-    "Fletcher",
-    "Fleur",
-    "Flint",
-    "Flo",
-    "Flora",
-    "Floramaria",
-    "Florence",
-    "Floria",
-    "Floriane",
-    "Florida",
-    "Florrie",
-    "Flower",
-    "Floyd",
-    "Flynn",
-    "Fola",
-    "Fonda",
-    "Fondea",
-    "Forbes",
-    "Ford",
-    "Fordon",
-    "Forrest",
-    "Forrester",
-    "Forster",
-    "Fortune",
-    "Foster",
-    "Fountain",
-    "Fox",
-    "Foy",
-    "Fraley",
-    "Fran",
-    "Frances",
-    "Francesca",
-    "Francis",
-    "Frank",
-    "Franklin",
-    "Franz",
-    "Frasier",
-    "Frayne",
-    "Fred",
-    "Freddy",
-    "Frederica",
-    "Frederick",
-    "Fredrica",
-    "Freed",
-    "Freeman",
-    "Freja",
-    "Fremont",
-    "Freya",
-    "Frieda",
-    "Fritz",
-    "Fritzi",
-    "Fronde",
-    "Fruma",
-    "Frye",
-    "Fulbright",
-    "Fuller",
-    "Fynn",
-    "Gabby",
-    "Gabe",
-    "Gabi",
-    "Gabriel",
-    "Gabriela",
-    "Gabriella",
-    "Gabrielle",
-    "Gaby",
-    "Gaetan",
-    "Gaetane",
-    "Gafna",
-    "Gage",
-    "Gail",
-    "Gaille",
-    "Gainell",
-    "Gaius",
-    "Gale",
-    "Galen",
-    "Galeno",
-    "Gali",
-    "Gallagher",
-    "Gallia",
-    "Galvin",
-    "Gamada",
-    "Gamal",
-    "Gamaliel",
-    "Ganit",
-    "Gannon",
-    "Ganya",
-    "Gardner",
-    "Gareth",
-    "Garfield",
-    "Garren",
-    "Garret",
-    "Garrett",
-    "Garrick",
-    "Garrison",
-    "Garron",
-    "Garry",
-    "Garson",
-    "Garth",
-    "Garvey",
-    "Gary",
-    "Gates",
-    "Gaurav",
-    "Gautier",
-    "Gavan",
-    "Gavin",
-    "Gavivi",
-    "Gavril",
-    "Gay",
-    "Gaye",
-    "Gayle",
-    "Gaylord",
-    "Gaynell",
-    "Gazali",
-    "Gazelle",
-    "Gazit",
-    "Gella",
-    "Gelsey",
-    "Gemma",
-    "Gene",
-    "Genet",
-    "Geneva",
-    "Genevieve",
-    "Genna",
-    "Gent",
-    "Geoff",
-    "Geoffrey",
-    "Geordi",
-    "George",
-    "Georgette",
-    "Georgia",
-    "Georgina",
-    "Gerald",
-    "Geraldene",
-    "Geraldine",
-    "Geraldo",
-    "Gerard",
-    "Gerda",
-    "Geri",
-    "Gerik",
-    "Germain",
-    "Germaine",
-    "Gerodi",
-    "Gerry",
-    "Gershom",
-    "Gertrude",
-    "Ghita",
-    "Giacomo",
-    "Gianna",
-    "Gibson",
-    "Gideon",
-    "Gigi",
-    "Gil",
-    "Gilbert",
-    "Gilda",
-    "Giles",
-    "Gili",
-    "Gillespie",
-    "Gillian",
-    "Gin",
-    "Gina",
-    "Ginacarlo",
-    "Ginata",
-    "Ginger",
-    "Ginny",
-    "Gino",
-    "Giolla",
-    "Giorgio",
-    "Giovanni",
-    "Gisela",
-    "Giselle",
-    "Gita",
-    "Gitano",
-    "Gitel",
-    "Gittel",
-    "Giulio",
-    "Giuseppe",
-    "Giva",
-    "Giza",
-    "Gladys",
-    "Glen",
-    "Glenda",
-    "Glenn",
-    "Glenna",
-    "Glennis",
-    "Glenys",
-    "Glora",
-    "Gloria",
-    "Glory",
-    "Glyn",
-    "Glynis",
-    "Glynnis",
-    "Godana",
-    "Godfrey",
-    "Golda",
-    "Goldie",
-    "Goldy",
-    "Gomer",
-    "Gordon",
-    "Gordy",
-    "Grace",
-    "Gracie",
-    "Grady",
-    "Graham",
-    "Gram",
-    "Grania",
-    "Grant",
-    "Granville",
-    "Gratia",
-    "Gratiana",
-    "Grayson",
-    "Grazia",
-    "Greer",
-    "Greg",
-    "Gregg",
-    "Gregory",
-    "Greta",
-    "Gretchen",
-    "Gretel",
-    "Griffin",
-    "Griselda",
-    "Grizelda",
-    "Grover",
-    "Guadalupe",
-    "Gualtier",
-    "Guban",
-    "Guenevere",
-    "Guido",
-    "Guinevere",
-    "Gunnar",
-    "Gunther",
-    "Gur",
-    "Gure",
-    "Guri",
-    "Gustav",
-    "Guy",
-    "Gwen",
-    "Gwendolyn",
-    "Gwyn",
-    "Gwyneth",
-    "Gypsy",
-    "Haben",
-    "Habib",
-    "Hada",
-    "Hadar",
-    "Hadassah",
-    "Hadley",
-    "Haile",
-    "Haines",
-    "Hajari",
-    "Hal",
-    "Halen",
-    "Haley",
-    "Hali",
-    "Halona",
-    "Ham",
-    "Hamal",
-    "Hamilton",
-    "Hamlet",
-    "Hamlin",
-    "Hampton",
-    "Hana",
-    "Hank",
-    "Hanley",
-    "Hanna",
-    "Hannah",
-    "Hannelore",
-    "Hans",
-    "Hanzila",
-    "Hao",
-    "Haracha",
-    "Harlan",
-    "Harley",
-    "Harlow",
-    "Harmon",
-    "Harmony",
-    "Harold",
-    "Haroun",
-    "Harper",
-    "Harriet",
-    "Harrison",
-    "Harry",
-    "Hart",
-    "Hartwell",
-    "Haru",
-    "Haruki",
-    "Haruko",
-    "Haruni",
-    "Harva",
-    "Harvey",
-    "Hasad",
-    "Hasana",
-    "Hastin",
-    "Hateya",
-    "Haven",
-    "Hawa",
-    "Hayden",
-    "Hayley",
-    "Hayward",
-    "Hazel",
-    "Hazelle",
-    "Hazina",
-    "Heath",
-    "Heather",
-    "Heavynne",
-    "Hector",
-    "Hedda",
-    "Hedia",
-    "Hedva",
-    "Hedwig",
-    "Hedy",
-    "Hedya",
-    "Heidi",
-    "Heinz",
-    "Helaine",
-    "Helen",
-    "Helena",
-    "Helene",
-    "Helga",
-    "Helia",
-    "Heller",
-    "Heloise",
-    "Henri",
-    "Henrietta",
-    "Henrik",
-    "Henry",
-    "Hera",
-    "Herb",
-    "Herbert",
-    "Herbst",
-    "Heremon",
-    "Herman",
-    "Herschel",
-    "Hertz",
-    "Hesper",
-    "Hester",
-    "Hestia",
-    "Hewitt",
-    "Hidalgo",
-    "Hidi",
-    "Hiero",
-    "Hija",
-    "Hila",
-    "Hilaire",
-    "Hilary",
-    "Hilda",
-    "Hilde",
-    "Hillary",
-    "Hilzarie",
-    "Hina",
-    "Hinda",
-    "Hiroko",
-    "Hirsi",
-    "Holden",
-    "Holiday",
-    "Hollace",
-    "Holli",
-    "Hollis",
-    "Holly",
-    "Hollye",
-    "Holt",
-    "Homer",
-    "Honey",
-    "Honora",
-    "Honoria",
-    "Hope",
-    "Horace",
-    "Horus",
-    "Hosea",
-    "Hoshi",
-    "Hoshiko",
-    "Houston",
-    "Howard",
-    "Howe",
-    "Howell",
-    "Howie",
-    "Hubert",
-    "Hue",
-    "Huela",
-    "Huey",
-    "Hugh",
-    "Hugo",
-    "Humphrey",
-    "Hunter",
-    "Huso",
-    "Hussein",
-    "Hy",
-    "Hyacinth",
-    "Hyman",
-    "Hyroniemus",
-    "Ian",
-    "Ianna",
-    "Ianthe",
-    "Ida",
-    "Idalee",
-    "Idalia",
-    "Idana",
-    "Idande",
-    "Idania",
-    "Idra",
-    "Ife",
-    "Ige",
-    "Iggi",
-    "Iggy",
-    "Ignatius",
-    "Ike",
-    "Ilana",
-    "Ilario",
-    "Ilit",
-    "Ilo",
-    "Ilom",
-    "Ilori",
-    "Ilse",
-    "Ilyssa",
-    "Imogene",
-    "Ina",
-    "Inari",
-    "Independence",
-    "India",
-    "Indira",
-    "Indra",
-    "Inez",
-    "Infinity",
-    "Inga",
-    "Inge",
-    "Ingrid",
-    "Inoke",
-    "Iokina",
-    "Iola",
-    "Iolani",
-    "Ion",
-    "Iona",
-    "Ipo",
-    "Ira",
-    "Iram",
-    "Irene",
-    "Iria",
-    "Irina",
-    "Iris",
-    "Irisa",
-    "Irma",
-    "Irving",
-    "Iryl",
-    "Isaac",
-    "Isabel",
-    "Isabis",
-    "Isadora",
-    "Isaiah",
-    "Isha",
-    "Isi",
-    "Isis",
-    "Isleen",
-    "Ismaela",
-    "Ismail",
-    "Ismet",
-    "Isolde",
-    "Isra",
-    "Israel",
-    "Issay",
-    "Ita",
-    "Italia",
-    "Ivan",
-    "Ivi",
-    "Ivie",
-    "Ivo",
-    "Ivria",
-    "Ivrit",
-    "Ivy",
-    "Izefia",
-    "Izellah",
-    "Ja",
-    "Jaali",
-    "Jabari",
-    "Jabilo",
-    "Jabir",
-    "Jabulani",
-    "Jace",
-    "Jacinta",
-    "Jack",
-    "Jackie",
-    "Jackson",
-    "Jaclyn",
-    "Jacob",
-    "Jacoba",
-    "Jacqueline",
-    "Jacques",
-    "Jacqui",
-    "Jada",
-    "Jade",
-    "Jaden",
-    "Jadon",
-    "Jadyn",
-    "Jadzia",
-    "Jael",
-    "Jafaru",
-    "Jaime",
-    "Jaimie",
-    "Jake",
-    "Jalen",
-    "Jalene",
-    "Jalil",
-    "James",
-    "Jamese",
-    "Jamie",
-    "Jamila",
-    "Jan",
-    "Jana",
-    "Janae",
-    "Jane",
-    "Janel",
-    "Janelle",
-    "Janet",
-    "Janette",
-    "Jania",
-    "Janice",
-    "Janina",
-    "Janine",
-    "Japheth",
-    "Jara",
-    "Jared",
-    "Jariath",
-    "Jarrett",
-    "Jarvis",
-    "Jasmine",
-    "Jason",
-    "Jasper",
-    "Javen",
-    "Jay",
-    "Jayden",
-    "Jayme",
-    "Jazlynn",
-    "Jean",
-    "Jeanine",
-    "Jeanne",
-    "Jeb",
-    "Jeff",
-    "Jefferson",
-    "Jeffrey",
-    "Jemima",
-    "Jengo",
-    "Jenis",
-    "Jenna",
-    "Jennelle",
-    "Jennessa",
-    "Jennie",
-    "Jennifer",
-    "Jenny",
-    "Jens",
-    "Jensen",
-    "Jered",
-    "Jeremiah",
-    "Jeremy",
-    "Jeri",
-    "Jerica",
-    "Jericho",
-    "Jerod",
-    "Jeroen",
-    "Jerold",
-    "Jerom",
-    "Jerome",
-    "Jerommeke",
-    "Jerrell",
-    "Jerrick",
-    "Jerry",
-    "Jerusha",
-    "Jess",
-    "Jesse",
-    "Jessica",
-    "Jessie",
-    "Jesus",
-    "Jethro",
-    "Jett",
-    "Jewel",
-    "Jewell",
-    "Jezebel",
-    "Jianna",
-    "Jihan",
-    "Jill",
-    "Jillian",
-    "Jim",
-    "Jimmy",
-    "Jin",
-    "Jira",
-    "Jiro",
-    "Joan",
-    "Joann",
-    "Joanna",
-    "Joanne",
-    "Job",
-    "Jocasta",
-    "Jocelyn",
-    "Jock",
-    "Jodi",
-    "Jodie",
-    "Jody",
-    "Joe",
-    "Joel",
-    "Joelle",
-    "Joey",
-    "Johanna",
-    "John",
-    "Johnny",
-    "Joie",
-    "Jola",
-    "Jolene",
-    "Jolie",
-    "Jon",
-    "Jonah",
-    "Jonathan",
-    "Jonny",
-    "Jordan",
-    "Joren",
-    "Jorge",
-    "Jorn",
-    "Jorryn",
-    "Jory",
-    "Jose",
-    "Josef",
-    "Joseph",
-    "Josephine",
-    "Josh",
-    "Joshua",
-    "Joshwa",
-    "Josiah",
-    "Josie",
-    "Josue",
-    "Jovan",
-    "Jovianne",
-    "Jovita",
-    "Joy",
-    "Joyce",
-    "Joylyn",
-    "Juan",
-    "Juana",
-    "Juandalynn",
-    "Juanita",
-    "Jubal",
-    "Jud",
-    "Judah",
-    "Judd",
-    "Jude",
-    "Judith",
-    "Judson",
-    "Judy",
-    "Juji",
-    "Jules",
-    "Julia",
-    "Julian",
-    "Juliana",
-    "Julianna",
-    "Julianne",
-    "Julie",
-    "Juliet",
-    "Julio",
-    "Julisha",
-    "July",
-    "Jumoke",
-    "Jun",
-    "June",
-    "Junior",
-    "Justin",
-    "Justine",
-    "Justise",
-    "Kabibe",
-    "Kabili",
-    "Kacela",
-    "Kachina",
-    "Kacy",
-    "Kadeem",
-    "Kael",
-    "Kaelin",
-    "Kaethe",
-    "Kahlilia",
-    "Kai",
-    "Kaikura",
-    "Kailey",
-    "Kaitlyn",
-    "Kalea",
-    "Kalei",
-    "Kaleigh",
-    "Kaley",
-    "Kali",
-    "Kalin",
-    "Kalinda",
-    "Kalista",
-    "Kalli",
-    "Kamal",
-    "Kamali",
-    "Kame",
-    "Kamella",
-    "Kameryn",
-    "Kamilia",
-    "Kande",
-    "Kane",
-    "Kara",
-    "Karan",
-    "Kare",
-    "Kareem",
-    "Karen",
-    "Karena",
-    "Kari",
-    "Karik",
-    "Karim",
-    "Karimah",
-    "Karina",
-    "Karis",
-    "Karl",
-    "Karla",
-    "Karli",
-    "Karma",
-    "Karmina",
-    "Karna",
-    "Karston",
-    "Kaseko",
-    "Kasi",
-    "Kasim",
-    "Kaspar",
-    "Kassia",
-    "Kat",
-    "Kata",
-    "Kate",
-    "Katelin",
-    "Katharine",
-    "Katherine",
-    "Kathie",
-    "Kathleen",
-    "Kathryn",
-    "Kathy",
-    "Katie",
-    "Katina",
-    "Kato",
-    "Katrina",
-    "Katungi",
-    "Katy",
-    "Kaula",
-    "Kawena",
-    "Kay",
-    "Kaya",
-    "Kaycee",
-    "Kayla",
-    "Kaylana",
-    "Kaylee",
-    "Kayo",
-    "Kayonga",
-    "Kaz",
-    "Kazi",
-    "Kazu",
-    "Keagan",
-    "Keaira",
-    "Keb",
-    "Kedem",
-    "Kedma",
-    "Keefe",
-    "Keefer",
-    "Keegan",
-    "Keelan",
-    "Keelia",
-    "Keely",
-    "Keena",
-    "Keenan",
-    "Keene",
-    "Keeya",
-    "Kefira",
-    "Kei",
-    "Keiji",
-    "Keiki",
-    "Keir",
-    "Keira",
-    "Keiran",
-    "Keita",
-    "Keitaro",
-    "Keith",
-    "Kelby",
-    "Kelda",
-    "Kele",
-    "Kelii",
-    "Kelila",
-    "Kellan",
-    "Kellee",
-    "Kellen",
-    "Kelley",
-    "Kelli",
-    "Kellsie",
-    "Kelly",
-    "Kelsey",
-    "Kelton",
-    "Kelvin",
-    "Ken",
-    "Kenda",
-    "Kendall",
-    "Kendi",
-    "Kendis",
-    "Kendra",
-    "Kenisha",
-    "Kenley",
-    "Kenna",
-    "Kennan",
-    "Kennedi",
-    "Kennedy",
-    "Kenneth",
-    "Kenny",
-    "Kent",
-    "Kenton",
-    "Kenyi",
-    "Kenyon",
-    "Kenzie",
-    "Keola",
-    "Keon",
-    "Kerda",
-    "Keren",
-    "Kermit",
-    "Kern",
-    "Kerr",
-    "Kerri",
-    "Kerry",
-    "Kesin",
-    "Ketara",
-    "Kevin",
-    "Kevina",
-    "Keyanna",
-    "Khalida",
-    "Khalil",
-    "Khalipha",
-    "Khiry",
-    "Kia",
-    "Kiah",
-    "Kiana",
-    "Kiandra",
-    "Kibibe",
-    "Kiden",
-    "Kieran",
-    "Kiersten",
-    "Kiho",
-    "Kiki",
-    "Kiley",
-    "Killian",
-    "Kim",
-    "Kimball",
-    "Kimberly",
-    "Kimi",
-    "Kimmy",
-    "Kin",
-    "Kina",
-    "Kinfe",
-    "King",
-    "Kingston",
-    "Kinipela",
-    "Kioko",
-    "Kione",
-    "Kiora",
-    "Kipling",
-    "Kipp",
-    "Kira",
-    "Kirabo",
-    "Kiral",
-    "Kirby",
-    "Kiri",
-    "Kiril",
-    "Kirk",
-    "Kiros",
-    "Kirra",
-    "Kirsi",
-    "Kirsten",
-    "Kisha",
-    "Kishi",
-    "Kita",
-    "Kitoko",
-    "Kitra",
-    "Kitty",
-    "Kiyoshi",
-    "Kizzy",
-    "Klaus",
-    "Klitos",
-    "Knut",
-    "Koda",
-    "Koen",
-    "Koko",
-    "Kolton",
-    "Konane",
-    "Koren",
-    "Korene",
-    "Kori",
-    "Kory",
-    "Kostya",
-    "Koto",
-    "Kourtney",
-    "Kozue",
-    "Kris",
-    "Krista",
-    "Kristen",
-    "Kristin",
-    "Kristina",
-    "Kristine",
-    "Kristopher",
-    "Krystyn",
-    "Kuma",
-    "Kumi",
-    "Kumiko",
-    "Kura",
-    "Kuri",
-    "Kuron",
-    "Kurt",
-    "Kwanita",
-    "Kyla",
-    "Kyle",
-    "Kyleigh",
-    "Kylene",
-    "Kyler",
-    "Kylia",
-    "Kylie",
-    "Kyna",
-    "Kynan",
-    "Kynthia",
-    "Kyra",
-    "Kyrene",
-    "Kyria",
-    "L'pree",
-    "La Don",
-    "Lacey",
-    "Lachlan",
-    "Lacy",
-    "Laddie",
-    "Lael",
-    "Lahela",
-    "Laina",
-    "Laird",
-    "Lajuan",
-    "Lajuana",
-    "Lakin",
-    "Lale",
-    "Laleh",
-    "Lali",
-    "Lalita",
-    "Lalo",
-    "Lamar",
-    "Lamont",
-    "Lan",
-    "Lana",
-    "Lanai",
-    "Lanaya",
-    "Lance",
-    "Lancelot",
-    "Landen",
-    "Landers",
-    "Landis",
-    "Landon",
-    "Landry",
-    "Lane",
-    "Lanelle",
-    "Lang",
-    "Langer",
-    "Langston",
-    "Lani",
-    "Lankston",
-    "Lanza",
-    "Laqueta",
-    "Lara",
-    "Laraine",
-    "Lareina",
-    "Larissa",
-    "Lark",
-    "Larry",
-    "Lars",
-    "Larue",
-    "Larvall",
-    "Lasca",
-    "Lassie",
-    "Laszlo",
-    "Latanya",
-    "Latham",
-    "Lathrop",
-    "Latika",
-    "Latimer",
-    "Latisha",
-    "Laura",
-    "Lauren",
-    "Laurence",
-    "Laurie",
-    "Laval",
-    "Lave",
-    "Laverne",
-    "Lavey",
-    "Lavi",
-    "Lavonn",
-    "Lavonne",
-    "Lawanda",
-    "Lawrence",
-    "Lawrencia",
-    "Layla",
-    "Layne",
-    "Lazar",
-    "Lazarus",
-    "Lea",
-    "Leah",
-    "Leal",
-    "Leala",
-    "Leander",
-    "Leane",
-    "Leanna",
-    "Leanne",
-    "Leavitt",
-    "Lecea",
-    "Leda",
-    "Ledell",
-    "Lee",
-    "Leena",
-    "Leeto",
-    "Lehana",
-    "Leia",
-    "Leif",
-    "Leigh",
-    "Leila",
-    "Leilani",
-    "Leimomi",
-    "Lel",
-    "Lela",
-    "Leland",
-    "Lelia",
-    "Lemuel",
-    "Lena",
-    "Lencho",
-    "Lenka",
-    "Lenora",
-    "Lenore",
-    "Lente",
-    "Leo",
-    "Leola",
-    "Leoma",
-    "Leon",
-    "Leona",
-    "Leonard",
-    "Leone",
-    "Leonie",
-    "Leonora",
-    "Leonzal",
-    "Leopold",
-    "Leora",
-    "Lerato",
-    "Leroy",
-    "Les",
-    "Lesa",
-    "Lesley",
-    "Leslie",
-    "Lester",
-    "Letitia",
-    "Lev",
-    "Levana",
-    "Leverett",
-    "Levi",
-    "Levia",
-    "Levon",
-    "Lewa",
-    "Lewis",
-    "Lex",
-    "Lexi",
-    "Lexine",
-    "Lia",
-    "Liam",
-    "Lian",
-    "Liana",
-    "Libba",
-    "Libby",
-    "Liberty",
-    "Lida",
-    "Lidia",
-    "Lien",
-    "Liko",
-    "Lila",
-    "Lilac",
-    "Lilah",
-    "Lilia",
-    "Liliha",
-    "Lilith",
-    "Lilli",
-    "Lillian",
-    "Lilo",
-    "Lily",
-    "Lin",
-    "Lina",
-    "Lincoln",
-    "Linda",
-    "Lindley",
-    "Lindsay",
-    "Lindsey",
-    "Lindy",
-    "Linus",
-    "Liona",
-    "Lionel",
-    "Lirit",
-    "Lisa",
-    "Lisbet",
-    "Lisette",
-    "Lisimba",
-    "Lisle",
-    "Liv",
-    "Livana",
-    "Livi",
-    "Livia",
-    "Livvy",
-    "Lixue",
-    "Liz",
-    "Liza",
-    "Lizbeth",
-    "Lizina",
-    "Llewellyn",
-    "Lloyd",
-    "Loba",
-    "Lobo",
-    "Locke",
-    "Logan",
-    "Lois",
-    "Lola",
-    "Lolonyo",
-    "Lolovivi",
-    "Lona",
-    "Lonato",
-    "London",
-    "Lonna",
-    "Lonnie",
-    "Lonnit",
-    "Lora",
-    "Lorelei",
-    "Lorena",
-    "Lorenzo",
-    "Loretta",
-    "Lori",
-    "Lorimer",
-    "Lorin",
-    "Loring",
-    "Lorna",
-    "Lorne",
-    "Lorraine",
-    "Lorretta",
-    "Lotta",
-    "Lotte",
-    "Lotus",
-    "Lou",
-    "Loughlin",
-    "Louis",
-    "Louisa",
-    "Louise",
-    "Loura",
-    "Lourana",
-    "Lourdes",
-    "Lourine",
-    "Love",
-    "Lovey",
-    "Lovie",
-    "Lowell",
-    "Luam",
-    "Luana",
-    "Lucas",
-    "Luce",
-    "Lucia",
-    "Lucian",
-    "Lucie",
-    "Lucille",
-    "Lucinda",
-    "Lucio",
-    "Lucius",
-    "Lucretia",
-    "Lucus",
-    "Lucy",
-    "Ludlow",
-    "Ludwig",
-    "Luigi",
-    "Luis",
-    "Luke",
-    "Lula",
-    "Lulli",
-    "Lulu",
-    "Luna",
-    "Lundy",
-    "Lunette",
-    "Lupe",
-    "Lupita",
-    "Luthando",
-    "Luther",
-    "Lyde",
-    "Lydia",
-    "Lyle",
-    "Lyn",
-    "Lynch",
-    "Lynda",
-    "Lynde",
-    "Lyndel",
-    "Lyndon",
-    "Lyndsey",
-    "Lynelle",
-    "Lynette",
-    "Lynley",
-    "Lynn",
-    "Lynna",
-    "Lynne",
-    "Lynnea",
-    "Lynton",
-    "Lyre",
-    "Lyris",
-    "Lysa",
-    "Lysander",
-    "Lysandra",
-    "Maarten",
-    "Maat",
-    "Mabel",
-    "Mac",
-    "Macayle",
-    "Macha",
-    "Mackenzie",
-    "Macy",
-    "Maddox",
-    "Madeleine",
-    "Madelia",
-    "Madeline",
-    "Madge",
-    "Madison",
-    "Madonna",
-    "Madra",
-    "Madrona",
-    "Mae",
-    "Maeko",
-    "Maemi",
-    "Maeron",
-    "Maeryn",
-    "Maeve",
-    "Magan",
-    "Magda",
-    "Magdalena",
-    "Magdalene",
-    "Magee",
-    "Maggie",
-    "Magnar",
-    "Magnolia",
-    "Maha",
-    "Mahala",
-    "Mahalia",
-    "Mahari",
-    "Mahdi",
-    "Maia",
-    "Maik",
-    "Maille",
-    "Maimun",
-    "Maire",
-    "Mairi",
-    "Maisie",
-    "Maj",
-    "Major",
-    "Makaila",
-    "Makale",
-    "Makalo",
-    "Makani",
-    "Makenna",
-    "Makya",
-    "Malachi",
-    "Malaika",
-    "Malana",
-    "Malaya",
-    "Malcolm",
-    "Maleah",
-    "Malia",
-    "Malina",
-    "Malissa",
-    "Malka",
-    "Mallory",
-    "Malo",
-    "Malomo",
-    "Malone",
-    "Malory",
-    "Mana",
-    "Mandel",
-    "Mandell",
-    "Mandy",
-    "Manica",
-    "Manning",
-    "Manon",
-    "Mansa",
-    "Manuel",
-    "Manuela",
-    "Mara",
-    "Marc",
-    "Marcel",
-    "Marcell",
-    "Marcella",
-    "Marcello",
-    "Marcellus",
-    "Marcia",
-    "Marcie",
-    "Marco",
-    "Marcus",
-    "Marcy",
-    "Mardell",
-    "Mardi",
-    "Mare",
-    "Maree",
-    "Marek",
-    "Maren",
-    "Marenda",
-    "Margaret",
-    "Margarita",
-    "Marge",
-    "Margo",
-    "Margot",
-    "Marguerite",
-    "Mari",
-    "Maria",
-    "Mariah",
-    "Mariam",
-    "Marianne",
-    "Mariatu",
-    "Maribel",
-    "Maribeth",
-    "Marie",
-    "Mariel",
-    "Marietta",
-    "Marigold",
-    "Marijke",
-    "Marika",
-    "Marilu",
-    "Marilyn",
-    "Marin",
-    "Marina",
-    "Marinel",
-    "Mario",
-    "Marion",
-    "Maris",
-    "Marisa",
-    "Marisela",
-    "Marisol",
-    "Marissa",
-    "Marius",
-    "Marjean",
-    "Marjorie",
-    "Mark",
-    "Marka",
-    "Marlas",
-    "Marlene",
-    "Marli",
-    "Marlie",
-    "Marlin",
-    "Marlo",
-    "Marlon",
-    "Marlow",
-    "Marly",
-    "Marnie",
-    "Marnin",
-    "Marnina",
-    "Maro",
-    "Marrim",
-    "Marsha",
-    "Marshall",
-    "Marta",
-    "Martha",
-    "Martin",
-    "Martina",
-    "Marty",
-    "Marv",
-    "Marva",
-    "Marvel",
-    "Marvela",
-    "Marvene",
-    "Marvin",
-    "Mary",
-    "Masada",
-    "Mashaka",
-    "Mason",
-    "Massimo",
-    "Matana",
-    "Mateo",
-    "Mathilda",
-    "Mathilde",
-    "Matia",
-    "Matias",
-    "Matilda",
-    "Matilde",
-    "Matrika",
-    "Matsu",
-    "Matt",
-    "Matteo",
-    "Matthew",
-    "Matthias",
-    "Mattox",
-    "Matty",
-    "Maude",
-    "Mauli",
-    "Maura",
-    "Maureen",
-    "Maurice",
-    "Maurilio",
-    "Maurizio",
-    "Mauro",
-    "Mauve",
-    "Maverick",
-    "Mavis",
-    "Max",
-    "Maxim",
-    "Maxima",
-    "Maxime",
-    "Maximilian",
-    "Maximos",
-    "Maxine",
-    "Maxwell",
-    "May",
-    "Maya",
-    "Mayan",
-    "Mayda",
-    "Mayes",
-    "Maylin",
-    "Maynard",
-    "Mckale",
-    "Mckayla",
-    "Mckenna",
-    "Mea",
-    "Mead",
-    "Meara",
-    "Meda",
-    "Medard",
-    "Medea",
-    "Meg",
-    "Megan",
-    "Meged",
-    "Mehalia",
-    "Mei",
-    "Meir",
-    "Mekelle",
-    "Mel",
-    "Melania",
-    "Melanie",
-    "Melantha",
-    "Melba",
-    "Melchior",
-    "Mele",
-    "Meli",
-    "Melia",
-    "Melina",
-    "Melinda",
-    "Meliora",
-    "Melisande",
-    "Melissa",
-    "Melita",
-    "Melody",
-    "Melora",
-    "Melosa",
-    "Melva",
-    "Melvin",
-    "Melvina",
-    "Melvyn",
-    "Mendel",
-    "Menora",
-    "Mercedes",
-    "Mercer",
-    "Mercia",
-    "Mercy",
-    "Meredith",
-    "Meria",
-    "Meris",
-    "Merle",
-    "Merlin",
-    "Merrill",
-    "Merritt",
-    "Merry",
-    "Merton",
-    "Merv",
-    "Mervin",
-    "Mervyn",
-    "Meryl",
-    "Meryle",
-    "Meshal",
-    "Messina",
-    "Metea",
-    "Mettabel",
-    "Mia",
-    "Micah",
-    "Michael",
-    "Michaela",
-    "Michal",
-    "Michel",
-    "Michele",
-    "Micheline",
-    "Michelle",
-    "Michon",
-    "Mick",
-    "Mickey",
-    "Micol",
-    "Mieko",
-    "Miette",
-    "Migdana",
-    "Mignon",
-    "Mika",
-    "Mikaili",
-    "Mike",
-    "Mikhail",
-    "Miki",
-    "Mikkel",
-    "Milan",
-    "Milandu",
-    "Mildred",
-    "Miles",
-    "Mili",
-    "Miliani",
-    "Miller",
-    "Millicent",
-    "Millie",
-    "Mills",
-    "Milly",
-    "Milo",
-    "Milt",
-    "Milton",
-    "Mimi",
-    "Mina",
-    "Minda",
-    "Mindy",
-    "Minerva",
-    "Miniya",
-    "Minna",
-    "Minnie",
-    "Minor",
-    "Minty",
-    "Mio",
-    "Mira",
-    "Mirabel",
-    "Mirabelle",
-    "Miracle",
-    "Miranda",
-    "Mircea",
-    "Mireille",
-    "Mirella",
-    "Miriam",
-    "Mirit",
-    "Miroslav",
-    "Mirra",
-    "Misae",
-    "Misha",
-    "Misty",
-    "Misu",
-    "Mitch",
-    "Mitchel",
-    "Mitchell",
-    "Miya",
-    "Miyanda",
-    "Miyoko",
-    "Mizell",
-    "Moana",
-    "Moanna",
-    "Modesta",
-    "Modesty",
-    "Mohammed",
-    "Mohan",
-    "Moina",
-    "Moira",
-    "Moke",
-    "Molly",
-    "Mona",
-    "Monahan",
-    "Monica",
-    "Monita",
-    "Monroe",
-    "Montague",
-    "Montana",
-    "Monte",
-    "Montego",
-    "Montgomery",
-    "Monty",
-    "Moon",
-    "Moon-unit",
-    "Mora",
-    "Moral",
-    "Morathi",
-    "Mordecai",
-    "More",
-    "Morela",
-    "Morey",
-    "Morgan",
-    "Morgana",
-    "Moriah",
-    "Moriba",
-    "Morley",
-    "Morna",
-    "Morrie",
-    "Morrigan",
-    "Morris",
-    "Morrison",
-    "Morse",
-    "Mort",
-    "Mortimer",
-    "Morton",
-    "Morty",
-    "Morwenna",
-    "Moses",
-    "Moshe",
-    "Moss",
-    "Mostyn",
-    "Moya",
-    "Moyna",
-    "Mrena",
-    "Muhammad",
-    "Muna",
-    "Mura",
-    "Muriel",
-    "Murphy",
-    "Murray",
-    "Murron",
-    "Musoke",
-    "Mutia",
-    "Mykel",
-    "Myles",
-    "Myra",
-    "Myrilla",
-    "Myrladis",
-    "Myrna",
-    "Myron",
-    "Myrtle",
-    "Naal",
-    "Nadia",
-    "Nadie",
-    "Nadine",
-    "Nafis",
-    "Nafuna",
-    "Naiser",
-    "Nakima",
-    "Nalo",
-    "Namir",
-    "Nan",
-    "Nancy",
-    "Nanette",
-    "Nani",
-    "Naolin",
-    "Naoll",
-    "Naomi",
-    "Napoleon",
-    "Nara",
-    "Narcisse",
-    "Nardo",
-    "Nariah",
-    "Nascha",
-    "Nasha",
-    "Nasia",
-    "Nasser",
-    "Nat",
-    "Natala",
-    "Natalia",
-    "Natalie",
-    "Natalya",
-    "Natane",
-    "Natasha",
-    "Nate",
-    "Nathalie",
-    "Nathan",
-    "Nathaniel",
-    "Natine",
-    "Natividad",
-    "Natori",
-    "Natsu",
-    "Nature",
-    "Navarro",
-    "Naveen",
-    "Navid",
-    "Nawal",
-    "Nayati",
-    "Nayeli",
-    "Nayer",
-    "Neal",
-    "Nealon",
-    "Necia",
-    "Neda",
-    "Nedra",
-    "Neely",
-    "Neena",
-    "Neetee",
-    "Neil",
-    "Nelia",
-    "Nellie",
-    "Nelson",
-    "Nen",
-    "Nenet",
-    "Neola",
-    "Nerina",
-    "Nerine",
-    "Nerissa",
-    "Nerita",
-    "Nero",
-    "Nessa",
-    "Nessan",
-    "Nestor",
-    "Netanya",
-    "Neva",
-    "Nevada",
-    "Nevan",
-    "Neville",
-    "Newman",
-    "Nia",
-    "Niabi",
-    "Niall",
-    "Niamh",
-    "Nichelle",
-    "Nicholai",
-    "Nicholas",
-    "Nick",
-    "Nicki",
-    "Nicodemus",
-    "Nicola",
-    "Nicole",
-    "Nicolette",
-    "Niel",
-    "Nigel",
-    "Nijole",
-    "Nikhil",
-    "Nikita",
-    "Nikki",
-    "Nikkos",
-    "Niles",
-    "Nimeesha",
-    "Nina",
-    "Ninon",
-    "Nira",
-    "Nissa",
-    "Nita",
-    "Nitara",
-    "Nitesh",
-    "Nitis",
-    "Niv",
-    "Nixie",
-    "Nizana",
-    "Noah",
-    "Noam",
-    "Nodin",
-    "Noe",
-    "Noel",
-    "Noelani",
-    "Nokomis",
-    "Nola",
-    "Nolan",
-    "Noland",
-    "Noma",
-    "Nomlanga",
-    "Nona",
-    "Nonnie",
-    "Nora",
-    "Norah",
-    "Noreen",
-    "Nori",
-    "Norina",
-    "Norm",
-    "Norma",
-    "Norman",
-    "Normandy",
-    "Norris",
-    "Norton",
-    "Norwood",
-    "Nova",
-    "Novia",
-    "Nowles",
-    "Noxolo",
-    "Noya",
-    "Nuncio",
-    "Nuri",
-    "Nuru",
-    "Nyako",
-    "Nydia",
-    "Nyeki",
-    "Nyoka",
-    "Nysa",
-    "Nyx",
-    "Oafe",
-    "Oakes",
-    "Oakley",
-    "Obedience",
-    "Oberon",
-    "Obert",
-    "Oceana",
-    "Octavia",
-    "Octavio",
-    "Octavious",
-    "Odele",
-    "Odelia",
-    "Odell",
-    "Odessa",
-    "Odetta",
-    "Odette",
-    "Odina",
-    "Odysseus",
-    "Ofer",
-    "Ogden",
-    "Ogima",
-    "Ohio",
-    "Oistin",
-    "Okal",
-    "Okalik",
-    "Okapi",
-    "Oke",
-    "Okechuku",
-    "Okoth",
-    "Oksana",
-    "Ola",
-    "Olaf",
-    "Olathe",
-    "Oleg",
-    "Olesia",
-    "Olga",
-    "Olin",
-    "Olinda",
-    "Olive",
-    "Oliver",
-    "Olivia",
-    "Ollie",
-    "Olympia",
-    "Omar",
-    "Omega",
-    "Ona",
-    "Onan",
-    "Oneida",
-    "Oni",
-    "Onslow",
-    "Oona",
-    "Opa",
-    "Opal",
-    "Ophelia",
-    "Ophira",
-    "Oprah",
-    "Ora",
-    "Oral",
-    "Oralee",
-    "Oran",
-    "Orane",
-    "Orde",
-    "Oren",
-    "Orenda",
-    "Oria",
-    "Oriana",
-    "Oriel",
-    "Orien",
-    "Oringo",
-    "Orino",
-    "Oriole",
-    "Orion",
-    "Orla",
-    "Orlando",
-    "Orleans",
-    "Orlee",
-    "Orli",
-    "Orly",
-    "Orma",
-    "Ormand",
-    "Orrick",
-    "Orsen",
-    "Orsin",
-    "Orson",
-    "Orton",
-    "Orville",
-    "Osanna",
-    "Osaze",
-    "Osborn",
-    "Osborne",
-    "Oscar",
-    "Osgood",
-    "Osias",
-    "Oskar",
-    "Osma",
-    "Osmond",
-    "Ossian",
-    "Ossie",
-    "Oswald",
-    "Othello",
-    "Otis",
-    "Otto",
-    "Ouray",
-    "Ova",
-    "Overton",
-    "Ovid",
-    "Owen",
-    "Ownah",
-    "Oz",
-    "Ozzie",
-    "Pabla",
-    "Pablo",
-    "Packard",
-    "Paco",
-    "Paddy",
-    "Page",
-    "Paige",
-    "Palani",
-    "Palesa",
-    "Paley",
-    "Pallas",
-    "Palma",
-    "Palmer",
-    "Paloma",
-    "Palti",
-    "Pamela",
-    "Pamelia",
-    "Pancho",
-    "Pandora",
-    "Panfila",
-    "Paniga",
-    "Panya",
-    "Paola",
-    "Paolo",
-    "Papina",
-    "Paris",
-    "Parker",
-    "Parkin",
-    "Parlan",
-    "Parley",
-    "Parrish",
-    "Parry",
-    "Parson",
-    "Pascal",
-    "Pascale",
-    "Pascha",
-    "Pasi",
-    "Patch",
-    "Patience",
-    "Patricia",
-    "Patrick",
-    "Patsy",
-    "Patty",
-    "Paul",
-    "Paula",
-    "Paulette",
-    "Paulina",
-    "Pauline",
-    "Paulo",
-    "Paulos",
-    "Paxton",
-    "Payton",
-    "Paz",
-    "Peale",
-    "Pearl",
-    "Pearlie",
-    "Pearly",
-    "Pebbles",
-    "Pedro",
-    "Peggy",
-    "Pelagia",
-    "Pelham",
-    "Pembroke",
-    "Penelope",
-    "Penn",
-    "Penney",
-    "Pennie",
-    "Penny",
-    "Peony",
-    "Pepper",
-    "Percival",
-    "Percy",
-    "Perdita",
-    "Perdy",
-    "Peregrine",
-    "Peri",
-    "Perrin",
-    "Perry",
-    "Pete",
-    "Peter",
-    "Petra",
-    "Petula",
-    "Petunia",
-    "Peyton",
-    "Phaedra",
-    "Phemia",
-    "Phiala",
-    "Phil",
-    "Phila",
-    "Philana",
-    "Philena",
-    "Philip",
-    "Phillip",
-    "Philomena",
-    "Philyra",
-    "Phindiwe",
-    "Phoebe",
-    "Phylicia",
-    "Phyliss",
-    "Phyllis",
-    "Phyre",
-    "Pia",
-    "Picabo",
-    "Pier",
-    "Piera",
-    "Pierce",
-    "Pierre",
-    "Pierrette",
-    "Pilar",
-    "Pillan",
-    "Piper",
-    "Pirro",
-    "Piuta",
-    "Placido",
-    "Plato",
-    "Platt",
-    "Pleasance",
-    "Plennie",
-    "Polly",
-    "Polo",
-    "Ponce",
-    "Poppy",
-    "Poria",
-    "Porter",
-    "Posy",
-    "Powa",
-    "Prentice",
-    "Prescott",
-    "Presencia",
-    "Preston",
-    "Price",
-    "Primo",
-    "Prince",
-    "Priscilla",
-    "Procopia",
-    "Prudence",
-    "Prue",
-    "Prunella",
-    "Psyche",
-    "Pyralis",
-    "Qabil",
-    "Qamar",
-    "Qiana",
-    "Qing-jao",
-    "Quade",
-    "Quana",
-    "Quanda",
-    "Quang",
-    "Queenie",
-    "Quella",
-    "Quennell",
-    "Quentin",
-    "Querida",
-    "Quiana",
-    "Quilla",
-    "Quillan",
-    "Quimby",
-    "Quin",
-    "Quincy",
-    "Quinlan",
-    "Quinn",
-    "Quinta",
-    "Quintin",
-    "Quinto",
-    "Quinton",
-    "Quirino",
-    "Quon",
-    "Qwin",
-    "Rabia",
-    "Rach",
-    "Rachael",
-    "Rachel",
-    "Rachelle",
-    "Radley",
-    "Radwan",
-    "Rae",
-    "Raeanne",
-    "Raegan",
-    "Rafael",
-    "Raffaello",
-    "Rafi",
-    "Raimi",
-    "Raina",
-    "Raine",
-    "Raisa",
-    "Raja",
-    "Raleigh",
-    "Ralph",
-    "Ramiro",
-    "Ramon",
-    "Ramona",
-    "Ramses",
-    "Ranae",
-    "Randall",
-    "Randilyn",
-    "Randolph",
-    "Randy",
-    "Rane",
-    "Ranee",
-    "Rania",
-    "Ranit",
-    "Raphael",
-    "Raphaela",
-    "Raquel",
-    "Rasha",
-    "Rashida",
-    "Rasia",
-    "Raul",
-    "Raven",
-    "Ravi",
-    "Ray",
-    "Raymond",
-    "Rayya",
-    "Razi",
-    "Rea",
-    "Read",
-    "Reagan",
-    "Reba",
-    "Rebecca",
-    "Rebekah",
-    "Red",
-    "Redell",
-    "Redford",
-    "Reed",
-    "Reese",
-    "Reeves",
-    "Regan",
-    "Regina",
-    "Reginald",
-    "Reilly",
-    "Reina",
-    "Remedy",
-    "Remi",
-    "Remington",
-    "Remy",
-    "Ren",
-    "Rena",
-    "Renata",
-    "Renate",
-    "Rene",
-    "Renee",
-    "Renny",
-    "Reth",
-    "Reuben",
-    "Revelin",
-    "Rex",
-    "Rey",
-    "Reyna",
-    "Reynard",
-    "Reynold",
-    "Reza",
-    "Rhea",
-    "Rhett",
-    "Rhiannon",
-    "Rhoda",
-    "Rhodes",
-    "Rhona",
-    "Rhonda",
-    "Rhoswen",
-    "Rhys",
-    "Ria",
-    "Rianna",
-    "Rianne",
-    "Ricardo",
-    "Rich",
-    "Richard",
-    "Ricjunette",
-    "Rick",
-    "Rico",
-    "Rider",
-    "Rigg",
-    "Riley",
-    "Rimca",
-    "Rimona",
-    "Rina",
-    "Ringo",
-    "Riona",
-    "Riordan",
-    "Risa",
-    "Rita",
-    "Riva",
-    "Rivka",
-    "Rob",
-    "Robbin",
-    "Robert",
-    "Robin",
-    "Robyn",
-    "Rocco",
-    "Rochelle",
-    "Rocio",
-    "Rock",
-    "Rockne",
-    "Rockwell",
-    "Rocky",
-    "Rod",
-    "Rodd",
-    "Roddy",
-    "Roderick",
-    "Rodney",
-    "Roger",
-    "Roland",
-    "Rolando",
-    "Rolf",
-    "Rollo",
-    "Romaine",
-    "Roman",
-    "Romeo",
-    "Rona",
-    "Ronald",
-    "Ronalee",
-    "Ronan",
-    "Ronat",
-    "Ronda",
-    "Ronia",
-    "Ronli",
-    "Ronna",
-    "Ronnie",
-    "Ronny",
-    "Roosevelt",
-    "Rori",
-    "Rory",
-    "Ros",
-    "Rosalba",
-    "Rosalia",
-    "Rosalind",
-    "Rosalyn",
-    "Rosamunde",
-    "Rose",
-    "Roseanne",
-    "Roselani",
-    "Rosemary",
-    "Roshaun",
-    "Rosie",
-    "Rosine",
-    "Ross",
-    "Rossa",
-    "Rothrock",
-    "Rowan",
-    "Rowdy",
-    "Rowena",
-    "Roxanne",
-    "Roy",
-    "Royce",
-    "Roz",
-    "Roza",
-    "Ruby",
-    "Rudolph",
-    "Rudra",
-    "Rudy",
-    "Rufina",
-    "Rufus",
-    "Rumer",
-    "Runa",
-    "Rune",
-    "Rupert",
-    "Russ",
-    "Russell",
-    "Russom",
-    "Rusti",
-    "Rusty",
-    "Ruth",
-    "Ryan",
-    "Ryder",
-    "Rylan",
-    "Ryland",
-    "Rylee",
-    "Rylie",
-    "Ryo",
-    "Saba",
-    "Sabina",
-    "Sabine",
-    "Sabra",
-    "Sabrina",
-    "Sachi",
-    "Sadie",
-    "Sadiki",
-    "Sadira",
-    "Safara",
-    "Saffron",
-    "Safina",
-    "Sage",
-    "Sahara",
-    "Saidi",
-    "Saku",
-    "Sal",
-    "Salena",
-    "Salene",
-    "Sally",
-    "Salome",
-    "Salvador",
-    "Salvatore",
-    "Sam",
-    "Samantha",
-    "Samson",
-    "Samuel",
-    "Sandra",
-    "Sandro",
-    "Sandy",
-    "Sanford",
-    "Sanjay",
-    "Sanjeet",
-    "Sanne",
-    "Santo",
-    "Santos",
-    "Sanyu",
-    "Sapphire",
-    "Sara",
-    "Sarah",
-    "Saraid",
-    "Sarama",
-    "Sarda",
-    "Sargent",
-    "Sarki",
-    "Sasha",
-    "Sasilvia",
-    "Saskia",
-    "Satchel",
-    "Satin",
-    "Satinka",
-    "Satu",
-    "Saul",
-    "Savannah",
-    "Sawyer",
-    "Saxen",
-    "Saxon",
-    "Saxton",
-    "Scarlet",
-    "Scarlett",
-    "Schuyler",
-    "Scot",
-    "Scott",
-    "Seamus",
-    "Sean",
-    "Seanna",
-    "Season",
-    "Sebastian",
-    "Sebastien",
-    "Seda",
-    "Seema",
-    "Seghen",
-    "Seiko",
-    "Selas",
-    "Selena",
-    "Selene",
-    "Selia",
-    "Selima",
-    "Selina",
-    "Selma",
-    "Sema",
-    "Semele",
-    "Semira",
-    "Senalda",
-    "September",
-    "Sera",
-    "Serafina",
-    "Serena",
-    "Serendipity",
-    "Serenity",
-    "Serepta",
-    "Serge",
-    "Sergio",
-    "Serwa",
-    "Seth",
-    "Seven",
-    "Severino",
-    "Sevinc",
-    "Seymour",
-    "Shacher",
-    "Shaina",
-    "Shakia",
-    "Shakila",
-    "Shakir",
-    "Shakira",
-    "Shakti",
-    "Shalaidah",
-    "Shaman",
-    "Shamara",
-    "Shamira",
-    "Shamus",
-    "Shana",
-    "Shandi",
-    "Shane",
-    "Shani",
-    "Shannen",
-    "Shannon",
-    "Shanon",
-    "Shantell",
-    "Shaquille",
-    "Sharis",
-    "Sharlene",
-    "Sharne",
-    "Sharon",
-    "Shasa",
-    "Shaun",
-    "Shauna",
-    "Shaunna",
-    "Shaw",
-    "Shawn",
-    "Shawna",
-    "Shay",
-    "Shea",
-    "Sheba",
-    "Sheehan",
-    "Sheena",
-    "Sheera",
-    "Sheila",
-    "Shel",
-    "Shelby",
-    "Sheldon",
-    "Shelley",
-    "Shelly",
-    "Sheri",
-    "Sheridan",
-    "Sherine",
-    "Sherise",
-    "Sherman",
-    "Sherri",
-    "Sherrie",
-    "Sherry",
-    "Sheryl",
-    "Shiela",
-    "Shiloh",
-    "Shing",
-    "Shino",
-    "Shira",
-    "Shiri",
-    "Shirley",
-    "Shirlyn",
-    "Shlomo",
-    "Shona",
-    "Shoshana",
-    "Shoshanah",
-    "Shubha",
-    "Sian",
-    "Sibyl",
-    "Sid",
-    "Sidney",
-    "Sidonia",
-    "Sidra",
-    "Sienna",
-    "Sierra",
-    "Signa",
-    "Sika",
-    "Silvain",
-    "Silvana",
-    "Silver",
-    "Sima",
-    "Simon",
-    "Simone",
-    "Sinclair",
-    "Sine",
-    "Sinead",
-    "Sinjin",
-    "Siobhan",
-    "Sissy",
-    "Sivney",
-    "Skip",
-    "Skipper",
-    "Skylar",
-    "Skyler",
-    "Slade",
-    "Sloan",
-    "Sloane",
-    "Slone",
-    "Smedley",
-    "Snow",
-    "Snowy",
-    "Sofia",
-    "Sol",
-    "Solace",
-    "Solana",
-    "Solange",
-    "Soleil",
-    "Solomon",
-    "Sondo",
-    "Sondra",
-    "Sonia",
-    "Sonnagh",
-    "Sonora",
-    "Sonya",
-    "Sophia",
-    "Sophie",
-    "Sora",
-    "Sorcha",
-    "Soren",
-    "Sorley",
-    "Spence",
-    "Spencer",
-    "Speranza",
-    "Spike",
-    "Stacey",
-    "Stacia",
-    "Stacy",
-    "Stan",
-    "Stanislaus",
-    "Stanislav",
-    "Stanislaw",
-    "Stanley",
-    "Star",
-    "Starr",
-    "Stavros",
-    "Stefan",
-    "Stefanie",
-    "Steffi",
-    "Steffie",
-    "Stella",
-    "Step",
-    "Stephan",
-    "Stephanie",
-    "Stephen",
-    "Stephenie",
-    "Sterling",
-    "Steve",
-    "Steven",
-    "Stevie",
-    "Stew",
-    "Stewart",
-    "Stillman",
-    "Stockton",
-    "Stone",
-    "Storm",
-    "Stormy",
-    "Stu",
-    "Stuart",
-    "Studs",
-    "Sue",
-    "Sugar",
-    "Sukey",
-    "Suki",
-    "Sulis",
-    "Sully",
-    "Sumana",
-    "Summer",
-    "Sunee",
-    "Sunny",
-    "Susan",
-    "Susane",
-    "Susanna",
-    "Susannah",
-    "Susie",
-    "Sutton",
-    "Suzanne",
-    "Suzette",
-    "Suzy",
-    "Svein",
-    "Sveta",
-    "Sybil",
-    "Sydnee",
-    "Sydney",
-    "Sylvain",
-    "Sylvester",
-    "Sylvia",
-    "Sylvie",
-    "Synan",
-    "Synclair",
-    "Syshe",
-    "Ta'ib",
-    "Tab",
-    "Taban",
-    "Taber",
-    "Tabitha",
-    "Tacita",
-    "Tacy",
-    "Tad",
-    "Tadelesh",
-    "Tadhg",
-    "Taffy",
-    "Tai",
-    "Taifa",
-    "Tailynn",
-    "Taima",
-    "Tait",
-    "Tala",
-    "Talen",
-    "Talia",
-    "Taliesin",
-    "Talisa",
-    "Talisha",
-    "Talitha",
-    "Tallis",
-    "Tallulah",
-    "Talmai",
-    "Tam",
-    "Tama",
-    "Tamah",
-    "Tamara",
-    "Tamasha",
-    "Tamasine",
-    "Tamatha",
-    "Tambre",
-    "Tamera",
-    "Tameron",
-    "Tamika",
-    "Tammy",
-    "Tana",
-    "Tandice",
-    "Tanesia",
-    "Tania",
-    "Tanisha",
-    "Tanith",
-    "Tanner",
-    "Tanya",
-    "Tao",
-    "Tara",
-    "Taran",
-    "Tarana",
-    "Tarika",
-    "Tarin",
-    "Taru",
-    "Taryn",
-    "Tasha",
-    "Tasida",
-    "Tasmine",
-    "Tassos",
-    "Tate",
-    "Tatiana",
-    "Taurean",
-    "Tave",
-    "Tavi",
-    "Tavia",
-    "Tavita",
-    "Tawana",
-    "Taylor",
-    "Tazara",
-    "Tea",
-    "Teagan",
-    "Teague",
-    "Teal",
-    "Tecla",
-    "Ted",
-    "Teddy",
-    "Teenie",
-    "Tefo",
-    "Teige",
-    "Teleza",
-    "Teli",
-    "Telly",
-    "Telma",
-    "Temima",
-    "Temira",
-    "Temple",
-    "Templeton",
-    "Tenen",
-    "Teo",
-    "Terena",
-    "Terence",
-    "Terentia",
-    "Teresa",
-    "Termon",
-    "Terra",
-    "Terran",
-    "Terrel",
-    "Terrence",
-    "Terris",
-    "Terry",
-    "Terryal",
-    "Tertius",
-    "Tertullian",
-    "Terweduwe",
-    "Teshi",
-    "Tess",
-    "Tessa",
-    "Tex",
-    "Thad",
-    "Thaddeus",
-    "Thadeus",
-    "Thady",
-    "Thalassa",
-    "Thalia",
-    "Than",
-    "Thandeka",
-    "Thane",
-    "Thanh",
-    "Thatcher",
-    "Thayer",
-    "Thea",
-    "Thel",
-    "Thelma",
-    "Thema",
-    "Themba",
-    "Theo",
-    "Theodora",
-    "Theodore",
-    "Theresa",
-    "Therese",
-    "Thina",
-    "Thom",
-    "Thomas",
-    "Thor",
-    "Thora",
-    "Thornton",
-    "Thrine",
-    "Thron",
-    "Thurman",
-    "Thyra",
-    "Tia",
-    "Tiana",
-    "Tiaret",
-    "Tiassale",
-    "Tierney",
-    "Tiffany",
-    "Tilden",
-    "Tillie",
-    "Tilly",
-    "Tim",
-    "Timothy",
-    "Tina",
-    "Tino",
-    "Tip",
-    "Tirza",
-    "Tirzah",
-    "Tisha",
-    "Tivona",
-    "Toan",
-    "Tobit",
-    "Toby",
-    "Tod",
-    "Todd",
-    "Toki",
-    "Tolla",
-    "Tom",
-    "Tomas",
-    "Tommy",
-    "Tomo",
-    "Toni",
-    "Tony",
-    "Topaz",
-    "Topaza",
-    "Topo",
-    "Topper",
-    "Tori",
-    "Torie",
-    "Torn",
-    "Torrance",
-    "Torrin",
-    "Tory",
-    "Toshi",
-    "Totie",
-    "Tova",
-    "Tovah",
-    "Tovi",
-    "Townsend",
-    "Toyah",
-    "Tracey",
-    "Tracy",
-    "Traelic-an",
-    "Trahern",
-    "Tranquilla",
-    "Trapper",
-    "Trava",
-    "Travis",
-    "Trella",
-    "Trent",
-    "Trevor",
-    "Trey",
-    "Tricia",
-    "Trilby",
-    "Trina",
-    "Trini",
-    "Trinity",
-    "Trish",
-    "Trisha",
-    "Trista",
-    "Tristan",
-    "Tristana",
-    "Tristessa",
-    "Tristram",
-    "Trixie",
-    "Trory",
-    "Troy",
-    "Truda",
-    "Trude",
-    "Trudy",
-    "Trula",
-    "Truly",
-    "Truman",
-    "Tryphena",
-    "Tudor",
-    "Tuesday",
-    "Tulla",
-    "Tully",
-    "Tumo",
-    "Tuyen",
-    "Twila",
-    "Twyla",
-    "Ty",
-    "Tyanne",
-    "Tybal",
-    "Tyler",
-    "Tyme",
-    "Tyne",
-    "Tyra",
-    "Tyree",
-    "Tyrone",
-    "Tyson",
-    "Uang",
-    "Uba",
-    "Uday",
-    "Ugo",
-    "Ujana",
-    "Ula",
-    "Ulan",
-    "Ulani",
-    "Ulema",
-    "Ulf",
-    "Ull",
-    "Ulla",
-    "Ulric",
-    "Ulysses",
-    "Uma",
-    "Umay",
-    "Umberto",
-    "Umeko",
-    "Umi",
-    "Ummi",
-    "Una",
-    "Unity",
-    "Upendo",
-    "Urania",
-    "Urbain",
-    "Urban",
-    "Uri",
-    "Uriah",
-    "Uriel",
-    "Urilla",
-    "Urit",
-    "Ursa",
-    "Ursala",
-    "Ursula",
-    "Uta",
-    "Ute",
-    "Vail",
-    "Val",
-    "Valarie",
-    "Valencia",
-    "Valentina",
-    "Valentine",
-    "Valeria",
-    "Valerie",
-    "Valiant",
-    "Vallerie",
-    "Valtina",
-    "Van",
-    "Vance",
-    "Vandalin",
-    "Vanessa",
-    "Vangie",
-    "Vanna",
-    "Varen",
-    "Vaschel",
-    "Vatusia",
-    "Vaughan",
-    "Vaughn",
-    "Vea",
-    "Veasna",
-    "Vega",
-    "Velma",
-    "Venedict",
-    "Venetia",
-    "Vera",
-    "Verda",
-    "Verdi",
-    "Vern",
-    "Verna",
-    "Verne",
-    "Vernon",
-    "Veronica",
-    "Vesta",
-    "Vevay",
-    "Vevina",
-    "Vi",
-    "Vic",
-    "Vicki",
-    "Vicky",
-    "Victor",
-    "Victoria",
-    "Vida",
-    "Vidal",
-    "Vidor",
-    "Vienna",
-    "Vila",
-    "Vince",
-    "Vincent",
-    "Vine",
-    "Vinnie",
-    "Vinny",
-    "Vinson",
-    "Viola",
-    "Violet",
-    "Virgil",
-    "Virginia",
-    "Visola",
-    "Vita",
-    "Vitalis",
-    "Vito",
-    "Vittorio",
-    "Vivek",
-    "Vivi",
-    "Vivian",
-    "Viviana",
-    "Vivienne",
-    "Vlad",
-    "Vladimir",
-    "Volleny",
-    "Von",
-    "Vonda",
-    "Vondila",
-    "Vondra",
-    "Vui",
-    "Wade",
-    "Wafa",
-    "Waggoner",
-    "Walda",
-    "Waldo",
-    "Walker",
-    "Wallace",
-    "Walt",
-    "Walta",
-    "Walter",
-    "Wanda",
-    "Waneta",
-    "Ward",
-    "Warner",
-    "Warren",
-    "Wasaki",
-    "Washi",
-    "Washington",
-    "Waverly",
-    "Wayne",
-    "Webster",
-    "Welcome",
-    "Wenda",
-    "Wendell",
-    "Wendi",
-    "Wendy",
-    "Werner",
-    "Wes",
-    "Wesley",
-    "Weston",
-    "Wheeler",
-    "Whitby",
-    "Whitfield",
-    "Whitley",
-    "Whitney",
-    "Wilbur",
-    "Wiley",
-    "Wilford",
-    "Wilfred",
-    "Wilhelmina",
-    "Will",
-    "Willa",
-    "Willard",
-    "Willem",
-    "William",
-    "Willis",
-    "Wilma",
-    "Wilson",
-    "Wilton",
-    "Winda",
-    "Winfred",
-    "Winifred",
-    "Winona",
-    "Winslow",
-    "Winston",
-    "Winta",
-    "Winthrop",
-    "Wolfgang",
-    "Wood",
-    "Woodrow",
-    "Woods",
-    "Woody",
-    "Worden",
-    "Wyatt",
-    "Wyman",
-    "Wynn",
-    "Wynne",
-    "Wynona",
-    "Wyome",
-    "Xandy",
-    "Xanthe",
-    "Xanthus",
-    "Xanto",
-    "Xavier",
-    "Xaviera",
-    "Xena",
-    "Xenia",
-    "Xenophon",
-    "Xenos",
-    "Xerxes",
-    "Xi-wang",
-    "Xinavane",
-    "Xolani",
-    "Xuxa",
-    "Xylon",
-    "Yachi",
-    "Yadid",
-    "Yael",
-    "Yaholo",
-    "Yahto",
-    "Yair",
-    "Yale",
-    "Yamal",
-    "Yamin",
-    "Yana",
-    "Yancy",
-    "Yank",
-    "Yanka",
-    "Yanni",
-    "Yannis",
-    "Yardan",
-    "Yardley",
-    "Yaro",
-    "Yaron",
-    "Yaser",
-    "Yasin",
-    "Yasmin",
-    "Yasuo",
-    "Yates",
-    "Ye",
-    "Yeardleigh",
-    "Yehudi",
-    "Yelena",
-    "Yen",
-    "Yenge",
-    "Yepa",
-    "Yered",
-    "Yeriel",
-    "Yestin",
-    "Yetty",
-    "Yeva",
-    "Yihana",
-    "Yitro",
-    "Ymir",
-    "Yo",
-    "Yogi",
-    "Yoko",
-    "Yoland",
-    "Yolanda",
-    "Yonah",
-    "Yoninah",
-    "Yorick",
-    "York",
-    "Yosef",
-    "Yosefu",
-    "Yoshi",
-    "Yoshino",
-    "Yuk",
-    "Yuki",
-    "Yukio",
-    "Yul",
-    "Yule",
-    "Yuma",
-    "Yuri",
-    "Yuval",
-    "Yves",
-    "Yvette",
-    "Yvon",
-    "Yvonne",
-    "Zaccheus",
-    "Zach",
-    "Zachariah",
-    "Zachary",
-    "Zaci",
-    "Zada",
-    "Zahur",
-    "Zaida",
-    "Zaide",
-    "Zaila",
-    "Zaire",
-    "Zaki",
-    "Zalman",
-    "Zan",
-    "Zane",
-    "Zanna",
-    "Zara",
-    "Zareb",
-    "Zared",
-    "Zareh",
-    "Zarek",
-    "Zarifa",
-    "Zarina",
-    "Zavad",
-    "Zayn",
-    "Zaza",
-    "Zazu",
-    "Zbigniew",
-    "Ze'ev",
-    "Zea",
-    "Zeb",
-    "Zebidy",
-    "Zebulon",
-    "Zed",
-    "Zedekiah",
-    "Zef",
-    "Zeheb",
-    "Zeke",
-    "Zeki",
-    "Zelda",
-    "Zelia",
-    "Zelig",
-    "Zena",
-    "Zenas",
-    "Zene",
-    "Zenia",
-    "Zenobia",
-    "Zenon",
-    "Zephan",
-    "Zesiro",
-    "Zev",
-    "Zia",
-    "Ziazan",
-    "Zikomo",
-    "Zili",
-    "Zilli",
-    "Zimri",
-    "Zinna",
-    "Zinnia",
-    "Zion",
-    "Ziraili",
-    "Zita",
-    "Ziv",
-    "Zivan",
-    "Ziven",
-    "Ziya",
-    "Zizi",
-    "Zo",
-    "Zoan",
-    "Zoe",
-    "Zoey",
-    "Zofia",
-    "Zohar",
-    "Zoie",
-    "Zola",
-    "Zoltan",
-    "Zoltin",
-    "Zona",
-    "Zorada",
-    "Zsa Zsa",
-    "Zula",
-    "Zuleika",
-    "Zulema",
-    "Zuriel",
-    "Zwi",
-    "Zyta",
-];
 function getName() {
     return randomItem(names);
 }
-var catIcons = [
-    "🐈",
-    "😸",
-    "😼",
-    "😽",
-    "😾",
-    "😿",
-    "🙀",
-    "🐱‍👤",
-    "🐱‍🐉",
-    "🐱‍👓",
-    "🐱‍🚀",
-    "🐱‍🏍",
-    "😹",
-    "😻",
-];
-var dogIcons = [
-    "🐕",
-    "🐶",
-    "🐩",
-    "🐺",
-    "🐕",
-    "🐶",
-    "🐩",
-    "🐺",
-    "🐻",
-    "🐨",
-    "🌭",
-];
-var catNames = [
-    "Lackets",
-    "Ace",
-    "Alfie",
-    "Alonzo",
-    "Amberjack",
-    "Angel",
-    "Angus",
-    "Ashes",
-    "Astro",
-    "Baby",
-    "Bagel",
-    "Baguette",
-    "Barb",
-    "Barley",
-    "Basil",
-    "Batfish",
-    "Bella",
-    "Bill",
-    "Birdie",
-    "Bitty",
-    "Blackie",
-    "Bobo",
-    "Bombalurina",
-    "Buddy",
-    "Buffy",
-    "Bugsy",
-    "Bustopher Jones",
-    "Butter",
-    "Buttercup",
-    "Butterscotch",
-    "Buzz",
-    "Cabbage",
-    "Captain",
-    "Carbucketty",
-    "Carrot",
-    "Cashew",
-    "Casper",
-    "Catalufa",
-    "Chai",
-    "Chairman Meow",
-    "Charlie",
-    "Cheddar",
-    "Cheerio",
-    "Cherubfish",
-    "Chesnut",
-    "Chickpea",
-    "Chloe",
-    "Churro",
-    "Cinnamon",
-    "Clementine",
-    "Cleo",
-    "Coco",
-    "Coffee",
-    "Comet",
-    "Cranberry",
-    "Croaker",
-    "Croissant",
-    "Crouton",
-    "Crumbs",
-    "Crêpe",
-    "Cubby",
-    "Curry",
-    "Cutthroat",
-    "Daggertooth",
-    "Daisy",
-    "Demeter",
-    "Dewey",
-    "Diesel",
-    "Doodle",
-    "Dory",
-    "Dottie",
-    "Dragonfish",
-    "Ducky",
-    "Dude",
-    "Dumpling",
-    "Dwight",
-    "Edward",
-    "Etcetera",
-    "Fangtooth",
-    "Felix",
-    "Fergus",
-    "Fig",
-    "Flapjack",
-    "Fluffy",
-    "Fondue",
-    "Fraidy",
-    "Fritter",
-    "Frodo",
-    "Fudge",
-    "Gibberfish",
-    "Ginger",
-    "Granola",
-    "Gravy",
-    "Grits",
-    "Grizabella",
-    "Guacamole",
-    "Gumbo",
-    "Gyro",
-    "Hades",
-    "Hamlet",
-    "Hash Brown",
-    "Hector",
-    "Hoagie",
-    "Jack",
-    "Jalapeño",
-    "Jambalaya",
-    "Jasper",
-    "Jellicle",
-    "Jellylorum",
-    "Jemima",
-    "Jennyanydots",
-    "Jet",
-    "Jimmy",
-    "Jules",
-    "Kabob",
-    "Kimchi",
-    "Kingfish",
-    "Kitty",
-    "Knifejaw",
-    "Kumquat",
-    "Lackets",
-    "Lala",
-    "Latke",
-    "Lemonshark",
-    "Lentil",
-    "Licorice",
-    "Linguini",
-    "Lucky",
-    "Lucy",
-    "Macaron",
-    "Macavity",
-    "Maggie",
-    "Manny",
-    "Marshmallow",
-    "Max",
-    "Meatball",
-    "Milkshake",
-    "Millie",
-    "Milo",
-    "Missy",
-    "Misty",
-    "Molly",
-    "Mooneye",
-    "Morty",
-    "Moses",
-    "Mousse",
-    "Mr. Mistoffelees",
-    "Muffin",
-    "Mungojerrie",
-    "Munkustrap",
-    "Mushroom",
-    "Mushu",
-    "Mustard",
-    "Nimbus",
-    "Noodlefish",
-    "Nugget",
-    "Nutella",
-    "Old Deuteronomy",
-    "Oliver",
-    "Opah",
-    "Oreo",
-    "Oscar",
-    "Otto",
-    "Parsnip",
-    "Patch",
-    "Patches",
-    "Peaches",
-    "Peanut",
-    "Pecan",
-    "Perogi",
-    "Phil",
-    "Pickles",
-    "Pistachio",
-    "Ponyfish",
-    "Popcorn",
-    "Poppy",
-    "Porkchop",
-    "Porky",
-    "Pouncival",
-    "Princess",
-    "Pudding",
-    "Puss",
-    "Radish",
-    "Raisin",
-    "Rambo",
-    "Ramen",
-    "Reuben",
-    "Rooster",
-    "Rum Tum",
-    "Rumpleteazer",
-    "Rumpus Cat",
-    "Sacha",
-    "Sam",
-    "Samantha",
-    "Sammy",
-    "Sausage",
-    "Scampi",
-    "Scaredy",
-    "Sea raven",
-    "Shadow",
-    "Shortcake",
-    "Simba",
-    "Simon",
-    "Skimbleshanks",
-    "Smokey",
-    "Smudge",
-    "Sneaky",
-    "Snook",
-    "Snooty",
-    "Snots",
-    "Sooty",
-    "Sophie",
-    "Sorbet",
-    "Spaghetti",
-    "Sparkles",
-    "Sparky",
-    "Splashes",
-    "Sploosh",
-    "Squash",
-    "Sriracha",
-    "Stan",
-    "Stickers",
-    "String Bean",
-    "Sweet Pea",
-    "Sylvester",
-    "Synonym",
-    "Taffy",
-    "Tallulah",
-    "Tapetail",
-    "Tesla",
-    "Thumper",
-    "Thunder",
-    "Thyme",
-    "Tiger",
-    "Tigger",
-    "Timmy",
-    "Tink",
-    "Tinks",
-    "Tinky",
-    "Tippy",
-    "Toast",
-    "Tofu",
-    "Tom",
-    "Toothless",
-    "Tootsie",
-    "Treefish",
-    "Truffle",
-    "Turbo",
-    "Turkeyfish",
-    "Turnip",
-    "Turtle",
-    "Twinkie",
-    "Velvetfish",
-    "Victoria the White Cat",
-    "Vimba",
-    "Wahoo",
-    "Walleye",
-    "Warmouth",
-    "Weasel shark",
-    "Whiskers",
-    "Whiskey",
-    "Wolf-eel",
-    "Wonton",
-    "Wrymouth",
-    "Yam",
-    "Yellow-eye mullet",
-    "Yogi",
-    "Zingle",
-    "Ziti",
-    "Ziggy",
-];
-var dogNames = [
-    "Brackets",
-    "Stickers",
-    "Abbie",
-    "Abby",
-    "Abigail",
-    "Ace",
-    "Achilles",
-    "Addie",
-    "Ajax",
-    "Ali",
-    "Alice",
-    "Allie",
-    "Amber",
-    "Angel",
-    "Angus",
-    "Annie",
-    "Apollo",
-    "Archie",
-    "Arlo",
-    "Aspen",
-    "Athena",
-    "Atlas",
-    "Aurora",
-    "Axel",
-    "Babe",
-    "Baby",
-    "Baby Girl",
-    "Bailey",
-    "Bandit",
-    "Banjo",
-    "Barley",
-    "Baxter",
-    "Bear",
-    "Beau",
-    "Bella",
-    "Belle",
-    "Ben",
-    "Benny",
-    "Bentley",
-    "Bernie",
-    "Blaze",
-    "Blue",
-    "Bo",
-    "Bob",
-    "Bobby",
-    "Bodhi",
-    "Bolt",
-    "Boo",
-    "Boomer",
-    "Boots",
-    "Bowser",
-    "Brandy",
-    "Bristol",
-    "Brodie",
-    "Brody",
-    "Bruce",
-    "Bruno",
-    "Brutus",
-    "Bubba",
-    "Buddy",
-    "Buster",
-    "Caesar",
-    "Cali",
-    "Callie",
-    "Casey",
-    "Cash",
-    "Cassie",
-    "Chai",
-    "Chance",
-    "Charley",
-    "Charlie",
-    "Charlotte",
-    "Chase",
-    "Chena",
-    "Chevy",
-    "Chewy",
-    "Chica",
-    "Chico",
-    "Chief",
-    "Chinook",
-    "Chip",
-    "Chloe",
-    "Cinder",
-    "Cinnamon",
-    "Coal",
-    "Coco",
-    "Cocoa",
-    "Cody",
-    "Comet",
-    "Cookie",
-    "Cooper",
-    "Copper",
-    "Cosmo",
-    "Cricket",
-    "Daisy",
-    "Daisy Mae",
-    "Dakota",
-    "Dallas",
-    "Daphne",
-    "Dash",
-    "Dawson",
-    "Dax",
-    "Delilah",
-    "Denali",
-    "Deshka",
-    "Dexter",
-    "Diamond",
-    "Diego",
-    "Diesel",
-    "Dixie",
-    "Dobby",
-    "Doc",
-    "Dozer",
-    "Drake",
-    "Dude",
-    "Duke",
-    "Dusty",
-    "Dutch",
-    "Eddie",
-    "Ella",
-    "Ellie",
-    "Elsa",
-    "Elvis",
-    "Ember",
-    "Emma",
-    "Eva",
-    "Fancy",
-    "Finley",
-    "Finn",
-    "Fiona",
-    "Foxy",
-    "Frank",
-    "Frankie",
-    "Freya",
-    "Fritz",
-    "Frodo",
-    "George",
-    "Gertie",
-    "Gigi",
-    "Ginger",
-    "Gizmo",
-    "Goldie",
-    "Goose",
-    "Grace",
-    "Gracie",
-    "Grizzly",
-    "Gunner",
-    "Gus",
-    "Gypsy",
-    "Hank",
-    "Hannah",
-    "Harley",
-    "Hatcher",
-    "Hazel",
-    "Heidi",
-    "Henry",
-    "Hercules",
-    "Holly",
-    "Homer",
-    "Honey",
-    "Hope",
-    "Hunter",
-    "Indy",
-    "Isabella",
-    "Isis",
-    "Ivy",
-    "Izzy",
-    "Jack",
-    "Jackson",
-    "Jade",
-    "Jager",
-    "Jake",
-    "Jasmine",
-    "Jasper",
-    "Jax",
-    "Jaxx",
-    "Jazz",
-    "Jenny",
-    "Jesse",
-    "Jethro",
-    "Joe",
-    "Joey",
-    "Josie",
-    "Joy",
-    "Juno",
-    "Kai",
-    "Kaiser",
-    "Kane",
-    "Karma",
-    "Katie",
-    "Kaya",
-    "Kenai",
-    "Keta",
-    "Kiki",
-    "Kimber",
-    "King",
-    "Kinley",
-    "Kira",
-    "Kiska",
-    "Kita",
-    "Koa",
-    "Kobe",
-    "Kobuk",
-    "Koda",
-    "Kodiak",
-    "Koko",
-    "Kona",
-    "Lady",
-    "Layla",
-    "Leia",
-    "Lenny",
-    "Leo",
-    "Lexi",
-    "Lila",
-    "Lilly",
-    "Lily",
-    "Lincoln",
-    "Logan",
-    "Loki",
-    "Lola",
-    "Louie",
-    "Lucky",
-    "Lucy",
-    "Luka",
-    "Luke",
-    "Lulu",
-    "Luna",
-    "Mabel",
-    "Macy",
-    "Maddie",
-    "Maddy",
-    "Madison",
-    "Maggie",
-    "Major",
-    "Marley",
-    "Mason",
-    "Matilda",
-    "Mattie",
-    "Maui",
-    "Maverick",
-    "Max",
-    "Maximus",
-    "Maya",
-    "Mckinley",
-    "Mia",
-    "Mickey",
-    "Midnight",
-    "Mila",
-    "Miley",
-    "Millie",
-    "Milo",
-    "Mimi",
-    "Minnie",
-    "Mishka",
-    "Miska",
-    "Missy",
-    "Misty",
-    "Mocha",
-    "Mojo",
-    "Moki",
-    "Molly",
-    "Moose",
-    "Morgan",
-    "Murphy",
-    "Nala",
-    "Nanook",
-    "Nellie",
-    "Nikki",
-    "Nina",
-    "Nova",
-    "Nugget",
-    "Nukka",
-    "Oakley",
-    "Obi",
-    "Odie",
-    "Odin",
-    "Olive",
-    "Oliver",
-    "Ollie",
-    "Onyx",
-    "Oreo",
-    "Oscar",
-    "Otis",
-    "Otto",
-    "Ozzy",
-    "Panda",
-    "Papi",
-    "Parker",
-    "Patch",
-    "Peaches",
-    "Peanut",
-    "Pearl",
-    "Penelope",
-    "Penny",
-    "Pepper",
-    "Percy",
-    "Phoebe",
-    "Piper",
-    "Pixie",
-    "Poppy",
-    "Porter",
-    "Prince",
-    "Princess",
-    "Quinn",
-    "Radar",
-    "Raider",
-    "Ranger",
-    "Rascal",
-    "Raven",
-    "Rebel",
-    "Red",
-    "Reggie",
-    "Remi",
-    "Remington",
-    "Remy",
-    "Rex",
-    "Rico",
-    "Riley",
-    "Rio",
-    "Ripley",
-    "River",
-    "Rocco",
-    "Rocket",
-    "Rocky",
-    "Roger",
-    "Romeo",
-    "Roo",
-    "Roscoe",
-    "Rose",
-    "Rosie",
-    "Rowdy",
-    "Roxie",
-    "Roxy",
-    "Ruby",
-    "Rudy",
-    "Rufus",
-    "Ruger",
-    "Rusty",
-    "Ryder",
-    "Sadie",
-    "Sally",
-    "Sam",
-    "Samantha",
-    "Sammy",
-    "Sampson",
-    "Sandy",
-    "Sara",
-    "Sarge",
-    "Sasha",
-    "Sassy",
-    "Scooby",
-    "Scooter",
-    "Scout",
-    "Scrappy",
-    "Shadow",
-    "Sheba",
-    "Shelby",
-    "Sherman",
-    "Shiloh",
-    "Sierra",
-    "Simba",
-    "Simon",
-    "Sitka",
-    "Skippy",
-    "Skye",
-    "Smokey",
-    "Snickers",
-    "Sophia",
-    "Sophie",
-    "Sparky",
-    "Spike",
-    "Stanley",
-    "Star",
-    "Stella",
-    "Stormy",
-    "Sugar",
-    "Summer",
-    "Sunny",
-    "Sweet Pea",
-    "Sweetie",
-    "Sydney",
-    "Tallulah",
-    "Tank",
-    "Taz",
-    "Teddy",
-    "Thor",
-    "Thunder",
-    "Tiger",
-    "Tilly",
-    "Timber",
-    "Tinkerbell",
-    "Titan",
-    "Titus",
-    "Toby",
-    "Tonka",
-    "Tori",
-    "Trapper",
-    "Trigger",
-    "Trinity",
-    "Trixie",
-    "Trooper",
-    "Tucker",
-    "Tuffy",
-    "Tundra",
-    "Turbo",
-    "Tyson",
-    "Violet",
-    "Watson",
-    "Whiskey",
-    "Willow",
-    "Winnie",
-    "Winston",
-    "Wrigley",
-    "Xena",
-    "Yoda",
-    "Yuki",
-    "Yukon",
-    "Zeke",
-    "Zelda",
-    "Zeus",
-    "Ziggy",
-    "Ziva",
-    "Zoe",
-    "Zoey",
-];
-var projectPart0 = [
+let projectPart0 = [
     "project",
     "project",
     "project",
@@ -7340,7 +2096,7 @@ var projectPart0 = [
     "industrial",
     "project",
 ]; //,'account','group'];
-var projectPart1 = [
+let projectPart1 = [
     "rattling",
     "slate",
     "aegean",
@@ -7420,7 +2176,7 @@ var projectPart1 = [
     "wise",
     "wonder",
 ];
-var projectPart2 = [
+let projectPart2 = [
     "viper",
     "alpha",
     "arms",
@@ -7504,7 +2260,7 @@ function projectName() {
         "-" +
         randomItem(projectPart2));
 }
-var avatars = [
+let avatars = [
     "😕",
     "😉",
     "😕",
@@ -7582,7 +2338,7 @@ var avatars = [
 function getAvatar() {
     return randomItem(avatars);
 }
-var logos = [
+let logos = [
     "🎈",
     "🎆",
     "🎇",
@@ -7663,7 +2419,7 @@ function getLogo() {
     return randomItem(logos);
 }
 // todo: alphabetic ordering
-var taskParts = [
+let taskParts = [
     "3D",
     "A/B",
     "accessible",
@@ -7780,7 +2536,7 @@ var taskParts = [
 ];
 // todo: alphabetic ordering
 // note: should be singular.
-var taskParts2 = [
+let taskParts2 = [
     "2.0",
     "2001",
     "9000",
@@ -7931,22 +2687,20 @@ function getTask() {
 function LevelUp() {
     game.XP -= game.LevelUpXP;
     game.Level += 1;
-    drawMessage("Level Up! ".concat(game.Level, "\uD83E\uDD51"));
+    drawMessage(`Level Up! ${game.Level}🥑`);
     game.LevelUpXP = Inflate(game.Inflation, game.LevelUpXP);
     game.PointPrice = Inflate(game.Inflation, game.PointPrice);
     game.ProjectSize = Inflate(game.SmallInflation, game.ProjectSize);
     game.MaxAge += 5; //an extra 5 seconds is allowed for completing projects on each level;
-    var items = game.AllLevelItems["l" + game.Level];
+    let items = game.AllLevelItems["l" + game.Level];
     if (items != undefined) {
-        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
-            var item = items_1[_i];
+        for (const item of items) {
             game.StoreItems[item.id].enabled = true;
         }
         addClass(".visitStore", "hint");
     }
     if (testMode) {
-        for (var _a = 0, _b = Object.keys(game.StoreItems); _a < _b.length; _a++) {
-            var key = _b[_a];
+        for (let key of Object.keys(game.StoreItems)) {
             game.StoreItems[key].enabled = true;
             game.StoreItems[key].price = 5;
         }
@@ -8008,7 +2762,7 @@ function incrementXP(amount) {
     drawXP(game.XP, game.LevelUpXP, game.Level);
 }
 function Inflate(inflation, value) {
-    var newValue = Math.floor(inflation * value);
+    let newValue = Math.floor(inflation * value);
     if (value == newValue)
         newValue++;
     return newValue;
@@ -8022,7 +2776,7 @@ function incrementMoney(amount) {
     game.Money += amount;
     if (amount > 0) {
         game.LifeTimeRevenue += amount;
-        var payment = { amount: amount, when: new Date() };
+        let payment = { amount: amount, when: new Date() };
         game.PositiveCashFlows.push(payment);
     }
     if (game.Money >= game.HighestMoney) {
@@ -8128,50 +2882,52 @@ function visitHire() {
     drawStoreMessage("⭐ Welcome to the Joy of Hiring ⭐");
 }
 function describe(itemId) {
-    var item = game.StoreItems[itemId];
+    let item = game.StoreItems[itemId];
     if (!item.enabled) {
         // TODO: Until level X
         if (item.name.indexOf("OUT OF STOCK") != -1) {
-            drawStoreMessage("Sorry, ".concat(item.name, " ").concat(item.icon, " \uD83D\uDE2D"));
+            drawStoreMessage(`Sorry, ${item.name} ${item.icon} 😭`);
         }
         else {
-            drawStoreMessage("\"".concat(item.name, " ").concat(item.icon, "\" is not available until a higher level"));
+            drawStoreMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
         }
         return;
     }
-    drawStoreMessage("\"".concat(item.name, " ").concat(item.icon, "\" ").concat(item.description));
+    drawStoreMessage(`"${item.name} ${item.icon}" ${item.description}`);
 }
 function drawHires() {
-    var hireList = $id("hires");
+    let hireList = $id("hires");
     // clear store items from #items
     hireList.innerText = "";
     // add store items to #items
-    for (var _i = 0, _a = Object.keys(game.toHire); _i < _a.length; _i++) {
-        var key = _a[_i];
-        var item = game.toHire[key];
-        var shtml = getNewHireHtml(item); //getStoreItemHtml
-        var newItem = htmlToElement(shtml);
+    for (let key of Object.keys(game.toHire)) {
+        let item = game.toHire[key];
+        let shtml = getNewHireHtml(item);
+        let newItem = htmlToElement(shtml);
         hireList.appendChild(newItem);
     }
 }
 function drawStore() {
-    var itemList = $id("items");
+    let itemList = $id("items");
     // clear store items from #items
     itemList.innerText = "";
     // add store items to #items
-    for (var _i = 0, _a = Object.keys(game.StoreItems); _i < _a.length; _i++) {
-        var key = _a[_i];
-        var item = game.StoreItems[key];
-        var shtml = getStoreItemHtml(item);
-        var newItem = htmlToElement(shtml);
+    for (let key of Object.keys(game.StoreItems)) {
+        let item = game.StoreItems[key];
+        let shtml = getStoreItemHtml(item);
+        let newItem = htmlToElement(shtml);
         itemList.appendChild(newItem);
+        let storeItemButton = $id(`store-button-${item.id}`);
+        storeItemButton.addEventListener("click", () => purchase(item.id));
+        let storeDescribeButton = $id(`describe-store-item-${item.id}`);
+        storeDescribeButton.addEventListener("click", () => describe(item.id));
     }
 }
 function getNewHireHtml(item) {
-    return "<div class='storeItem-catalog ".concat(item.enabled ? "item-enabled" : "item-disabled", "' id='storeitem-").concat(item.id, "'><div onclick='purchase(").concat(item.id, ");' class='button' id='hire-button-").concat(item.id, "'>").concat(formatPrice(item.price), "</div><span class='hireIcon'>").concat(item.icon, "</span> <span class='describe' onclick='describe(").concat(item.id, ");' title='more information'>\u2753</span><span class='item-name'>").concat(item.name, "</span></div>");
+    return `<div class='storeItem-catalog ${item.enabled ? "item-enabled" : "item-disabled"}' id='storeitem-${item.id}'><div class='button' id='hire-button-${item.id}'>${formatPrice(item.price)}</div><span class='hireIcon'>${item.icon}</span> <span id='describe-store-item-${item.id}' class='describe' title='more information'>❓</span><span class='item-name'>${item.name}</span></div>`;
 }
 function getStoreItemHtml(item) {
-    return "<div class='storeItem-catalog ".concat(item.enabled ? "item-enabled" : "item-disabled", "' id='storeitem-").concat(item.id, "'><div onclick='purchase(").concat(item.id, ");' class='button' id='store-button-").concat(item.id, "'>").concat(formatPrice(item.price), "</div><span class='storeIcon'>").concat(item.icon, "</span> <span class='describe' onclick='describe(").concat(item.id, ");' title='more information'>\u2753</span><span class='item-name'>").concat(item.name, "</span></div>");
+    return `<div class='storeItem-catalog ${item.enabled ? "item-enabled" : "item-disabled"}' id='storeitem-${item.id}'><div class='button' id='store-button-${item.id}'>${formatPrice(item.price)}</div><span class='storeIcon'>${item.icon}</span> <span id='describe-store-item-${item.id}' class='describe' title='more information'>❓</span><span class='item-name'>${item.name}</span></div>`;
 }
 function formatPrice(price) {
     if (price > 1000000000) {
@@ -8197,25 +2953,25 @@ function leaveStore() {
     $("h1")[0].innerText = "DevShop";
 }
 function purchase(itemId) {
-    var item = game.StoreItems[itemId]; //.filter(i => i.id == itemId)[0];
+    let item = game.StoreItems[itemId]; //.filter(i => i.id == itemId)[0];
     if (!item.enabled) {
         // TODO: Until level X
         if (item.name.indexOf("OUT OF STOCK") != -1) {
-            drawStoreMessage("Sorry, ".concat(item.name, " ").concat(item.icon, " \uD83D\uDE2D"));
+            drawStoreMessage(`Sorry, ${item.name} ${item.icon} 😭`);
         }
         else {
-            drawStoreMessage("\"".concat(item.name, " ").concat(item.icon, "\" is not available until a higher level"));
+            drawStoreMessage(`"${item.name} ${item.icon}" is not available until a higher level`);
         }
         console.log(item);
         return;
     }
     if (game.Money < item.price) {
-        drawStoreMessage("You cannot afford the ".concat(item.name, " ").concat(item.icon, " for \uD83D\uDCB2").concat(item.price));
+        drawStoreMessage(`You cannot afford the ${item.name} ${item.icon} for 💲${item.price}`);
         return;
     }
     incrementMoney(item.price * -1);
     // Add a shallow clone of the item (not the item itself)
-    var clone = Object.assign({}, item);
+    let clone = Object.assign({}, item);
     clone.id = nextId();
     if (clone.code == ItemCode.dog) {
         clone.icon = randomItem(dogIcons);
@@ -8226,7 +2982,7 @@ function purchase(itemId) {
         clone.name = randomItem(catNames);
     }
     game.Items["i" + clone.id] = clone;
-    drawStoreMessage("You bought ".concat(clone.name, " ").concat(clone.icon, " for \uD83D\uDCB2").concat(clone.price, ". Nice!"));
+    drawStoreMessage(`You bought ${clone.name} ${clone.icon} for 💲${clone.price}. Nice!`);
     // Every time you purchase an item, the price of that item goes up
     // consider: some specific items should have a different inflation curve.
     item.price = Inflate(game.MediumInflation, item.price);
@@ -8235,11 +2991,16 @@ function purchase(itemId) {
         item.name = item.name + " OUT OF STOCK";
         item.enabled = false;
         //refresh the item
-        var html = getStoreItemHtml(item);
-        $id("storeitem-".concat(item.id)).outerHTML = html;
+        let html = getStoreItemHtml(item);
+        $id(`storeitem-${item.id}`).outerHTML = html;
+        let storeItemButton = $id(`store-button-${item.id}`);
+        storeItemButton.addEventListener("click", () => purchase(item.id));
+        let describeStoreItem = $id(`describe-store-item-${item.id}`);
+        describeStoreItem.addEventListener("click", () => describe(item.id));
     }
     drawInboxItem("i" + clone.id, clone);
-    $id("store-button-" + itemId).innerText = "\uD83D\uDCB2".concat(item.price);
+    //Show the adjusted price
+    $id("store-button-" + itemId).innerText = `💲${item.price}`;
 }
 //never use this ;)
 function jalert(obj) {
@@ -8247,12 +3008,12 @@ function jalert(obj) {
 }
 function log(message) {
     if (debugOutput) {
-        var m = htmlToElement("<div>".concat(message, "</div>"));
+        let m = htmlToElement(`<div>${message}</div>`);
         $id("debug").appendChild(m);
     }
     console.log(message);
 }
-var mainIntervalId;
+let mainIntervalId;
 function startMainLoop() {
     mainIntervalId = setInterval(mainLoop, 1000);
 }
@@ -8268,36 +3029,32 @@ function mainLoop() {
     }
 }
 function trackIncome() {
-    var now = new Date();
+    let now = new Date();
     //how long has the game been going?
-    var gameAge_s = Math.floor(Math.abs(game.StartTime.getTime() - now.getTime()) / 1000);
+    let gameAge_s = Math.floor(Math.abs(game.StartTime.getTime() - now.getTime()) / 1000);
     if (gameAge_s > 60) {
-        var OneMinuteAgo = new Date(now.getTime() - 60000);
-        var toRemove_1 = [];
+        let OneMinuteAgo = new Date(now.getTime() - 60000);
+        let toRemove = [];
         //remove any incomes from start of
-        for (var _i = 0, _a = game.PositiveCashFlows; _i < _a.length; _i++) {
-            var x = _a[_i];
+        for (let x of game.PositiveCashFlows) {
             if (x.when > OneMinuteAgo)
                 break;
             game.LifeTimeRevenueMinus1Minute += x.amount;
-            toRemove_1.push(x);
+            toRemove.push(x);
         }
-        game.PositiveCashFlows = game.PositiveCashFlows.filter(function (item) { return !toRemove_1.includes(item); });
-        toRemove_1 = [];
-        for (var _b = 0, _c = game.PositivePointEvents; _b < _c.length; _b++) {
-            var x = _c[_b];
+        game.PositiveCashFlows = game.PositiveCashFlows.filter((item) => !toRemove.includes(item));
+        toRemove = [];
+        for (let x of game.PositivePointEvents) {
             if (x.when > OneMinuteAgo)
                 break;
             game.LifeTimePointsMinus1Minute += x.amount;
-            toRemove_1.push(x);
+            toRemove.push(x);
         }
-        game.PositivePointEvents = game.PositivePointEvents.filter(function (item) { return !toRemove_1.includes(item); });
+        game.PositivePointEvents = game.PositivePointEvents.filter((item) => !toRemove.includes(item));
     }
-    var sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
-    var sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
-    //<span id='rate' title='revenue rate'>💲0/min</span>
-    //removed: 💲${sixtySecondIncome}/min,
-    $id("rate").innerText = "(".concat(sixtySecondPoints, "\uD83D\uDCCD/min)");
+    let sixtySecondIncome = game.LifeTimeRevenue - game.LifeTimeRevenueMinus1Minute;
+    let sixtySecondPoints = game.LifeTimePoints - game.LifeTimePointsMinus1Minute;
+    $id("rate").innerText = `(${sixtySecondPoints}📍/min)`;
 }
 /*
 
@@ -8318,6 +3075,27 @@ function exitloadmenu() {
     $id("startscreen").classList.remove("hidden");
 }
 function drawLoadScreen() {
-    var gamesJson = localStorage.getItem("games");
-    var games = JSON.parse(gamesJson);
+    let gamesJson = localStorage.getItem("games");
+    let games = JSON.parse(gamesJson);
 }
+function WireupButtons() {
+    $id("exitload").addEventListener("click", exitloadmenu);
+    $id("start").addEventListener("click", go);
+    $id("loadmenu").addEventListener("click", loadmenu);
+    $id("privacyLink").addEventListener("click", visitPrivacy);
+    $id("closeHelp").addEventListener("click", leaveHelp);
+    $id("closeHelp2").addEventListener("click", leaveHelp);
+    $id("closeAbout").addEventListener("click", leaveAbout);
+    $id("closeAbout2").addEventListener("click", leaveAbout);
+    $id("closePrivacy").addEventListener("click", leavePrivacy);
+    $id("closePrivacy2").addEventListener("click", leavePrivacy);
+    $id("getLead").addEventListener("click", getNewLead);
+    $id("getdev").addEventListener("click", () => getNewPerson("dev"));
+    $id("gettest").addEventListener("click", () => getNewPerson("test"));
+    $id("getba").addEventListener("click", () => getNewPerson("ba"));
+    $id("visitStore").addEventListener("click", visitStore);
+    $id("closeStore").addEventListener("click", leaveStore);
+    $id("aboutLink").addEventListener("click", visitAbout);
+    $id("helpLink").addEventListener("click", visitHelp);
+}
+WireupButtons();
