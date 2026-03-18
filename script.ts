@@ -34,11 +34,10 @@ let defaultCompletionTime = testMode ? 10 : 100; //how long have you got to comp
 //const names: string[] = ["zAaron2", "zAbbie2", "zAbbott2"];
 import { names } from "./names.js";
 import { catNames, dogNames, catIcons, dogIcons} from "./animals.js";
-
+import { projectPart0, projectPart1, projectPart2} from "./projectNames.js";
+import { taskParts, taskParts2 } from "./taskParts.js"
 
 let hashLocation = window.location.hash.substring(1);
-
-
 
 privacy = privacy || hashLocation == "privacy";
 
@@ -52,10 +51,10 @@ if (debugOutput) {
 }
 
 enum HireCode {
-dev = 1,
-test,
-ba,
-sales,
+  dev = 1,
+  test,
+  ba,
+  sales,
 }
 
 enum ItemCode {
@@ -727,10 +726,6 @@ interface HireItem {
   enabled: boolean;
 }
 
-
-
-
-
 class Project {
   constructor(lead: Story) {
     this.lead = lead;
@@ -1086,7 +1081,6 @@ function drawPerson(key: string, people: { [x: string]: Person }): void {
     person.summary +
     "</div></span>";
   let newPersonElement = htmlToElement(phtml);
-  
 
   for (let key of Object.keys(person.skills)) {
     newPersonElement.classList.add(key);
@@ -1196,7 +1190,6 @@ function getNewLead(): void {
   }
 
   removeClass("#getLead", "hint");
-
   DeSelectDoerAndReceiver();
 
   let price = game.LeadPrice;
@@ -1211,26 +1204,6 @@ function getNewLead(): void {
   incrementXP(5);
   // TODO: story should be created by a constructor on story
   let newLead: Story = new Story("lead", "ba", projectName(), null);
-  /*{ 
-      id: nextId(), 
-      points:game.ProjectSize, 
-      pointPrice:game.PointPrice, 
-      status:"lead", 
-      skillNeeded:"ba",
-      summary:projectName(),
-      logo: getLogo(),
-      person: null,
-      busy: false,
-      icon: null,
-      hasBug: false,
-      hasSpecBug: false,
-      customerFoundBug: null,
-      projectId: null,
-      reworkLevel:0,
-      startingTime: new Date(),
-      maxAge: -1
-    };
-*/
   if (game.TimeBarFeatureFlag) {
     if (Math.floor(Math.random() * 100) < game.TimeBarChance) {
       if (!game.FirstTimeSensitiveProject) {
@@ -2483,11 +2456,6 @@ function $(selector: string): HTMLElement[] {
   return Array.from(document.querySelectorAll(selector) as NodeListOf<HTMLElement>);
 }
 
-function $xid(id: string): HTMLElement | null {
-  return document.getElementById(id);
-}
-
-
 // Return an element that must exist. Throws if not found to help silence
 // widespread non-null assertions where the element is required.
 function $id<T extends HTMLElement>(id: string): T {
@@ -2555,185 +2523,6 @@ function getName() {
   return randomItem(names);
 }
 
-let projectPart0 = [
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "project",
-  "operation",
-  "operation",
-  "system",
-  "the",
-  "strategy",
-  "industrial",
-  "project",
-]; //,'account','group'];
-let projectPart1 = [
-  "rattling",
-  "slate",
-  "aegean",
-  "amber",
-  "angry",
-  "arctic",
-  "black",
-  "bleak",
-  "blue",
-  "brave",
-  "bravo",
-  "bronze",
-  "chaos",
-  "chartreuse",
-  "chilled",
-  "cold",
-  "constant",
-  "crimson",
-  "crisp",
-  "cruel",
-  "crystal",
-  "cyan",
-  "delta",
-  "devout",
-  "diamond",
-  "drab",
-  "dry",
-  "emerald",
-  "fear",
-  "frozen",
-  "ghostly",
-  "gold",
-  "green",
-  "hot",
-  "icy",
-  "indigo",
-  "magenta",
-  "malachite",
-  "mauve",
-  "moon",
-  "nasty",
-  "neat",
-  "noble",
-  "ocean",
-  "orange",
-  "oscar",
-  "peace",
-  "plaid",
-  "platinum",
-  "pure",
-  "purple",
-  "rasping",
-  "red",
-  "resolute",
-  "robot",
-  "sabre",
-  "sane",
-  "sapphire",
-  "seagreen",
-  "shocking",
-  "shrieking",
-  "silver",
-  "slippy",
-  "sneaky",
-  "steam",
-  "steel",
-  "stoic",
-  "stormy",
-  "suffering",
-  "tasty",
-  "teal",
-  "tense",
-  "terse",
-  "tyrano",
-  "violet",
-  "wild",
-  "wise",
-  "wonder",
-];
-let projectPart2 = [
-  "viper",
-  "alpha",
-  "arms",
-  "arrow",
-  "axe",
-  "bacon",
-  "banjo",
-  "bishop",
-  "birch",
-  "blaze",
-  "calculo",
-  "cargo",
-  "castle",
-  "cats",
-  "centurion",
-  "chateau",
-  "cobra",
-  "creek",
-  "cup",
-  "dagger",
-  "dawn",
-  "december",
-  "disco",
-  "dolphin",
-  "donkey",
-  "dream",
-  "duck",
-  "ember",
-  "flare",
-  "fortune",
-  "fox",
-  "gazelle",
-  "gemstone",
-  "gimlet",
-  "giraffe",
-  "gnocchi",
-  "goat",
-  "hat",
-  "hound",
-  "husky",
-  "island",
-  "jacobite",
-  "key",
-  "knight",
-  "lion",
-  "marakesh",
-  "monkey",
-  "narwhal",
-  "night",
-  "oak",
-  "otter",
-  "palace",
-  "parakeet",
-  "pawn",
-  "penguin",
-  "puzzle",
-  "queen",
-  "rook",
-  "saurus",
-  "skull",
-  "sloth",
-  "spear",
-  "spider",
-  "teeth",
-  "tiger",
-  "timber",
-  "torch",
-  "wallaby",
-  "warrior",
-  "wave",
-  "whisper",
-  "window",
-  "wolf",
-  "zanzibar",
-  "zebra",
-];
 
 function projectName() {
   return (
@@ -2904,271 +2693,7 @@ let logos = [
 function getLogo() {
   return randomItem(logos);
 }
-// todo: alphabetic ordering
-let taskParts = [
-  "3D",
-  "A/B",
-  "accessible",
-  "anarcho",
-  "async",
-  "augmented",
-  "auto",
-  "automated",
-  "batch",
-  "big-data",
-  "big",
-  "bug-free",
-  "bulk",
-  "business",
-  "chat",
-  "cloud-based",
-  "code-first",
-  "code-free",
-  "computery",
-  "critical",
-  "crypto",
-  "custom",
-  "customer",
-  "customer-first",
-  "cyber",
-  "deep",
-  "developer",
-  "digital",
-  "distributed",
-  "embedded",
-  "enterprise",
-  "ethical",
-  "excessive",
-  "femto",
-  "functional",
-  "fusion",
-  "graphical",
-  "hierarchical",
-  "high-res",
-  "hybrid",
-  "hydrogen",
-  "hyper",
-  "immutable",
-  "indirect",
-  "indie",
-  "integrated",
-  "interactive",
-  "irreversible",
-  "keyword",
-  "linguistic",
-  "lock-free",
-  "logarithmic",
-  "logical",
-  "manipulation",
-  "meta",
-  "micro",
-  "mobile",
-  "mobile-first",
-  "nano",
-  "native",
-  "neural",
-  "no-code",
-  "no-sql",
-  "non-virtual",
-  "nuclear",
-  "obfuscated",
-  "offline",
-  "opinionated",
-  "optimal",
-  "organic",
-  "p2p",
-  "person",
-  "pico",
-  "point-free",
-  "pointer",
-  "positronic",
-  "pro",
-  "productivity",
-  "progressive",
-  "pseudo",
-  "pure",
-  "pvp",
-  "raster",
-  "recursive",
-  "remote",
-  "responsive",
-  "reticulated",
-  "retina",
-  "reverse",
-  "robo",
-  "robotic",
-  "satellite",
-  "seamless",
-  "secure",
-  "self-closing",
-  "self-service",
-  "semantic",
-  "SEO",
-  "shadow",
-  "social",
-  "structural",
-  "structural",
-  "third-normal",
-  "truth",
-  "uptime",
-  "user-generated",
-  "validation",
-  "vector",
-  "virtual",
-  "weaponised",
-  "web",
-  "wireless",
-  "yet another",
 
-];
-
-// todo: alphabetic ordering
-// note: should be singular.
-let taskParts2 = [
-  "2.0",
-  "2001",
-  "9000",
-  "accelerator",
-  "addin",
-  "algo",
-  "analytics",
-  "app",
-  "architecture",
-  "artwork",
-  "assets",
-  "attribute",
-  "automation",
-  "avatar",
-  "blockchain",
-  "blogs",
-  "bot",
-  "bots",
-  "cache",
-  "catalog",
-  "chatbot",
-  "chat",
-  "class",
-  "client",
-  "cluster",
-  "coin",
-  "collector",
-  "column",
-  "combinator",
-  "compiler",
-  "component",
-  "container",
-  "content",
-  "controller",
-  "core",
-  "CSV",
-  "cta",
-  "customization",
-  "cybernetics",
-  "data",
-  "datamodel",
-  "DB",
-  "devoops",
-  "devops",
-  "diagram",
-  "DOM",
-  "DRM",
-  "drone",
-  "DTO",
-  "emailer",
-  "engine",
-  "entity",
-  "exploit",
-  "extensions",
-  "fields",
-  "firewall",
-  "form",
-  "foundation",
-  "framework",
-  "function",
-  "funnel",
-  "fusion",
-  "GPGPU",
-  "graph",
-  "graphic",
-  "hack",
-  "heuristic",
-  "hierarchy",
-  "host",
-  "hub",
-  "interface",
-  "integrator",
-  "IP",
-  "job",
-  "JSON",
-  "laser",
-  "layer",
-  "list",
-  "logging",
-  "logic",
-  "Macro",
-  "manifest",
-  "map-reduce",
-  "mesh",
-  "middle-ware",
-  "model",
-  "module",
-  "multiplexor",
-  "namespace",
-  "net",
-  "network",
-  "node",
-  "object",
-  "pager",
-  "paradigm",
-  "parser",
-  "part",
-  "persona",
-  "pixels",
-  "platform",
-  "plugin",
-  "property",
-  "prototype",
-  "proxy",
-  "queue",
-  "RAM",
-  "RDBMS",
-  "reactor",
-  "registry",
-  "reticulator",
-  "RIA",
-  "robot",
-  "robots",
-  "sdk",
-  "server",
-  "services",
-  "sheet",
-  "solver",
-  "SPA",
-  "spline",
-  "stack",
-  "structure",
-  "style",
-  "switch",
-  "system",
-  "tests",
-  "theory",
-  "thread",
-  "tracker",
-  "tracking",
-  "UI",
-  "unit tests",
-  "up-time",
-  "UX",
-  "video",
-  "vlogs",
-  "vision",
-  "vm",
-  "vpn",
-  "ware",
-  "wiki",
-  "XML",
-  "Yaml",
-];
 
 function getTask() {
   return randomItem(taskParts) + " " + randomItem(taskParts2);
@@ -3300,6 +2825,7 @@ function visitPrivacy() {
   $id("message").classList.add("hidden");
   $id("aboutLink").classList.add("hidden");
   $id("helpLink").classList.add("hidden");
+  return false;
 }
 
 function leavePrivacy() {
@@ -3322,6 +2848,8 @@ function visitHelp() {
   $id("message").classList.add("hidden");
   $id("aboutLink").classList.add("hidden");
   $id("helpLink").classList.add("hidden");
+
+  return false;
 }
 
 function visitAbout() {
@@ -3335,6 +2863,8 @@ function visitAbout() {
   $id("message").classList.add("hidden");
   $id("aboutLink").classList.add("hidden");
   $id("helpLink").classList.add("hidden");
+
+  return false;
 }
 
 function leaveHelp() {
@@ -3396,6 +2926,7 @@ function visitHire() { //  visitStore
   $id("message").classList.add("hidden");
   //drawStoreMessage("⭐ Welcome to the DevStore ⭐");
   drawStoreMessage("⭐ Welcome to the Joy of Hiring ⭐");
+  return false;
 }
 
 
@@ -3428,7 +2959,6 @@ function drawHires() {
     hireList.appendChild(newItem);
   }
 }
-
 
 function drawStore() {
   let itemList = $id("items");
@@ -3644,13 +3174,11 @@ function trackIncome() {
 }
 
 /*
-
 // Save
 localStorage.setItem('game', JSON.stringify(game));
 
 // Load
 game = JSON.parse(localStorage.getItem('game')); drawRoom();
-
 */
 
 function loadmenu(): void {

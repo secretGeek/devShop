@@ -1,5 +1,5 @@
-tsc -p ./tsconfig.json
+gen: tsc -p ./tsconfig.json
 code .
 n index.html
 todo: n todo.md # todo
-npx serve -o; # npx http-server -o
+serve: npx serve -o; # npx http-server -o

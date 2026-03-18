@@ -1,8 +1,8 @@
-# TODO
+﻿# TODO
 
 ## Ranked
 
-- [ ] leaveHire()
+- [ ] leaveHire() -- similar to leaveStore()
 		newHires() -- similar to visitStore()...
 	- div .button.visitHire.hidden
     'icon' 🤼   "new hires"
@@ -11,7 +11,9 @@
 	"New Hires"🤼
 	#closeHire.button =leaveHire() icon=🤼 "exit store"
     #people    -- list of People for HIRE (if any!)
-	[ ] POPULATe #people -- similar to populating '#items'
+	[ ] POPULATe #people -- similar to populating '#items' in the store
+	[ ] starts off with just 1 person on the list...
+		[ ] a random name...
 	[ ] Hire a person (and remove from the list)
 </div>
 	
